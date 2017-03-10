@@ -1,0 +1,18 @@
+IExpression: DATATYPE
+ BEGIN
+   variable(index: nat, marked: bool): variable?
+   constant(value: int): constant?
+   nil: nil?
+   application(fun: nat, args: list[(variable?)]): application?
+   letexpr(letrhs :  IExpression, body: IExpression): letexpr?
+   ift(condition: (variable?), thenexpr, elseexpr: IExpression): ift?
+   update(target, lhs, rhs: (variable?)): update?
+   lookup(arrayvalue, position: (variable?)): lookup?
+   newint(size: nat): newint?
+   newref(size: nat): newref?
+   pop(pbody: IExpression): pop?
+   ref(refindex: nat): ref?
+   release(rvar: (variable?), rexpr: IExpression): release?
+%   mark(mvar: (variable?)): mark?
+ END IExpression
+

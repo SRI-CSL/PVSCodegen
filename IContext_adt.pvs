@@ -1,0 +1,195 @@
+%%% ADT file generated from intermediateLanguage
+
+IContext_adt: THEORY
+ BEGIN
+
+  IContext: TYPE
+
+  IMPORTING IExpression
+
+  hole?, letc?, popc?: [IContext -> boolean]
+
+  letcrhs: [(letc?) -> IContext]
+
+  body: [(letc?) -> IExpression]
+
+  pcbody: [(popc?) -> IContext]
+
+  hole: (hole?)
+
+  letc: [[IContext, IExpression] -> (letc?)]
+
+  popc: [IContext -> (popc?)]
+
+  IContext_ord: [IContext -> upto(2)]
+
+  IContext_ord_defaxiom: AXIOM
+    IContext_ord(hole) = 0 AND
+     (FORALL (letcrhs: IContext, body: IExpression):
+        IContext_ord(letc(letcrhs, body)) = 1)
+      AND (FORALL (pcbody: IContext): IContext_ord(popc(pcbody)) = 2);
+
+  ord(x: IContext): upto(2) =
+      CASES x OF hole: 0, letc(letc1_var, letc2_var): 1, popc(popc1_var): 2
+        ENDCASES
+
+  IContext_hole_extensionality: AXIOM
+    FORALL (hole?_var: (hole?), hole?_var2: (hole?)):
+      hole?_var = hole?_var2;
+
+  IContext_letc_extensionality: AXIOM
+    FORALL (letc?_var: (letc?), letc?_var2: (letc?)):
+      letcrhs(letc?_var) = letcrhs(letc?_var2) AND
+       body(letc?_var) = body(letc?_var2)
+       IMPLIES letc?_var = letc?_var2;
+
+  IContext_letc_eta: AXIOM
+    FORALL (letc?_var: (letc?)):
+      letc(letcrhs(letc?_var), body(letc?_var)) = letc?_var;
+
+  IContext_popc_extensionality: AXIOM
+    FORALL (popc?_var: (popc?), popc?_var2: (popc?)):
+      pcbody(popc?_var) = pcbody(popc?_var2) IMPLIES popc?_var = popc?_var2;
+
+  IContext_popc_eta: AXIOM
+    FORALL (popc?_var: (popc?)): popc(pcbody(popc?_var)) = popc?_var;
+
+  IContext_letcrhs_letc: AXIOM
+    FORALL (letc1_var: IContext, letc2_var: IExpression):
+      letcrhs(letc(letc1_var, letc2_var)) = letc1_var;
+
+  IContext_body_letc: AXIOM
+    FORALL (letc1_var: IContext, letc2_var: IExpression):
+      body(letc(letc1_var, letc2_var)) = letc2_var;
+
+  IContext_pcbody_popc: AXIOM
+    FORALL (popc1_var: IContext): pcbody(popc(popc1_var)) = popc1_var;
+
+  IContext_inclusive: AXIOM
+    FORALL (IContext_var: IContext):
+      hole?(IContext_var) OR letc?(IContext_var) OR popc?(IContext_var);
+
+  IContext_induction: AXIOM
+    FORALL (p: [IContext -> boolean]):
+      (p(hole) AND
+        (FORALL (letc1_var: IContext, letc2_var: IExpression):
+           p(letc1_var) IMPLIES p(letc(letc1_var, letc2_var)))
+         AND
+         (FORALL (popc1_var: IContext):
+            p(popc1_var) IMPLIES p(popc(popc1_var))))
+       IMPLIES (FORALL (IContext_var: IContext): p(IContext_var));
+
+  subterm(x: IContext, y: IContext):  boolean =
+      x = y OR
+       CASES y
+         OF hole: FALSE,
+            letc(letc1_var, letc2_var): subterm(x, letc1_var),
+            popc(popc1_var): subterm(x, popc1_var)
+         ENDCASES;
+
+  <<:  (strict_well_founded?[IContext]) =
+      LAMBDA (x, y: IContext):
+        CASES y
+          OF hole: FALSE,
+             letc(letc1_var, letc2_var): x = letc1_var OR x << letc1_var,
+             popc(popc1_var): x = popc1_var OR x << popc1_var
+          ENDCASES;
+
+  IContext_well_founded: AXIOM strict_well_founded?[IContext](<<);
+
+  reduce_nat(hole?_fun: nat, letc?_fun: [[nat, IExpression] -> nat],
+             popc?_fun: [nat -> nat]):
+        [IContext -> nat] =
+      LAMBDA (IContext_adtvar: IContext):
+        LET red: [IContext -> nat] =
+              reduce_nat(hole?_fun, letc?_fun, popc?_fun)
+          IN
+          CASES IContext_adtvar
+            OF hole: hole?_fun,
+               letc(letc1_var, letc2_var):
+                 letc?_fun(red(letc1_var), letc2_var),
+               popc(popc1_var): popc?_fun(red(popc1_var))
+            ENDCASES;
+
+  REDUCE_nat(hole?_fun: [IContext -> nat],
+             letc?_fun: [[nat, IExpression, IContext] -> nat],
+             popc?_fun: [[nat, IContext] -> nat]):
+        [IContext -> nat] =
+      LAMBDA (IContext_adtvar: IContext):
+        LET red: [IContext -> nat] =
+              REDUCE_nat(hole?_fun, letc?_fun, popc?_fun)
+          IN
+          CASES IContext_adtvar
+            OF hole: hole?_fun(IContext_adtvar),
+               letc(letc1_var, letc2_var):
+                 letc?_fun(red(letc1_var), letc2_var, IContext_adtvar),
+               popc(popc1_var): popc?_fun(red(popc1_var), IContext_adtvar)
+            ENDCASES;
+
+  reduce_ordinal(hole?_fun: ordinal,
+                 letc?_fun: [[ordinal, IExpression] -> ordinal],
+                 popc?_fun: [ordinal -> ordinal]):
+        [IContext -> ordinal] =
+      LAMBDA (IContext_adtvar: IContext):
+        LET red: [IContext -> ordinal] =
+              reduce_ordinal(hole?_fun, letc?_fun, popc?_fun)
+          IN
+          CASES IContext_adtvar
+            OF hole: hole?_fun,
+               letc(letc1_var, letc2_var):
+                 letc?_fun(red(letc1_var), letc2_var),
+               popc(popc1_var): popc?_fun(red(popc1_var))
+            ENDCASES;
+
+  REDUCE_ordinal(hole?_fun: [IContext -> ordinal],
+                 letc?_fun: [[ordinal, IExpression, IContext] -> ordinal],
+                 popc?_fun: [[ordinal, IContext] -> ordinal]):
+        [IContext -> ordinal] =
+      LAMBDA (IContext_adtvar: IContext):
+        LET red: [IContext -> ordinal] =
+              REDUCE_ordinal(hole?_fun, letc?_fun, popc?_fun)
+          IN
+          CASES IContext_adtvar
+            OF hole: hole?_fun(IContext_adtvar),
+               letc(letc1_var, letc2_var):
+                 letc?_fun(red(letc1_var), letc2_var, IContext_adtvar),
+               popc(popc1_var): popc?_fun(red(popc1_var), IContext_adtvar)
+            ENDCASES;
+ END IContext_adt
+
+IContext_adt_reduce[range: TYPE]: THEORY
+ BEGIN
+
+  IMPORTING IContext_adt
+
+  IMPORTING IExpression
+
+  reduce(hole?_fun: range, letc?_fun: [[range, IExpression] -> range],
+         popc?_fun: [range -> range]):
+        [IContext -> range] =
+      LAMBDA (IContext_adtvar: IContext):
+        LET red: [IContext -> range] =
+              reduce(hole?_fun, letc?_fun, popc?_fun)
+          IN
+          CASES IContext_adtvar
+            OF hole: hole?_fun,
+               letc(letc1_var, letc2_var):
+                 letc?_fun(red(letc1_var), letc2_var),
+               popc(popc1_var): popc?_fun(red(popc1_var))
+            ENDCASES;
+
+  REDUCE(hole?_fun: [IContext -> range],
+         letc?_fun: [[range, IExpression, IContext] -> range],
+         popc?_fun: [[range, IContext] -> range]):
+        [IContext -> range] =
+      LAMBDA (IContext_adtvar: IContext):
+        LET red: [IContext -> range] =
+              REDUCE(hole?_fun, letc?_fun, popc?_fun)
+          IN
+          CASES IContext_adtvar
+            OF hole: hole?_fun(IContext_adtvar),
+               letc(letc1_var, letc2_var):
+                 letc?_fun(red(letc1_var), letc2_var, IContext_adtvar),
+               popc(popc1_var): popc?_fun(red(popc1_var), IContext_adtvar)
+            ENDCASES;
+ END IContext_adt_reduce

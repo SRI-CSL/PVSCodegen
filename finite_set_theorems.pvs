@@ -1,0 +1,51 @@
+finite_set_theorems : THEORY
+
+  BEGIN
+
+   
+    is_finite_complement[T: TYPE]: LEMMA
+    (FORALL (S: finite_set[T]): 
+      is_finite(S) IMPLIES is_finite(fullset[T]) OR nonempty?(complement(S)))
+
+    nat_infinite: LEMMA
+      (FORALL (n: nat): NOT EXISTS (f: (injective?[nat, below(n)])): TRUE)
+
+    nat_fullset_infinite: LEMMA
+      NOT is_finite(fullset[nat])
+
+    i, j, k: VAR nat
+
+    NS: VAR finite_set[nat]
+
+    pick_new(NS): {j | NOT NS(j)} =
+      (choose! j: complement(NS)(j))
+
+   n, m: VAR nat
+
+    least_out_rec(NS, (i | i <= pick_new(NS))): RECURSIVE
+      {n | NOT NS(n)}
+    = (IF NS(i) THEN least_out_rec(NS, i + 1) ELSE i ENDIF)
+    MEASURE pick_new(NS) - i
+
+    least_out(NS): {n | NOT NS(n)} = least_out_rec(NS, 0)
+
+    X, Y, Z: VAR finite_set[nat]
+
+    f: VAR [nat -> nat]
+
+    IMPORTING sigma_set@sigma_countable[nat]
+
+    sigma(X, f):nat =
+     IF empty?(X)
+      THEN 0
+      ELSE sigma[below[card(X)]](0, card(X) - 1, f o finite_enumeration(X))
+      ENDIF
+
+    list2finset[T: TYPE](LL: list[T]):  finite_set[T]  =
+     list2set(LL)
+
+    finite_set_induction: LEMMA
+      (FORALL (P: PRED[finite_set[nat]]):
+        P(emptyset) AND (FORALL X: nonempty?(X) AND P(remove(choose(X), X)) => P(X)) => (FORALL X: P(X)))
+
+  END finite_set_theorems

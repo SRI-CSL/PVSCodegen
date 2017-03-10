@@ -1,0 +1,204 @@
+reduction  	: THEORY
+
+  BEGIN
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems
+
+    A, B, C: VAR IExpression
+    K, K1, K2: VAR IContext
+  
+    a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k: VAR nat
+    F: VAR finite_set[nat]
+
+    S, S1, S2: VAR Stack
+    nS: VAR neStack
+
+    dom: VAR finite_set[nat]
+    
+    Store(dom): TYPE = [(dom) -> finseq[(domainValue?(dom))]]
+
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND FORALL i: vars(A)(i) IMPLIES i < arity} #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+   estate: TYPE = [# error: bool,
+                     domain: finite_set[nat],
+                     store: Store(domain),
+                     stack: {S : Stack | every(domainValue?(domain))(S)},
+		     redex: {A | (FORALL i: refs(A)(i)  IMPLIES domain(i))
+				 AND (FORALL i: vars(A)(i) IMPLIES i + popDepth(A) < stack`length)
+				 AND popDepth(A) <= stack`length
+				 AND contextPure?(A)}
+                     				 #]
+   eS: VAR estate
+
+   goodstate: TYPE = {eS | NOT eS`error}
+   gS: VAR goodstate
+
+   stackvar?(S)(x): bool = (index(x) < S`length)
+
+    letReduce(D)(gS | pureLetRedex?(gS`redex)): estate =
+     (LET stack = gS`stack,
+           store = gS`store,
+    	   expr = gS`redex
+      IN
+      gS WITH [`error := FALSE,
+               `redex := pop(body(expr)),
+	       `stack := (IF variable?(letrhs(expr))
+	                  THEN push(get(stack)(letrhs(expr)), stack)
+		          ELSE push(letrhs(expr), stack) ENDIF)])
+
+    updateReduce(D)(gS | updateRedex?(gS`redex)): estate =
+      (LET stack = gS`stack,
+           domain = gS`domain,
+           store = gS`store,
+    	   expr = gS`redex,
+    	   aval = get(stack)(target(expr)),
+    	   lval = get(stack)(lhs(expr)),
+    	   rval = get(stack)(rhs(expr)) 
+	 IN
+         IF (ref?(aval) AND constant?(lval)
+	     AND value(lval) >= 0
+	     AND value(lval) < store(refindex(aval))`length)
+ 	  THEN
+	  (LET oldref = refindex(aval),
+               newref = least_out(domain),
+	       newdomain = add(newref, domain),
+	       newstore = store WITH [(newref) |-> store(oldref) WITH [`seq(value(lval)) := rval]]
+             IN
+	     gS WITH [`error := FALSE,
+	              `redex := ref(newref),
+		      `domain := newdomain,
+		      `store := newstore,
+		      `stack := stack])
+           ELSE gS WITH [error := TRUE]
+	   ENDIF)
+
+    popit(i)(A): RECURSIVE IExpression =
+      (IF i = 0 THEN A ELSE pop(popit(i-1)(A)) ENDIF)
+     MEASURE i
+
+    popit_pure: RECURSIVE JUDGEMENT popit(i)(A:(pure?)) HAS_TYPE {B | (FORALL j: NOT refs(B)(j))}
+
+    popit_refcount: LEMMA
+       refcount(popit(j)(A))(i) = refcount(A)(i)
+
+    popit_refs: LEMMA
+       refs(popit(j)(A))(i) = refs(A)(i)
+
+    popit_var: RECURSIVE JUDGEMENT popit(i)(A) HAS_TYPE {B | (FORALL j: vars(B)(j) = vars(A)(j + i))}
+
+    popit_popDepth: LEMMA popDepth(popit(i)(A)) = popDepth(A) + i
+
+    popitContextPure: RECURSIVE JUDGEMENT popit(i)(A:(pure?)) HAS_TYPE (contextPure?)
+
+    pushlist(V: list[(value?)], S):  Stack
+     = (V o S)
+
+    letApply(arity: nat, (args: list[(variable?)] | length(args) = arity), A):
+    RECURSIVE IExpression
+    = (IF arity = 0
+        THEN A
+        ELSE  LET arg1 = car(args),
+	         B = letApply(arity - 1, map(LAMBDA x: x WITH [`index := index(x) + 1])(cdr(args)), A)
+	      IN letexpr(arg1, B)
+	ENDIF)
+	MEASURE arity
+
+    pure_letApply: RECURSIVE JUDGEMENT
+       letApply(i, (args: list[(variable?)] | length(args) = i), (A : IExpression | pure?(A))) HAS_TYPE
+       (pure?)
+
+    vars_letApply: LEMMA
+      (FORALL i, (args: list[(variable?)] | length(args) = i), A: 
+       vars(letApply(i, args, A))(j) = (in_varlist(args)(j) OR vars(A)(j + i)))
+
+    popdepth_letApply: LEMMA
+    (FORALL i, (args: list[(variable?)] | length(args) = i), A: 
+       popDepth(letApply(i, args, A)) = (IF i = 0 THEN popDepth(A) ELSE popDepth(car(args)) ENDIF))
+
+    applyReduce(D)(gS | applyRedex?(gS`redex)): estate =
+    (LET stack = gS`stack,
+         store = gS`store,
+    	 expr = gS`redex,
+	 fun = fun(expr),
+	 args = args(expr),
+	 lenargs = length(args)
+     IN (IF fun < D`length
+         THEN LET def = D`seq(fun),
+	          arity = def`arity,
+	          body = def`body
+               IN IF lenargs = arity
+	           THEN gS WITH [`redex := letApply(arity, args, body)]
+		   ELSE gS WITH [error := TRUE]
+		   ENDIF
+	ELSE gS WITH [error := TRUE]
+	ENDIF))
+
+     ifReduce(D)(gS | pureIftRedex?(gS`redex)): estate =
+     (LET stack = gS`stack,
+          store = gS`store,
+    	  expr = gS`redex,
+	  condition = condition(expr),
+	  thenexpr = thenexpr(expr),
+	  elseexpr = elseexpr(expr)
+       IN IF get(stack)(condition) = constant(0)
+          THEN gS WITH [`redex := elseexpr]
+	  ELSE gS WITH [`redex := thenexpr]
+	  ENDIF)
+
+     lookupReduce(D)(gS | lookupRedex?(gS`redex)): estate =
+     (LET stack = gS`stack,
+          domain = gS`domain,
+          store = gS`store,
+    	  expr = gS`redex,
+	  avar = arrayvalue(expr),
+	  pos = position(expr),
+	  aval = get(stack)(avar),
+	  pval = get(stack)(pos)
+       IN IF (ref?(aval) AND domain(refindex(aval))
+               AND constant?(pval) AND 0 <= value(pval) AND value(pval) < store(refindex(aval))`length)
+          THEN gS WITH [`redex := store(refindex(aval))`seq(value(pval))]
+	  ELSE gS WITH [`error := TRUE]
+	  ENDIF)
+
+     newintReduce(D)(gS | newintRedex?(gS`redex)): estate =
+     (LET stack = gS`stack,
+          domain = gS`domain,    
+          store = gS`store,
+    	  expr = gS`redex,
+	  size = size(expr),
+	  newrefindex = least_out(domain)
+       IN gS WITH [`redex := ref(newrefindex),
+                   `domain := add(newrefindex, domain),
+                   `store := store WITH [(newrefindex) |->   (# length := size,
+		                                                seq := (LAMBDA (i:below(size)): constant(0)) #)]])
+
+    newrefReduce(D)(gS | newrefRedex?(gS`redex)): estate =
+     (LET stack = gS`stack,
+          domain = gS`domain,
+          store = gS`store,
+    	  expr = gS`redex,
+	  size = size(expr),
+	  newrefindex = least_out(domain)
+       IN gS WITH [`redex := ref(newrefindex),
+                   `domain |-> add(newrefindex, domain),
+                   `store |-> store WITH [(newrefindex) := (# length := size,
+		                                              seq := (LAMBDA (i:below(size)): nil) #)]])
+
+
+    popReduce(D)(gS | popRedex?(gS`redex)): estate =
+     (LET stack = gS`stack,
+          store = gS`store,
+    	  expr = gS`redex,
+	  body = pbody(expr),
+	  value = (IF value?(body) THEN body ELSE get(stack)(body) ENDIF)
+       IN gS WITH [`redex := value,
+                   `stack := pop(stack)])
+
+
+  END reduction

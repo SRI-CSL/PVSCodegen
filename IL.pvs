@@ -1,0 +1,293 @@
+IL  		: THEORY
+
+  BEGIN
+
+  IMPORTING IExpression
+
+  A, B, C: VAR IExpression
+
+%A value expression is a constant or a reference (possibly null)
+  value?(A): bool = (constant?(A) or ref?(A) OR nil?(A))
+
+%An atom expression is a variable or value
+  atom?(A): bool =
+   (variable?(A) OR value?(A))
+
+%Contexts have a single hole surrounded by let variable binding or pop
+  IContext: DATATYPE
+    BEGIN
+      hole: hole?
+      letc(letcrhs: IContext, letcbody: IExpression): letc?
+      popc(pcbody: IContext): popc?
+   END IContext
+
+
+%A let redex is one where the binding is atomic
+  letRedex?(A): bool =
+   (letexpr?(A) AND atom?(letrhs(A)))
+%An apply redex is an application expression
+  applyRedex?(A): bool =
+   application?(A)
+%An ift redex is an ift expression
+  iftRedex?(A): bool =
+    ift?(A)
+%An update redex is an update expression
+  updateRedex?(A): bool =
+     update?(A)
+%A lookup redex is a lookup expressoin
+  lookupRedex?(A): bool =
+    lookup?(A)
+%A newint redex is a new intarray expression
+  newintRedex?(A): bool = newint?(A)
+%A newref redex is a new ref array expression
+  newrefRedex?(A): bool = newref?(A)
+%A pop redex is a pop of an atom
+  popRedex?(A): bool =
+    (pop?(A) AND atom?(pbody(A)))
+%A release redex is a release expression
+  releaseRedex?(A): bool = release?(A)
+
+%A redex is one of the above redexes
+  redex?(A): bool =
+    (letRedex?(A) OR applyRedex?(A) OR iftRedex?(A) OR updateRedex?(A) OR
+      lookupRedex?(A) OR newintRedex?(A) OR newrefRedex?(A) OR  popRedex?(A) OR
+      releaseRedex?(A)) %OR markRedex?(A)
+
+  K, K1, K2: VAR IContext
+
+  a, b, c: VAR (atom?)
+  u, v, w: VAR (value?)
+  x, y, z: VAR (variable?)
+  i, j, k: VAR nat
+%Fills the hole in K with A
+  fill(K, A): RECURSIVE IExpression
+    = (CASES K OF
+        hole: A,
+	letc(K1, B): letexpr(fill(K1, A), B),
+	popc(K1): pop(fill(K1, A))
+       ENDCASES)
+    MEASURE K BY <<
+%An expression is either an atom or can be decomposed into a context filled with a redex
+   context_lemma: LEMMA
+     atom?(A) or (EXISTS K, B: redex?(B) AND A = fill(K, B))
+%Extracts the context from an expression
+   buildContext(A): RECURSIVE {(K, B) | fill(K, B) = A} = 
+    CASES A OF
+      letexpr(B, C): LET (K, B1) = buildContext(B) IN (letc(K, C), B1),
+      pop(B): LET (K, B1) = buildContext(B) IN (popc(K), B1)
+      ELSE (hole, A)
+      ENDCASES
+      MEASURE A BY <<
+%Composes two contexts
+   compose(K1, K2): RECURSIVE IContext =
+    (CASES K1 OF
+      hole: K2,
+      letc(K11, B): letc(compose(K11, K2), B),
+      popc(K11): popc(compose(K11, K2))
+      ENDCASES)
+    MEASURE K1 BY <<
+
+   context_composition: LEMMA
+     fill(compose(K1, K2), A) = fill(K1, fill(K2, A))
+%A pure expression does not contain a pop or a reference expression
+   pure?(A): RECURSIVE bool =
+   (CASES A OF
+    letexpr(B, C): pure?(B) AND pure?(C),
+    ift(x, B, C): pure?(B) AND pure?(C),
+    pop(B): FALSE,
+    ref(i): FALSE,
+    release(x, B): pure?(B)
+    ELSE TRUE
+    ENDCASES)
+    MEASURE A BY <<
+%cpure? checks that the context (the non-hole surrounding part) is pure (no pops or refs)
+   cpure?(K): RECURSIVE bool =
+   (CASES K OF
+     letc(K1, A): cpure?(K1) AND  pure?(A),
+     popc(K1): cpure?(K1)
+     ELSE TRUE
+     ENDCASES)
+     MEASURE K BY <<
+%The expression has a pure context
+   contextPure?(A): RECURSIVE bool =
+    (CASES A OF
+      letexpr(B, C): contextPure?(B) AND pure?(C),
+%      ift(x, B, C): pure?(B) AND pure?(C),
+      pop(B): contextPure?(B)
+      ELSE TRUE
+      ENDCASES)
+      MEASURE A BY <<
+%The converse need not hold since the context can have pops
+   pure_contextPure: LEMMA
+    pure?(A) IMPLIES contextPure?(A)
+
+   buildcontextPure: RECURSIVE JUDGEMENT
+     buildContext(A: (contextPure?)) HAS_TYPE  {(K, B) | cpure?(K) AND contextPure?(B)}
+
+   contextPurefill: LEMMA
+     contextPure?(fill(K, B)) = (cpure?(K) AND contextPure?(B))
+
+   pureApplyRedex: LEMMA
+    applyRedex?(A) => 
+     pure?(A)
+
+   pureLetRedex?(A): bool =
+    (letRedex?(A) AND pure?(body(A)))
+
+   pureIftRedex?(A): bool =
+    (iftRedex?(A) AND pure?(thenexpr(A)) AND pure?(elseexpr(A)))
+
+   pureReleaseRedex?(A): bool = (releaseRedex?(A) AND pure?(rexpr(A)))
+
+   pureRedex?(A): bool =
+    (pureLetRedex?(A) OR applyRedex?(A) OR pureIftRedex?(A) OR updateRedex?(A) OR
+      lookupRedex?(A) OR newintRedex?(A) OR newrefRedex?(A) OR  popRedex?(A) OR pureReleaseRedex?(A))
+
+   pureRedexContextPure: LEMMA
+    pureRedex?(A) IMPLIES contextPure?(A)
+
+   ContextPurePureRedex: LEMMA  %%conjecture?
+     redex?(A) AND contextPure?(A) => pureRedex?(A)
+
+   F: VAR finite_set[nat]
+
+   refSafe(F)(v: (ref?)): bool = F(refindex(v))
+
+  % might be easier to use refcount instead of refs
+   refs(A)(i): RECURSIVE bool  =
+    (CASES A OF
+      letexpr(B, C): refs(B)(i), 
+      ift(x, B, C): refs(B)(i) or refs(C)(i),
+      pop(B): refs(B)(i), 
+      ref(j): i = j,
+      release(x, B): refs(B)(i)
+      ELSE FALSE
+      ENDCASES)
+      MEASURE A BY <<
+
+    pure_refs: LEMMA
+      pure?(A) IMPLIES NOT refs(A)(i)
+
+    refs_fill: LEMMA
+      contextPure?(fill(K, A)) IMPLIES
+      refs(fill(K, A)) = refs(A)
+
+   refcount(A)(i):  RECURSIVE nat =
+    (CASES A OF
+      letexpr(B, C): refcount(B)(i), 
+      ift(x, B, C): refcount(B)(i) + refcount(C)(i),
+      pop(B): refcount(B)(i), 
+      ref(j): (IF i = j THEN 1 ELSE 0 ENDIF),
+      release(x, B): refcount(B)(i)
+      ELSE 0
+      ENDCASES)
+      MEASURE A BY <<
+
+   refcount_pure: LEMMA
+     pure?(A) IMPLIES refcount(A)(i) = 0
+
+   domainValue?(F)(v: (value?)): bool =
+   (ref?(v) IMPLIES F(refindex(v)))
+
+   Stack: TYPE = finseq[(value?)] %treat finseq as stack
+
+   S, S1, S2: VAR Stack
+
+   empty: Stack = empty_seq
+
+   neStack: TYPE = {S | S`length > 0}
+   nS: VAR neStack
+
+   push(u, S): Stack = add(u, S)
+%     (# length := S`length + 1,
+%        seq := (LAMBDA (i: upto(S`length)): IF i = S`length THEN u ELSE S`seq(i) ENDIF) #)
+
+
+   pop(nS): Stack = (# length := nS`length - 1,
+                       seq := (LAMBDA (i: below(nS`length - 1)): nS`seq(i)) #)
+
+   get(S)(x | index(x) < S`length): (value?) = 
+    (S`seq(S`length - index(x) -1))
+
+
+   popDepth(A): RECURSIVE nat =
+    CASES A OF
+      pop(B): 1 + popDepth(B),
+      letexpr(B, C): popDepth(B) 
+      %      ift(x, B, C): max(popDepth(B), popDepth(C))
+      ELSE 0
+      ENDCASES
+      MEASURE A BY <<
+
+    popDepth(K): RECURSIVE nat =
+     CASES K OF
+      letc(K1, B): popDepth(K1), 
+      popc(K1): 1 + popDepth(K1)
+      ELSE 0
+      ENDCASES
+      MEASURE K BY <<
+
+   popdepth_fill: LEMMA
+     popDepth(fill(K, A)) = popDepth(K) + popDepth(A)
+
+   purePopDepth: LEMMA
+     pure?(A) IMPLIES popDepth(A) = 0
+
+   depth: VAR nat
+
+   b: VAR bool
+   
+  IMPORTING finite_set_theorems, finseq_theorems
+
+   in_varlist(L: list[(variable?)]): finite_set[nat] =
+     {i | some(LAMBDA (v: (variable?)): index(v) = i)(L)}
+
+   X, Y: VAR finite_set[nat]
+
+   bumpn(X, j): finite_set[nat] = {i | i >= j AND X(i - j)}
+
+   bumpn_zero: LEMMA bumpn(X, 0) = X
+
+   bump(X): finite_set[nat] = bumpn(X, 1)
+     
+   drop(X): finite_set[nat] =
+     {i | X(i+1)}
+
+   drop_bump: LEMMA drop(bump(X)) = X
+
+   bumpn_union: LEMMA bumpn(union(X, Y), j) = union(bumpn(X, j), bumpn(Y, j))
+
+   bumpn_bump: LEMMA bumpn(X, j + 1) = bumpn(bump(X), j)
+
+   vars(A): RECURSIVE finite_set[nat] =
+    (CASES A OF
+      variable(j, b): singleton(j),
+      application(f, args): in_varlist(args),
+      letexpr(B, C): union(vars(B), drop(vars(C))), 
+      ift(x, B, C): add(index(x), union(vars(B), vars(C))),
+      update(x, y, z): add(index(x), add(index(y), add(index(z), emptyset[nat]))),
+      lookup(x, y): add(index(x), add(index(y), emptyset[nat])),
+      pop(B): drop(vars(B)),
+      release(x, B): add(index(x), vars(B))
+%      mark(x): vars(x)(i)
+      ELSE emptyset[nat]
+      ENDCASES)
+      MEASURE A BY <<
+
+    vars(K): RECURSIVE finite_set[nat] = 
+    (CASES K OF
+      letc(K1, B): union(vars(K1), drop(vars(B))),
+      popc(K1): drop(vars(K1))
+      ELSE emptyset
+      ENDCASES)
+      MEASURE K BY <<
+
+    vars_decompose: LEMMA
+      vars(fill(K, A))(i) = (vars(K)(i) OR vars(A)(i + popDepth(K)))
+
+   IMPORTING finseq_theorems
+
+    vars_finite: LEMMA
+        is_finite(vars(A))
+
+  END IL

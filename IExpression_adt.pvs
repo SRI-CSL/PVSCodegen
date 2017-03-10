@@ -1,0 +1,889 @@
+%%% ADT file generated from IExpression
+
+IExpression_adt: THEORY
+ BEGIN
+
+  IExpression: TYPE
+
+  variable?, constant?, nil?, application?, letexpr?, ift?, update?,
+  lookup?, newint?, newref?, pop?, ref?, release?: [IExpression -> boolean]
+
+  index: [(variable?) -> nat]
+
+  marked: [(variable?) -> bool]
+
+  value: [(constant?) -> int]
+
+  fun: [(application?) -> nat]
+
+  args: [(application?) -> list[(variable?)]]
+
+  letrhs: [(letexpr?) -> IExpression]
+
+  body: [(letexpr?) -> IExpression]
+
+  condition: [(ift?) -> (variable?)]
+
+  thenexpr: [(ift?) -> IExpression]
+
+  elseexpr: [(ift?) -> IExpression]
+
+  target: [(update?) -> (variable?)]
+
+  lhs: [(update?) -> (variable?)]
+
+  rhs: [(update?) -> (variable?)]
+
+  arrayvalue: [(lookup?) -> (variable?)]
+
+  position: [(lookup?) -> (variable?)]
+
+  size: [{x: IExpression | newint?(x) OR newref?(x)} -> nat]
+
+  pbody: [(pop?) -> IExpression]
+
+  refindex: [(ref?) -> nat]
+
+  rvar: [(release?) -> (variable?)]
+
+  rexpr: [(release?) -> IExpression]
+
+  variable: [[nat, bool] -> (variable?)]
+
+  constant: [int -> (constant?)]
+
+  nil: (nil?)
+
+  application: [[nat, list[(variable?)]] -> (application?)]
+
+  letexpr: [[IExpression, IExpression] -> (letexpr?)]
+
+  ift: [[(variable?), IExpression, IExpression] -> (ift?)]
+
+  update: [[(variable?), (variable?), (variable?)] -> (update?)]
+
+  lookup: [[(variable?), (variable?)] -> (lookup?)]
+
+  newint: [nat -> (newint?)]
+
+  newref: [nat -> (newref?)]
+
+  pop: [IExpression -> (pop?)]
+
+  ref: [nat -> (ref?)]
+
+  release: [[(variable?), IExpression] -> (release?)]
+
+  IExpression_ord: [IExpression -> upto(12)]
+
+  IExpression_ord_defaxiom: AXIOM
+         (forall (index: nat, marked: bool):
+            IExpression_ord(variable(index, marked)) = 0)
+     AND (forall (value: int): IExpression_ord(constant(value)) = 1)
+     AND IExpression_ord(nil) = 2
+     AND (forall (fun: nat, args: list[(variable?)]):
+            IExpression_ord(application(fun, args)) = 3)
+     AND (forall (letrhs: IExpression, body: IExpression):
+            IExpression_ord(letexpr(letrhs, body)) = 4)
+     AND (forall (condition: (variable?), thenexpr: IExpression,
+                  elseexpr: IExpression):
+            IExpression_ord(ift(condition, thenexpr, elseexpr)) = 5)
+     AND (forall (target: (variable?), lhs: (variable?), rhs: (variable?)):
+            IExpression_ord(update(target, lhs, rhs)) = 6)
+     AND (forall (arrayvalue: (variable?), position: (variable?)):
+            IExpression_ord(lookup(arrayvalue, position)) = 7)
+     AND (forall (size: nat): IExpression_ord(newint(size)) = 8)
+     AND (forall (size: nat): IExpression_ord(newref(size)) = 9)
+     AND (forall (pbody: IExpression): IExpression_ord(pop(pbody)) = 10)
+     AND (forall (refindex: nat): IExpression_ord(ref(refindex)) = 11)
+     AND (forall (rvar: (variable?), rexpr: IExpression):
+            IExpression_ord(release(rvar, rexpr)) = 12);
+
+  ord(x: IExpression): upto(12) =
+      CASES x
+        OF variable(variable1_var, variable2_var): 0,
+           constant(constant1_var): 1,
+           nil: 2,
+           application(application1_var, application2_var): 3,
+           letexpr(letexpr1_var, letexpr2_var): 4,
+           ift(ift1_var, ift2_var, ift3_var): 5,
+           update(update1_var, update2_var, update3_var): 6,
+           lookup(lookup1_var, lookup2_var): 7,
+           newint(newint1_var): 8,
+           newref(newref1_var): 9,
+           pop(pop1_var): 10,
+           ref(ref1_var): 11,
+           release(release1_var, release2_var): 12
+        ENDCASES
+
+  IExpression_variable_extensionality: AXIOM
+    FORALL (variable?_var: (variable?), variable?_var2: (variable?)):
+      index(variable?_var) = index(variable?_var2) AND
+       marked(variable?_var) = marked(variable?_var2)
+       IMPLIES variable?_var = variable?_var2;
+
+  IExpression_variable_eta: AXIOM
+    FORALL (variable?_var: (variable?)):
+      variable(index(variable?_var), marked(variable?_var)) = variable?_var;
+
+  IExpression_constant_extensionality: AXIOM
+    FORALL (constant?_var: (constant?), constant?_var2: (constant?)):
+      value(constant?_var) = value(constant?_var2) IMPLIES
+       constant?_var = constant?_var2;
+
+  IExpression_constant_eta: AXIOM
+    FORALL (constant?_var: (constant?)):
+      constant(value(constant?_var)) = constant?_var;
+
+  IExpression_nil_extensionality: AXIOM
+    FORALL (nil?_var: (nil?), nil?_var2: (nil?)): nil?_var = nil?_var2;
+
+  IExpression_application_extensionality: AXIOM
+    FORALL (application?_var: (application?),
+            application?_var2: (application?)):
+      fun(application?_var) = fun(application?_var2) AND
+       args(application?_var) = args(application?_var2)
+       IMPLIES application?_var = application?_var2;
+
+  IExpression_application_eta: AXIOM
+    FORALL (application?_var: (application?)):
+      application(fun(application?_var), args(application?_var)) =
+       application?_var;
+
+  IExpression_letexpr_extensionality: AXIOM
+    FORALL (letexpr?_var: (letexpr?), letexpr?_var2: (letexpr?)):
+      letrhs(letexpr?_var) = letrhs(letexpr?_var2) AND
+       body(letexpr?_var) = body(letexpr?_var2)
+       IMPLIES letexpr?_var = letexpr?_var2;
+
+  IExpression_letexpr_eta: AXIOM
+    FORALL (letexpr?_var: (letexpr?)):
+      letexpr(letrhs(letexpr?_var), body(letexpr?_var)) = letexpr?_var;
+
+  IExpression_ift_extensionality: AXIOM
+    FORALL (ift?_var: (ift?), ift?_var2: (ift?)):
+      condition(ift?_var) = condition(ift?_var2) AND
+       thenexpr(ift?_var) = thenexpr(ift?_var2) AND
+        elseexpr(ift?_var) = elseexpr(ift?_var2)
+       IMPLIES ift?_var = ift?_var2;
+
+  IExpression_ift_eta: AXIOM
+    FORALL (ift?_var: (ift?)):
+      ift(condition(ift?_var), thenexpr(ift?_var), elseexpr(ift?_var)) =
+       ift?_var;
+
+  IExpression_update_extensionality: AXIOM
+    FORALL (update?_var: (update?), update?_var2: (update?)):
+      target(update?_var) = target(update?_var2) AND
+       lhs(update?_var) = lhs(update?_var2) AND
+        rhs(update?_var) = rhs(update?_var2)
+       IMPLIES update?_var = update?_var2;
+
+  IExpression_update_eta: AXIOM
+    FORALL (update?_var: (update?)):
+      update(target(update?_var), lhs(update?_var), rhs(update?_var)) =
+       update?_var;
+
+  IExpression_lookup_extensionality: AXIOM
+    FORALL (lookup?_var: (lookup?), lookup?_var2: (lookup?)):
+      arrayvalue(lookup?_var) = arrayvalue(lookup?_var2) AND
+       position(lookup?_var) = position(lookup?_var2)
+       IMPLIES lookup?_var = lookup?_var2;
+
+  IExpression_lookup_eta: AXIOM
+    FORALL (lookup?_var: (lookup?)):
+      lookup(arrayvalue(lookup?_var), position(lookup?_var)) = lookup?_var;
+
+  IExpression_newint_extensionality: AXIOM
+    FORALL (newint?_var: (newint?), newint?_var2: (newint?)):
+      size(newint?_var) = size(newint?_var2) IMPLIES
+       newint?_var = newint?_var2;
+
+  IExpression_newint_eta: AXIOM
+    FORALL (newint?_var: (newint?)):
+      newint(size(newint?_var)) = newint?_var;
+
+  IExpression_newref_extensionality: AXIOM
+    FORALL (newref?_var: (newref?), newref?_var2: (newref?)):
+      size(newref?_var) = size(newref?_var2) IMPLIES
+       newref?_var = newref?_var2;
+
+  IExpression_newref_eta: AXIOM
+    FORALL (newref?_var: (newref?)):
+      newref(size(newref?_var)) = newref?_var;
+
+  IExpression_pop_extensionality: AXIOM
+    FORALL (pop?_var: (pop?), pop?_var2: (pop?)):
+      pbody(pop?_var) = pbody(pop?_var2) IMPLIES pop?_var = pop?_var2;
+
+  IExpression_pop_eta: AXIOM
+    FORALL (pop?_var: (pop?)): pop(pbody(pop?_var)) = pop?_var;
+
+  IExpression_ref_extensionality: AXIOM
+    FORALL (ref?_var: (ref?), ref?_var2: (ref?)):
+      refindex(ref?_var) = refindex(ref?_var2) IMPLIES ref?_var = ref?_var2;
+
+  IExpression_ref_eta: AXIOM
+    FORALL (ref?_var: (ref?)): ref(refindex(ref?_var)) = ref?_var;
+
+  IExpression_release_extensionality: AXIOM
+    FORALL (release?_var: (release?), release?_var2: (release?)):
+      rvar(release?_var) = rvar(release?_var2) AND
+       rexpr(release?_var) = rexpr(release?_var2)
+       IMPLIES release?_var = release?_var2;
+
+  IExpression_release_eta: AXIOM
+    FORALL (release?_var: (release?)):
+      release(rvar(release?_var), rexpr(release?_var)) = release?_var;
+
+  IExpression_index_variable: AXIOM
+    FORALL (variable1_var: nat, variable2_var: bool):
+      index(variable(variable1_var, variable2_var)) = variable1_var;
+
+  IExpression_marked_variable: AXIOM
+    FORALL (variable1_var: nat, variable2_var: bool):
+      marked(variable(variable1_var, variable2_var)) = variable2_var;
+
+  IExpression_value_constant: AXIOM
+    FORALL (constant1_var: int):
+      value(constant(constant1_var)) = constant1_var;
+
+  IExpression_fun_application: AXIOM
+    FORALL (application1_var: nat, application2_var: list[(variable?)]):
+      fun(application(application1_var, application2_var)) =
+       application1_var;
+
+  IExpression_args_application: AXIOM
+    FORALL (application1_var: nat, application2_var: list[(variable?)]):
+      args(application(application1_var, application2_var)) =
+       application2_var;
+
+  IExpression_letrhs_letexpr: AXIOM
+    FORALL (letexpr1_var: IExpression, letexpr2_var: IExpression):
+      letrhs(letexpr(letexpr1_var, letexpr2_var)) = letexpr1_var;
+
+  IExpression_body_letexpr: AXIOM
+    FORALL (letexpr1_var: IExpression, letexpr2_var: IExpression):
+      body(letexpr(letexpr1_var, letexpr2_var)) = letexpr2_var;
+
+  IExpression_condition_ift: AXIOM
+    FORALL (ift1_var: (variable?), ift2_var: IExpression,
+            ift3_var: IExpression):
+      condition(ift(ift1_var, ift2_var, ift3_var)) = ift1_var;
+
+  IExpression_thenexpr_ift: AXIOM
+    FORALL (ift1_var: (variable?), ift2_var: IExpression,
+            ift3_var: IExpression):
+      thenexpr(ift(ift1_var, ift2_var, ift3_var)) = ift2_var;
+
+  IExpression_elseexpr_ift: AXIOM
+    FORALL (ift1_var: (variable?), ift2_var: IExpression,
+            ift3_var: IExpression):
+      elseexpr(ift(ift1_var, ift2_var, ift3_var)) = ift3_var;
+
+  IExpression_target_update: AXIOM
+    FORALL (update1_var: (variable?), update2_var: (variable?),
+            update3_var: (variable?)):
+      target(update(update1_var, update2_var, update3_var)) = update1_var;
+
+  IExpression_lhs_update: AXIOM
+    FORALL (update1_var: (variable?), update2_var: (variable?),
+            update3_var: (variable?)):
+      lhs(update(update1_var, update2_var, update3_var)) = update2_var;
+
+  IExpression_rhs_update: AXIOM
+    FORALL (update1_var: (variable?), update2_var: (variable?),
+            update3_var: (variable?)):
+      rhs(update(update1_var, update2_var, update3_var)) = update3_var;
+
+  IExpression_arrayvalue_lookup: AXIOM
+    FORALL (lookup1_var: (variable?), lookup2_var: (variable?)):
+      arrayvalue(lookup(lookup1_var, lookup2_var)) = lookup1_var;
+
+  IExpression_position_lookup: AXIOM
+    FORALL (lookup1_var: (variable?), lookup2_var: (variable?)):
+      position(lookup(lookup1_var, lookup2_var)) = lookup2_var;
+
+  IExpression_size_newint: AXIOM
+    FORALL (newint1_var: nat): size(newint(newint1_var)) = newint1_var;
+
+  IExpression_size_newref: AXIOM
+    FORALL (newref1_var: nat): size(newref(newref1_var)) = newref1_var;
+
+  IExpression_pbody_pop: AXIOM
+    FORALL (pop1_var: IExpression): pbody(pop(pop1_var)) = pop1_var;
+
+  IExpression_refindex_ref: AXIOM
+    FORALL (ref1_var: nat): refindex(ref(ref1_var)) = ref1_var;
+
+  IExpression_rvar_release: AXIOM
+    FORALL (release1_var: (variable?), release2_var: IExpression):
+      rvar(release(release1_var, release2_var)) = release1_var;
+
+  IExpression_rexpr_release: AXIOM
+    FORALL (release1_var: (variable?), release2_var: IExpression):
+      rexpr(release(release1_var, release2_var)) = release2_var;
+
+  IExpression_inclusive: AXIOM
+    FORALL (IExpression_var: IExpression):
+           variable?(IExpression_var) OR constant?(IExpression_var)
+       OR nil?(IExpression_var) OR application?(IExpression_var)
+       OR letexpr?(IExpression_var) OR ift?(IExpression_var)
+       OR update?(IExpression_var) OR lookup?(IExpression_var)
+       OR newint?(IExpression_var) OR newref?(IExpression_var)
+       OR pop?(IExpression_var) OR ref?(IExpression_var)
+       OR release?(IExpression_var);
+
+  IExpression_induction: AXIOM
+    FORALL (p: [IExpression -> boolean]):
+      (     forall (variable1_var: nat, variable2_var: bool):
+              p(variable(variable1_var, variable2_var))
+        AND forall (constant1_var: int): p(constant(constant1_var))
+        AND p(nil)
+        AND forall (application1_var: nat,
+                    application2_var: list[(variable?)]):
+              every(p)(application2_var) IMPLIES
+               p(application(application1_var, application2_var))
+        AND forall (letexpr1_var: IExpression, letexpr2_var: IExpression):
+              p(letexpr1_var) AND p(letexpr2_var) IMPLIES
+               p(letexpr(letexpr1_var, letexpr2_var))
+        AND forall (ift1_var: (variable?), ift2_var: IExpression,
+                    ift3_var: IExpression):
+              p(ift1_var) AND p(ift2_var) AND p(ift3_var) IMPLIES
+               p(ift(ift1_var, ift2_var, ift3_var))
+        AND forall (update1_var: (variable?), update2_var: (variable?),
+                    update3_var: (variable?)):
+              p(update1_var) AND p(update2_var) AND p(update3_var) IMPLIES
+               p(update(update1_var, update2_var, update3_var))
+        AND forall (lookup1_var: (variable?), lookup2_var: (variable?)):
+              p(lookup1_var) AND p(lookup2_var) IMPLIES
+               p(lookup(lookup1_var, lookup2_var))
+        AND forall (newint1_var: nat): p(newint(newint1_var))
+        AND forall (newref1_var: nat): p(newref(newref1_var))
+        AND forall (pop1_var: IExpression):
+              p(pop1_var) IMPLIES p(pop(pop1_var))
+        AND forall (ref1_var: nat): p(ref(ref1_var))
+        AND forall (release1_var: (variable?), release2_var: IExpression):
+              p(release1_var) AND p(release2_var) IMPLIES
+               p(release(release1_var, release2_var)))
+       IMPLIES (FORALL (IExpression_var: IExpression): p(IExpression_var));
+
+  subterm(x: IExpression, y: IExpression):  boolean =
+      x = y OR
+       CASES y
+         OF variable(variable1_var, variable2_var): FALSE,
+            constant(constant1_var): FALSE,
+            nil: FALSE,
+            application(application1_var, application2_var):
+              some[(variable?)]
+                  ((restrict[IExpression, (variable?), boolean]
+                        ((lambda (z: IExpression): subterm(x, z)))))
+                  (application2_var),
+            letexpr(letexpr1_var, letexpr2_var):
+              subterm(x, letexpr1_var) OR subterm(x, letexpr2_var),
+            ift(ift1_var, ift2_var, ift3_var):
+              subterm(x, ift1_var) OR
+               subterm(x, ift2_var) OR subterm(x, ift3_var),
+            update(update1_var, update2_var, update3_var):
+              subterm(x, update1_var) OR
+               subterm(x, update2_var) OR subterm(x, update3_var),
+            lookup(lookup1_var, lookup2_var):
+              subterm(x, lookup1_var) OR subterm(x, lookup2_var),
+            newint(newint1_var): FALSE,
+            newref(newref1_var): FALSE,
+            pop(pop1_var): subterm(x, pop1_var),
+            ref(ref1_var): FALSE,
+            release(release1_var, release2_var):
+              subterm(x, release1_var) OR subterm(x, release2_var)
+         ENDCASES;
+
+  <<:  (strict_well_founded?[IExpression]) =
+      LAMBDA (x, y: IExpression):
+        CASES y
+          OF variable(variable1_var, variable2_var): FALSE,
+             constant(constant1_var): FALSE,
+             nil: FALSE,
+             application(application1_var, application2_var):
+               some[(variable?)]
+                   (restrict[IExpression, (variable?), boolean]
+                        (lambda (z: IExpression): x = z OR x << z))
+                   (application2_var),
+             letexpr(letexpr1_var, letexpr2_var):
+               (x = letexpr1_var OR x << letexpr1_var) OR
+                x = letexpr2_var OR x << letexpr2_var,
+             ift(ift1_var, ift2_var, ift3_var):
+                    x = ift1_var OR x << ift1_var OR x = ift2_var
+                OR x << ift2_var OR x = ift3_var OR x << ift3_var,
+             update(update1_var, update2_var, update3_var):
+                    x = update1_var OR x << update1_var OR x = update2_var
+                OR x << update2_var OR x = update3_var OR x << update3_var,
+             lookup(lookup1_var, lookup2_var):
+               (x = lookup1_var OR x << lookup1_var) OR
+                x = lookup2_var OR x << lookup2_var,
+             newint(newint1_var): FALSE,
+             newref(newref1_var): FALSE,
+             pop(pop1_var): x = pop1_var OR x << pop1_var,
+             ref(ref1_var): FALSE,
+             release(release1_var, release2_var):
+               (x = release1_var OR x << release1_var) OR
+                x = release2_var OR x << release2_var
+          ENDCASES;
+
+  IExpression_well_founded: AXIOM strict_well_founded?[IExpression](<<);
+
+  reduce_nat(variable?_fun: [[nat, bool] -> nat],
+             constant?_fun: [int -> nat], nil?_fun: nat,
+             application?_fun: [[nat, list[nat]] -> nat],
+             letexpr?_fun: [[nat, nat] -> nat],
+             ift?_fun: [[nat, nat, nat] -> nat],
+             update?_fun: [[nat, nat, nat] -> nat],
+             lookup?_fun: [[nat, nat] -> nat], newint?_fun: [nat -> nat],
+             newref?_fun: [nat -> nat], pop?_fun: [nat -> nat],
+             ref?_fun: [nat -> nat], release?_fun: [[nat, nat] -> nat]):
+        [IExpression -> nat] =
+      LAMBDA (IExpression_adtvar: IExpression):
+        LET red: [IExpression -> nat] =
+              reduce_nat(variable?_fun, constant?_fun, nil?_fun,
+                         application?_fun, letexpr?_fun, ift?_fun,
+                         update?_fun, lookup?_fun, newint?_fun,
+                         newref?_fun, pop?_fun, ref?_fun, release?_fun)
+          IN
+          CASES IExpression_adtvar
+            OF variable(variable1_var, variable2_var):
+                 variable?_fun(variable1_var, variable2_var),
+               constant(constant1_var): constant?_fun(constant1_var),
+               nil: nil?_fun,
+               application(application1_var, application2_var):
+                 application?_fun(application1_var,
+                                  map[(variable?), nat]
+                                      (restrict
+                                       [IExpression, (variable?), nat]
+                                       (red))
+                                      (application2_var)),
+               letexpr(letexpr1_var, letexpr2_var):
+                 letexpr?_fun(restrict[IExpression, (variable?), nat]
+                                  (red)(letexpr1_var),
+                              restrict[IExpression, (variable?), nat]
+                                  (red)(letexpr2_var)),
+               ift(ift1_var, ift2_var, ift3_var):
+                 ift?_fun(restrict[IExpression, (variable?), nat]
+                              (red)(ift1_var),
+                          restrict[IExpression, (variable?), nat]
+                              (red)(ift2_var),
+                          restrict[IExpression, (variable?), nat]
+                              (red)(ift3_var)),
+               update(update1_var, update2_var, update3_var):
+                 update?_fun(restrict[IExpression, (variable?), nat]
+                                 (red)(update1_var),
+                             restrict[IExpression, (variable?), nat]
+                                 (red)(update2_var),
+                             restrict[IExpression, (variable?), nat]
+                                 (red)(update3_var)),
+               lookup(lookup1_var, lookup2_var):
+                 lookup?_fun(restrict[IExpression, (variable?), nat]
+                                 (red)(lookup1_var),
+                             restrict[IExpression, (variable?), nat]
+                                 (red)(lookup2_var)),
+               newint(newint1_var): newint?_fun(newint1_var),
+               newref(newref1_var): newref?_fun(newref1_var),
+               pop(pop1_var):
+                 pop?_fun(restrict[IExpression, (variable?), nat]
+                              (red)(pop1_var)),
+               ref(ref1_var): ref?_fun(ref1_var),
+               release(release1_var, release2_var):
+                 release?_fun(restrict[IExpression, (variable?), nat]
+                                  (red)(release1_var),
+                              restrict[IExpression, (variable?), nat]
+                                  (red)(release2_var))
+            ENDCASES;
+
+  REDUCE_nat(variable?_fun: [[nat, bool, IExpression] -> nat],
+             constant?_fun: [[int, IExpression] -> nat],
+             nil?_fun: [IExpression -> nat],
+             application?_fun: [[nat, list[nat], IExpression] -> nat],
+             letexpr?_fun: [[nat, nat, IExpression] -> nat],
+             ift?_fun: [[nat, nat, nat, IExpression] -> nat],
+             update?_fun: [[nat, nat, nat, IExpression] -> nat],
+             lookup?_fun: [[nat, nat, IExpression] -> nat],
+             newint?_fun: [[nat, IExpression] -> nat],
+             newref?_fun: [[nat, IExpression] -> nat],
+             pop?_fun: [[nat, IExpression] -> nat],
+             ref?_fun: [[nat, IExpression] -> nat],
+             release?_fun: [[nat, nat, IExpression] -> nat]):
+        [IExpression -> nat] =
+      LAMBDA (IExpression_adtvar: IExpression):
+        LET red: [IExpression -> nat] =
+              REDUCE_nat(variable?_fun, constant?_fun, nil?_fun,
+                         application?_fun, letexpr?_fun, ift?_fun,
+                         update?_fun, lookup?_fun, newint?_fun,
+                         newref?_fun, pop?_fun, ref?_fun, release?_fun)
+          IN
+          CASES IExpression_adtvar
+            OF variable(variable1_var, variable2_var):
+                 variable?_fun(variable1_var, variable2_var,
+                               IExpression_adtvar),
+               constant(constant1_var):
+                 constant?_fun(constant1_var, IExpression_adtvar),
+               nil: nil?_fun(IExpression_adtvar),
+               application(application1_var, application2_var):
+                 application?_fun(application1_var,
+                                  map[(variable?), nat]
+                                      (restrict
+                                       [IExpression, (variable?), nat]
+                                       (red))
+                                      (application2_var),
+                                  IExpression_adtvar),
+               letexpr(letexpr1_var, letexpr2_var):
+                 letexpr?_fun(restrict[IExpression, (variable?), nat]
+                                  (red)(letexpr1_var),
+                              restrict[IExpression, (variable?), nat]
+                                  (red)(letexpr2_var),
+                              IExpression_adtvar),
+               ift(ift1_var, ift2_var, ift3_var):
+                 ift?_fun(restrict[IExpression, (variable?), nat]
+                              (red)(ift1_var),
+                          restrict[IExpression, (variable?), nat]
+                              (red)(ift2_var),
+                          restrict[IExpression, (variable?), nat]
+                              (red)(ift3_var),
+                          IExpression_adtvar),
+               update(update1_var, update2_var, update3_var):
+                 update?_fun(restrict[IExpression, (variable?), nat]
+                                 (red)(update1_var),
+                             restrict[IExpression, (variable?), nat]
+                                 (red)(update2_var),
+                             restrict[IExpression, (variable?), nat]
+                                 (red)(update3_var),
+                             IExpression_adtvar),
+               lookup(lookup1_var, lookup2_var):
+                 lookup?_fun(restrict[IExpression, (variable?), nat]
+                                 (red)(lookup1_var),
+                             restrict[IExpression, (variable?), nat]
+                                 (red)(lookup2_var),
+                             IExpression_adtvar),
+               newint(newint1_var):
+                 newint?_fun(newint1_var, IExpression_adtvar),
+               newref(newref1_var):
+                 newref?_fun(newref1_var, IExpression_adtvar),
+               pop(pop1_var):
+                 pop?_fun(restrict[IExpression, (variable?), nat]
+                              (red)(pop1_var),
+                          IExpression_adtvar),
+               ref(ref1_var): ref?_fun(ref1_var, IExpression_adtvar),
+               release(release1_var, release2_var):
+                 release?_fun(restrict[IExpression, (variable?), nat]
+                                  (red)(release1_var),
+                              restrict[IExpression, (variable?), nat]
+                                  (red)(release2_var),
+                              IExpression_adtvar)
+            ENDCASES;
+
+  reduce_ordinal(variable?_fun: [[nat, bool] -> ordinal],
+                 constant?_fun: [int -> ordinal], nil?_fun: ordinal,
+                 application?_fun: [[nat, list[ordinal]] -> ordinal],
+                 letexpr?_fun: [[ordinal, ordinal] -> ordinal],
+                 ift?_fun: [[ordinal, ordinal, ordinal] -> ordinal],
+                 update?_fun: [[ordinal, ordinal, ordinal] -> ordinal],
+                 lookup?_fun: [[ordinal, ordinal] -> ordinal],
+                 newint?_fun: [nat -> ordinal],
+                 newref?_fun: [nat -> ordinal],
+                 pop?_fun: [ordinal -> ordinal],
+                 ref?_fun: [nat -> ordinal],
+                 release?_fun: [[ordinal, ordinal] -> ordinal]):
+        [IExpression -> ordinal] =
+      LAMBDA (IExpression_adtvar: IExpression):
+        LET red: [IExpression -> ordinal] =
+              reduce_ordinal(variable?_fun, constant?_fun, nil?_fun,
+                             application?_fun, letexpr?_fun, ift?_fun,
+                             update?_fun, lookup?_fun, newint?_fun,
+                             newref?_fun, pop?_fun, ref?_fun, release?_fun)
+          IN
+          CASES IExpression_adtvar
+            OF variable(variable1_var, variable2_var):
+                 variable?_fun(variable1_var, variable2_var),
+               constant(constant1_var): constant?_fun(constant1_var),
+               nil: nil?_fun,
+               application(application1_var, application2_var):
+                 application?_fun(application1_var,
+                                  map[(variable?), ordinal]
+                                      (restrict
+                                       [IExpression, (variable?), ordinal]
+                                       (red))
+                                      (application2_var)),
+               letexpr(letexpr1_var, letexpr2_var):
+                 letexpr?_fun(restrict[IExpression, (variable?), ordinal]
+                                  (red)(letexpr1_var),
+                              restrict[IExpression, (variable?), ordinal]
+                                  (red)(letexpr2_var)),
+               ift(ift1_var, ift2_var, ift3_var):
+                 ift?_fun(restrict[IExpression, (variable?), ordinal]
+                              (red)(ift1_var),
+                          restrict[IExpression, (variable?), ordinal]
+                              (red)(ift2_var),
+                          restrict[IExpression, (variable?), ordinal]
+                              (red)(ift3_var)),
+               update(update1_var, update2_var, update3_var):
+                 update?_fun(restrict[IExpression, (variable?), ordinal]
+                                 (red)(update1_var),
+                             restrict[IExpression, (variable?), ordinal]
+                                 (red)(update2_var),
+                             restrict[IExpression, (variable?), ordinal]
+                                 (red)(update3_var)),
+               lookup(lookup1_var, lookup2_var):
+                 lookup?_fun(restrict[IExpression, (variable?), ordinal]
+                                 (red)(lookup1_var),
+                             restrict[IExpression, (variable?), ordinal]
+                                 (red)(lookup2_var)),
+               newint(newint1_var): newint?_fun(newint1_var),
+               newref(newref1_var): newref?_fun(newref1_var),
+               pop(pop1_var):
+                 pop?_fun(restrict[IExpression, (variable?), ordinal]
+                              (red)(pop1_var)),
+               ref(ref1_var): ref?_fun(ref1_var),
+               release(release1_var, release2_var):
+                 release?_fun(restrict[IExpression, (variable?), ordinal]
+                                  (red)(release1_var),
+                              restrict[IExpression, (variable?), ordinal]
+                                  (red)(release2_var))
+            ENDCASES;
+
+  REDUCE_ordinal(variable?_fun: [[nat, bool, IExpression] -> ordinal],
+                 constant?_fun: [[int, IExpression] -> ordinal],
+                 nil?_fun: [IExpression -> ordinal],
+                 application?_fun:
+                   [[nat, list[ordinal], IExpression] -> ordinal],
+                 letexpr?_fun:
+                   [[ordinal, ordinal, IExpression] -> ordinal],
+                 ift?_fun:
+                   [[ordinal, ordinal, ordinal, IExpression] -> ordinal],
+                 update?_fun:
+                   [[ordinal, ordinal, ordinal, IExpression] -> ordinal],
+                 lookup?_fun: [[ordinal, ordinal, IExpression] -> ordinal],
+                 newint?_fun: [[nat, IExpression] -> ordinal],
+                 newref?_fun: [[nat, IExpression] -> ordinal],
+                 pop?_fun: [[ordinal, IExpression] -> ordinal],
+                 ref?_fun: [[nat, IExpression] -> ordinal],
+                 release?_fun:
+                   [[ordinal, ordinal, IExpression] -> ordinal]):
+        [IExpression -> ordinal] =
+      LAMBDA (IExpression_adtvar: IExpression):
+        LET red: [IExpression -> ordinal] =
+              REDUCE_ordinal(variable?_fun, constant?_fun, nil?_fun,
+                             application?_fun, letexpr?_fun, ift?_fun,
+                             update?_fun, lookup?_fun, newint?_fun,
+                             newref?_fun, pop?_fun, ref?_fun, release?_fun)
+          IN
+          CASES IExpression_adtvar
+            OF variable(variable1_var, variable2_var):
+                 variable?_fun(variable1_var, variable2_var,
+                               IExpression_adtvar),
+               constant(constant1_var):
+                 constant?_fun(constant1_var, IExpression_adtvar),
+               nil: nil?_fun(IExpression_adtvar),
+               application(application1_var, application2_var):
+                 application?_fun(application1_var,
+                                  map[(variable?), ordinal]
+                                      (restrict
+                                       [IExpression, (variable?), ordinal]
+                                       (red))
+                                      (application2_var),
+                                  IExpression_adtvar),
+               letexpr(letexpr1_var, letexpr2_var):
+                 letexpr?_fun(restrict[IExpression, (variable?), ordinal]
+                                  (red)(letexpr1_var),
+                              restrict[IExpression, (variable?), ordinal]
+                                  (red)(letexpr2_var),
+                              IExpression_adtvar),
+               ift(ift1_var, ift2_var, ift3_var):
+                 ift?_fun(restrict[IExpression, (variable?), ordinal]
+                              (red)(ift1_var),
+                          restrict[IExpression, (variable?), ordinal]
+                              (red)(ift2_var),
+                          restrict[IExpression, (variable?), ordinal]
+                              (red)(ift3_var),
+                          IExpression_adtvar),
+               update(update1_var, update2_var, update3_var):
+                 update?_fun(restrict[IExpression, (variable?), ordinal]
+                                 (red)(update1_var),
+                             restrict[IExpression, (variable?), ordinal]
+                                 (red)(update2_var),
+                             restrict[IExpression, (variable?), ordinal]
+                                 (red)(update3_var),
+                             IExpression_adtvar),
+               lookup(lookup1_var, lookup2_var):
+                 lookup?_fun(restrict[IExpression, (variable?), ordinal]
+                                 (red)(lookup1_var),
+                             restrict[IExpression, (variable?), ordinal]
+                                 (red)(lookup2_var),
+                             IExpression_adtvar),
+               newint(newint1_var):
+                 newint?_fun(newint1_var, IExpression_adtvar),
+               newref(newref1_var):
+                 newref?_fun(newref1_var, IExpression_adtvar),
+               pop(pop1_var):
+                 pop?_fun(restrict[IExpression, (variable?), ordinal]
+                              (red)(pop1_var),
+                          IExpression_adtvar),
+               ref(ref1_var): ref?_fun(ref1_var, IExpression_adtvar),
+               release(release1_var, release2_var):
+                 release?_fun(restrict[IExpression, (variable?), ordinal]
+                                  (red)(release1_var),
+                              restrict[IExpression, (variable?), ordinal]
+                                  (red)(release2_var),
+                              IExpression_adtvar)
+            ENDCASES;
+ END IExpression_adt
+
+IExpression_adt_reduce[range: TYPE]: THEORY
+ BEGIN
+
+  IMPORTING IExpression_adt
+
+  reduce(variable?_fun: [[nat, bool] -> range],
+         constant?_fun: [int -> range], nil?_fun: range,
+         application?_fun: [[nat, list[range]] -> range],
+         letexpr?_fun: [[range, range] -> range],
+         ift?_fun: [[range, range, range] -> range],
+         update?_fun: [[range, range, range] -> range],
+         lookup?_fun: [[range, range] -> range],
+         newint?_fun: [nat -> range], newref?_fun: [nat -> range],
+         pop?_fun: [range -> range], ref?_fun: [nat -> range],
+         release?_fun: [[range, range] -> range]):
+        [IExpression -> range] =
+      LAMBDA (IExpression_adtvar: IExpression):
+        LET red: [IExpression -> range] =
+              reduce(variable?_fun, constant?_fun, nil?_fun,
+                     application?_fun, letexpr?_fun, ift?_fun, update?_fun,
+                     lookup?_fun, newint?_fun, newref?_fun, pop?_fun,
+                     ref?_fun, release?_fun)
+          IN
+          CASES IExpression_adtvar
+            OF variable(variable1_var, variable2_var):
+                 variable?_fun(variable1_var, variable2_var),
+               constant(constant1_var): constant?_fun(constant1_var),
+               nil: nil?_fun,
+               application(application1_var, application2_var):
+                 application?_fun(application1_var,
+                                  map[(variable?), range]
+                                      (restrict
+                                       [IExpression, (variable?), range]
+                                       (red))
+                                      (application2_var)),
+               letexpr(letexpr1_var, letexpr2_var):
+                 letexpr?_fun(restrict[IExpression, (variable?), range]
+                                  (red)(letexpr1_var),
+                              restrict[IExpression, (variable?), range]
+                                  (red)(letexpr2_var)),
+               ift(ift1_var, ift2_var, ift3_var):
+                 ift?_fun(restrict[IExpression, (variable?), range]
+                              (red)(ift1_var),
+                          restrict[IExpression, (variable?), range]
+                              (red)(ift2_var),
+                          restrict[IExpression, (variable?), range]
+                              (red)(ift3_var)),
+               update(update1_var, update2_var, update3_var):
+                 update?_fun(restrict[IExpression, (variable?), range]
+                                 (red)(update1_var),
+                             restrict[IExpression, (variable?), range]
+                                 (red)(update2_var),
+                             restrict[IExpression, (variable?), range]
+                                 (red)(update3_var)),
+               lookup(lookup1_var, lookup2_var):
+                 lookup?_fun(restrict[IExpression, (variable?), range]
+                                 (red)(lookup1_var),
+                             restrict[IExpression, (variable?), range]
+                                 (red)(lookup2_var)),
+               newint(newint1_var): newint?_fun(newint1_var),
+               newref(newref1_var): newref?_fun(newref1_var),
+               pop(pop1_var):
+                 pop?_fun(restrict[IExpression, (variable?), range]
+                              (red)(pop1_var)),
+               ref(ref1_var): ref?_fun(ref1_var),
+               release(release1_var, release2_var):
+                 release?_fun(restrict[IExpression, (variable?), range]
+                                  (red)(release1_var),
+                              restrict[IExpression, (variable?), range]
+                                  (red)(release2_var))
+            ENDCASES;
+
+  REDUCE(variable?_fun: [[nat, bool, IExpression] -> range],
+         constant?_fun: [[int, IExpression] -> range],
+         nil?_fun: [IExpression -> range],
+         application?_fun: [[nat, list[range], IExpression] -> range],
+         letexpr?_fun: [[range, range, IExpression] -> range],
+         ift?_fun: [[range, range, range, IExpression] -> range],
+         update?_fun: [[range, range, range, IExpression] -> range],
+         lookup?_fun: [[range, range, IExpression] -> range],
+         newint?_fun: [[nat, IExpression] -> range],
+         newref?_fun: [[nat, IExpression] -> range],
+         pop?_fun: [[range, IExpression] -> range],
+         ref?_fun: [[nat, IExpression] -> range],
+         release?_fun: [[range, range, IExpression] -> range]):
+        [IExpression -> range] =
+      LAMBDA (IExpression_adtvar: IExpression):
+        LET red: [IExpression -> range] =
+              REDUCE(variable?_fun, constant?_fun, nil?_fun,
+                     application?_fun, letexpr?_fun, ift?_fun, update?_fun,
+                     lookup?_fun, newint?_fun, newref?_fun, pop?_fun,
+                     ref?_fun, release?_fun)
+          IN
+          CASES IExpression_adtvar
+            OF variable(variable1_var, variable2_var):
+                 variable?_fun(variable1_var, variable2_var,
+                               IExpression_adtvar),
+               constant(constant1_var):
+                 constant?_fun(constant1_var, IExpression_adtvar),
+               nil: nil?_fun(IExpression_adtvar),
+               application(application1_var, application2_var):
+                 application?_fun(application1_var,
+                                  map[(variable?), range]
+                                      (restrict
+                                       [IExpression, (variable?), range]
+                                       (red))
+                                      (application2_var),
+                                  IExpression_adtvar),
+               letexpr(letexpr1_var, letexpr2_var):
+                 letexpr?_fun(restrict[IExpression, (variable?), range]
+                                  (red)(letexpr1_var),
+                              restrict[IExpression, (variable?), range]
+                                  (red)(letexpr2_var),
+                              IExpression_adtvar),
+               ift(ift1_var, ift2_var, ift3_var):
+                 ift?_fun(restrict[IExpression, (variable?), range]
+                              (red)(ift1_var),
+                          restrict[IExpression, (variable?), range]
+                              (red)(ift2_var),
+                          restrict[IExpression, (variable?), range]
+                              (red)(ift3_var),
+                          IExpression_adtvar),
+               update(update1_var, update2_var, update3_var):
+                 update?_fun(restrict[IExpression, (variable?), range]
+                                 (red)(update1_var),
+                             restrict[IExpression, (variable?), range]
+                                 (red)(update2_var),
+                             restrict[IExpression, (variable?), range]
+                                 (red)(update3_var),
+                             IExpression_adtvar),
+               lookup(lookup1_var, lookup2_var):
+                 lookup?_fun(restrict[IExpression, (variable?), range]
+                                 (red)(lookup1_var),
+                             restrict[IExpression, (variable?), range]
+                                 (red)(lookup2_var),
+                             IExpression_adtvar),
+               newint(newint1_var):
+                 newint?_fun(newint1_var, IExpression_adtvar),
+               newref(newref1_var):
+                 newref?_fun(newref1_var, IExpression_adtvar),
+               pop(pop1_var):
+                 pop?_fun(restrict[IExpression, (variable?), range]
+                              (red)(pop1_var),
+                          IExpression_adtvar),
+               ref(ref1_var): ref?_fun(ref1_var, IExpression_adtvar),
+               release(release1_var, release2_var):
+                 release?_fun(restrict[IExpression, (variable?), range]
+                                  (red)(release1_var),
+                              restrict[IExpression, (variable?), range]
+                                  (red)(release2_var),
+                              IExpression_adtvar)
+            ENDCASES;
+ END IExpression_adt_reduce

@@ -1,0 +1,204 @@
+preprocess  % [ parameters ]
+		: THEORY
+
+  BEGIN
+
+    IMPORTING IExpression, IL, finite_set_theorems
+
+    A, B, C: VAR IExpression
+    K, K1, K2: VAR IContext
+  
+    a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k: VAR nat
+    X, Y: VAR finite_set[nat]
+    L, J: VAR list[(variable?)]
+
+    ccard(X): nat = card(X)
+%iterative construction of release for variable indices in X.
+    release_set(A, X): RECURSIVE IExpression =
+    (IF empty?(X)
+     THEN A
+     ELSE LET i = choose(X),
+              Y = remove(i, X)
+	    IN release_set(release(variable(i, TRUE), A), Y)
+     ENDIF)
+     MEASURE ccard(X)
+
+    vars_release_set: LEMMA
+      vars(release_set(A, X)) = union(vars(A), X)
+
+    refs_release_set: LEMMA
+      refs(release_set(A, X))(i) = refs(A)(i)
+
+    mv: VAR bool %for marked variable
+
+    markvar(x): (variable?) = x WITH [`marked := TRUE]
+    unmarkvar(x): (variable?) = x WITH [`marked := FALSE]
+    
+%marks the variables in X in list L
+    markvars(X)(L): RECURSIVE {J | length(J) = length(L)} = 
+    (CASES L OF
+      null: null,
+      cons(x, L1): IF X(index(x)) OR in_varlist(L1)(index(x))
+                   THEN cons(unmarkvar(x), markvars(X)(L1))
+		   ELSE cons(markvar(x), markvars(X)(L1))
+		   ENDIF
+     ENDCASES)
+     MEASURE length(L)
+%marking preserves the order of the list L
+  markvars_index: LEMMA
+   (FORALL (i : below(length(L))): 
+    index(nth(markvars(X)(L), i)) = index(nth(L, i)))
+%markvars marks    
+  markvars_mark: LEMMA
+   (FORALL (i : below(length(L))):
+     X(index(nth(L, i))) OR EXISTS (j: below(length(L))): index(nth(L, i)) = index(nth(L, j)) AND marked(nth(markvars(X)(L), j)))
+
+%markvarsX
+   markvars_markX: LEMMA
+   (FORALL (j: below(length(L))):
+     marked(nth(markvars(X)(L), j)) => NOT X(index(nth(L, j))))
+
+%marking is idempotent
+  markvars_idem: LEMMA
+   markvars(X)(markvars(X)(L)) = markvars(X)(L)
+%marks x if it is not in X
+   markv(X)(x): (variable?) =
+   (LET j = index(x) IN 
+    IF X(j) THEN variable(j, FALSE) ELSE variable(j, TRUE) ENDIF)
+
+%marks the last occurrence of variables in A not in X
+    mark(X)(A): RECURSIVE IExpression
+     = 
+    (CASES A OF
+      variable(j, mv): markv(X)(A),
+      application(f, args): application(f, markvars(X)(args)),
+      letexpr(B, C): (LET mbody = (IF vars(C)(0)
+                                   THEN mark(bump(X))(C) %otherwise release var 0
+				   ELSE release(variable(0, TRUE), mark(bump(X))(C))
+				   ENDIF)
+                           IN letexpr(mark(union(drop(vars(C)), X))(B), mbody)),
+      ift(x, B, C): (LET Y = union(vars(B),  union(vars(C), X))
+                      IN ift(markv(Y)(x),
+		             release_set(mark(X)(B), difference(vars(C), union(vars(B), X))),
+			     release_set(mark(X)(C), difference(vars(B), union(vars(C), X))))),
+      update(x, y, z): update(markv(add(index(y), add(index(z), X)))(x),
+                              markv(add(index(z), X))(y),
+			      markv(X)(z)),
+      lookup(x, y): lookup(markv(add(index(y), X))(x), markv(X)(y)),
+      pop(B): pop(mark(bump(X))(B)),
+      release(x, B): release(markv(union(vars(B), X))(x), mark(X)(B)) %no need to mark released var
+      ELSE A
+      ENDCASES)
+      MEASURE A BY <<
+%set of vars is unchanged by marking.
+   vars_mark: LEMMA
+     vars(mark(X)(B)) = vars(B)
+
+   vars_mark_type: JUDGEMENT mark(X)(B) HAS_TYPE {C | vars(C) = vars(B)}
+
+   mark_release_set: LEMMA
+    disjoint?(Y, union(vars(A), X)) => 
+    (mark(X)(release_set(A, Y)) = release_set(mark(X)(A), Y))
+
+   mark_idem: LEMMA mark(X)(mark(X)(A)) = mark(X)(A)
+
+   refs_mark: LEMMA refs(mark(X)(A))(i) = refs(A)(i)
+
+   popDepth_mark: LEMMA popDepth(mark(X)(A)) = popDepth(A)
+
+
+%i is the index of a marked variable in A
+   mvars(A)(i): RECURSIVE bool =
+   (CASES A OF
+      variable(j, b): (b AND i = j),
+      application(f, args): some(LAMBDA (v: (variable?)): v = variable(i, TRUE))(args),
+      letexpr(B, C): mvars(B)(i) OR mvars(C)(i + 1),
+      ift(x, B, C): mvars(x)(i) OR mvars(B)(i) OR mvars(C)(i),
+      update(x, y, z): mvars(x)(i) OR mvars(y)(i) OR mvars(z)(i),
+      lookup(x, y): mvars(x)(i) OR mvars(y)(i) ,
+      pop(B): mvars(B)(i+1),
+      release(x, B): mvars(x)(i) OR mvars(B)(i)
+      ELSE FALSE
+      ENDCASES)
+    MEASURE A BY <<
+%unmarks all the variables in a list
+    unmarkvars(L: list[(variable?)]): RECURSIVE list[(variable?)] =
+    (CASES L OF
+      null: null,
+      cons(x, L1): cons(unmarkvar(x), unmarkvars(L1))
+     ENDCASES)
+     MEASURE length(L)
+
+%unmarks the variables in A
+    unmark(A): RECURSIVE IExpression
+     = 
+    (CASES A OF
+      variable(j, mv): variable(j, FALSE),
+      application(f, args): application(f, unmarkvars(args)),
+      letexpr(B, C): letexpr(unmark(B), unmark(C)),
+      ift(x, B, C): ift(unmarkvar(x),
+		        unmark(B),
+			unmark(C)),
+      update(x, y, z): update(unmarkvar(x), unmarkvar(y), unmarkvar(z)),
+      lookup(x, y): lookup(unmarkvar(x), unmarkvar(y)),
+      pop(B): pop(unmark(B)),
+      release(x, B): unmark(B)
+      ELSE A
+      ENDCASES)
+      MEASURE A BY <<
+%marks the variables in context K that don't occur in X
+    markc(X)(K): RECURSIVE IContext =
+    (CASES K OF
+      letc(K1, B): (LET mbody = (IF vars(B)(0)
+                                   THEN mark(bump(X))(B) %otherwise release var 0
+				   ELSE release(variable(0, TRUE), mark(bump(X))(B))
+				   ENDIF)
+                           IN letc(markc(union(drop(vars(B)), X))(K1), mbody)),
+      popc(K1): popc(markc(bump(X))(K1))
+      ELSE K
+      ENDCASES)
+      MEASURE K BY <<
+%context variables in K
+    cvars(K): RECURSIVE finite_set[nat] =
+    (CASES K OF
+      letc(K1, B): union(cvars(K1), bumpn(drop(vars(B)), popDepth(K1))),
+      popc(K1): cvars(K1)
+      ELSE emptyset
+      ENDCASES)
+      MEASURE K BY <<
+%marking a decomposition
+    mark_fill: LEMMA
+      mark(X)(fill(K, A)) = fill(markc(X)(K), mark(union(cvars(K), bumpn(X, popDepth(K))))(A))
+
+    wellformed?(A): RECURSIVE bool =
+    (CASES A OF
+      letexpr(B, C): wellformed?(B) AND wellformed?(C) AND vars(C)(0), %bound variable occurs
+      ift(x, B, C): wellformed?(B) AND wellformed?(C),
+      pop(B): wellformed?(B), 
+      release(x, B): wellformed?(B) AND NOT vars(B)(index(x))
+      ELSE TRUE
+      ENDCASES)
+      MEASURE A BY <<
+
+    wellformed_release_set: LEMMA
+      wellformed?(A) AND disjoint?(X, vars(A)) IMPLIES wellformed?(release_set(A, X))
+
+    wellformed_mark: LEMMA
+       wellformed?(A) IMPLIES wellformed?(mark(X)(A))
+
+    mvars_release_set: LEMMA
+      mvars(release_set(A, X))(i) = (mvars(A)(i) OR X(i))
+
+    mvars_mark: LEMMA
+      mvars(mark(X)(A))(i) = (vars(A)(i) AND NOT X(i))
+
+    pure_release_set: LEMMA
+      pure?(release_set(A, X)) = pure?(A)
+
+    pure_mark: LEMMA
+       pure?(mark(X)(A)) = pure?(A)
+
+ END preprocess

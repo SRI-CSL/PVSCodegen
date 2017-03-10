@@ -1,0 +1,306 @@
+intermediateLanguage  % [ parameters ]
+		: THEORY
+
+  BEGIN
+
+  IMPORTING IExpression
+
+  A, B, C: VAR IExpression
+
+  value?(A): bool = (constant?(A) or ref?(A) OR nil?(A))
+
+  atom?(A): bool =
+   (variable?(A) OR value?(A))
+
+  IContext: DATATYPE
+    BEGIN
+      hole: hole?
+      letc(letcrhs: IContext, letcbody: IExpression): letc?
+      popc(pcbody: IContext): popc?
+   END IContext
+
+
+
+  letRedex?(A): bool =
+   (letexpr?(A) AND atom?(letrhs(A)))
+
+  applyRedex?(A): bool =
+   application?(A)
+
+  iftRedex?(A): bool =
+    ift?(A)
+
+  updateRedex?(A): bool =
+     update?(A)
+
+  lookupRedex?(A): bool =
+    lookup?(A)
+
+  newintRedex?(A): bool = newint?(A)
+
+  newrefRedex?(A): bool = newref?(A)
+
+  popRedex?(A): bool =
+    (pop?(A) AND atom?(pbody(A)))
+
+  releaseRedex?(A): bool = release?(A)
+
+  redex?(A): bool =
+    (letRedex?(A) OR applyRedex?(A) OR iftRedex?(A) OR updateRedex?(A) OR
+      lookupRedex?(A) OR newintRedex?(A) OR newrefRedex?(A) OR  popRedex?(A)) OR releaseRedex?(A)
+
+  K, K1, K2: VAR IContext
+
+  a, b, c: VAR (atom?)
+  u, v, w: VAR (value?)
+  x, y, z: VAR (variable?)
+  i, j, k: VAR nat
+
+  fill(K, A): RECURSIVE IExpression
+    = (CASES K OF
+        hole: A,
+	letc(K1, B): letexpr(fill(K1, A), B),
+	popc(K1): pop(fill(K1, A))
+       ENDCASES)
+    MEASURE K BY <<
+
+   context_lemma: LEMMA
+     atom?(A) or (EXISTS K, B: redex?(B) AND A = fill(K, B))
+
+   buildContext(A): RECURSIVE {(K, B) | fill(K, B) = A} = 
+    CASES A OF
+      letexpr(B, C): LET (K, B1) = buildContext(B) IN (letc(K, C), B1),
+      pop(B): LET (K, B1) = buildContext(B) IN (popc(K), B1)
+      ELSE (hole, A)
+      ENDCASES
+      MEASURE A BY <<
+
+   compose(K1, K2): RECURSIVE IContext =
+    (CASES K1 OF
+      hole: K2,
+      letc(K11, B): letc(compose(K11, K2), B),
+      popc(K11): popc(compose(K11, K2))
+      ENDCASES)
+    MEASURE K1 BY <<
+
+   context_composition: LEMMA
+     fill(compose(K1, K2), A) = fill(K1, fill(K2, A))
+
+   pure?(A): RECURSIVE bool =
+   (CASES A OF
+    letexpr(B, C): pure?(B) AND pure?(C),
+    ift(x, B, C): pure?(B) AND pure?(C),
+    pop(B): FALSE,
+    ref(i): FALSE,
+    release(x, B): pure?(B)
+    ELSE TRUE
+    ENDCASES)
+    MEASURE A BY <<
+
+   pure?(K): RECURSIVE bool =
+   (CASES K OF
+     letc(K1, A): pure?(K1) AND  pure?(A),
+     popc(K1): pure?(K1)
+     ELSE TRUE
+     ENDCASES)
+     MEASURE K BY <<
+
+   contextPure?(A): RECURSIVE bool =
+    (CASES A OF
+      letexpr(B, C): contextPure?(B) AND pure?(C),
+      ift(x, B, C): contextPure?(B) AND contextPure?(C),
+      pop(B): contextPure?(B)
+      ELSE TRUE
+      ENDCASES)
+      MEASURE A BY <<
+
+   pure_contextPure: LEMMA
+    pure?(A) IMPLIES contextPure?(A)
+
+   buildcontextPure: RECURSIVE JUDGEMENT
+     buildContext(A: (contextPure?)) HAS_TYPE  {(K, B) | pure?(K) AND contextPure?(A)}
+
+   contextPurefill: LEMMA
+     contextPure?(fill(K, B)) = (pure?(K) AND contextPure?(B))
+
+   pureLetRedex?(A): bool =
+    (letRedex?(A) AND pure?(body(A)))
+
+   pureIftRedex?(A): bool =
+    (iftRedex?(A) AND pure?(thenexpr(A)) AND pure?(elseexpr(A)))
+
+   pureReleaseRedex?(A): bool = (releaseRedex?(A) AND pure?(rexpr(A)))
+
+   pureRedex?(A): bool =
+    (pureLetRedex?(A) OR applyRedex?(A) OR pureIftRedex?(A) OR updateRedex?(A) OR
+      lookupRedex?(A) OR newintRedex?(A) OR newrefRedex?(A) OR  popRedex?(A) OR pureReleaseRedex?(A))
+
+   F: VAR finite_set[nat]
+
+   refSafe(F)(v: (ref?)): bool = F(refindex(v))
+
+  % might be easier to use refcount instead of refs
+   refs(A : (contextPure?))(i): RECURSIVE bool  =
+    (CASES A OF
+      letexpr(B, C): refs(B)(i), 
+      ift(x, B, C): refs(B)(i) or refs(C)(i),
+      pop(B): refs(B)(i), 
+      ref(j): i = j
+      ELSE FALSE
+      ENDCASES)
+      MEASURE A BY <<
+
+    pure_refs: LEMMA
+      pure?(A) IMPLIES NOT refs(A)(i)
+
+    refs_fill: LEMMA
+      contextPure?(fill(K, A)) IMPLIES
+      refs(fill(K, A)) = refs(A)
+
+   refcount(A : (contextPure?))(i):  RECURSIVE nat =
+    (CASES A OF
+      letexpr(B, C): refcount(B)(i), 
+      ift(x, B, C): refcount(B)(i) + refcount(C)(i),
+      pop(B): refcount(B)(i), 
+      ref(j): (IF i = j THEN 1 ELSE 0 ENDIF) 
+      ELSE 0
+      ENDCASES)
+      MEASURE A BY <<
+
+   domainValue?(F)(v: (value?)): bool =
+   (ref?(v) IMPLIES F(refindex(v)))
+
+   Store: TYPE = [# domain: finite_set[nat], map: [(domain) -> finseq[(domainValue?(domain))]] #]
+
+   R, R1, R2: VAR Store
+
+   Stack: TYPE = finseq[(value?)] %treat finseq as stack
+
+   S, S1, S2: VAR Stack
+
+   empty: Stack = empty_seq
+
+   neStack: TYPE = {S | S`length > 0}
+   nS: VAR neStack
+
+   push(u, S): Stack =
+     (# length := S`length + 1,
+        seq := (LAMBDA (i: upto(S`length)): IF i = S`length THEN u ELSE S`seq(i) ENDIF) #)
+
+   pop(nS): Stack = (# length := nS`length - 1,
+                       seq := (LAMBDA (i: below(nS`length - 1)): nS(i)) #)
+
+   get(S)(x | index(x) < S`length): (value?) = 
+    (S`seq(S`length - index(x) -1))
+
+
+   popDepth(A): RECURSIVE nat =
+    CASES A OF
+      pop(B): 1 + popDepth(B),
+      letexpr(B, C): popDepth(B), 
+      ift(x, B, C): max(popDepth(B), popDepth(C))
+      ELSE 0
+      ENDCASES
+      MEASURE A BY <<
+
+    popDepth(K): RECURSIVE nat =
+     CASES K OF
+      letc(K1, B): popDepth(K1), 
+      popc(K1): 1 + popDepth(K1)
+      ELSE 0
+      ENDCASES
+      MEASURE K BY <<
+
+   popdepth_fill: LEMMA
+     popDepth(fill(K, A)) = popDepth(K) + popDepth(A)
+
+   purePopDepth: LEMMA
+     pure?(A) IMPLIES popDepth(A) = 0
+
+   depth: VAR nat
+
+   vars(A)(i): RECURSIVE bool =
+    (CASES A OF
+      variable(j, b): (i = j),
+      application(f, args): member(variable(i), args), 
+      letexpr(B, C): vars(B)(i) OR vars(C)(i + 1),
+      ift(x, B, C): vars(B)(i) OR vars(C)(i),
+      update(x, y, z): vars(x)(i) OR vars(y)(i) OR vars(z)(i),
+      lookup(x, y): vars(x)(i) OR vars(y)(i) ,
+      pop(B): vars(B)(i+1)
+      ELSE FALSE
+      ENDCASES)
+      MEASURE A BY <<
+
+    vars(K)(i): RECURSIVE bool =
+    (CASES K OF
+      letc(K1, B): vars(K1)(i) OR vars(B)(i + 1),
+      popc(K1): vars(K1)(i + 1)
+      ELSE FALSE
+      ENDCASES)
+      MEASURE K BY <<
+
+    vars_decompose: LEMMA
+      vars(fill(K, A))(i) = (vars(K)(i) OR vars(A)(popDepth(K) + i))
+
+    Definition: TYPE = [# arity: nat, body: {A |  FORALL i: vars(A)(i) IMPLIES i < arity} #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+   estate: TYPE = [# error: bool,
+                     store: Store,
+                     expr: {A | contextPure?(A)
+		                AND (FORALL i: refs(A)(i)  IMPLIES store`domain(i))
+				AND (FORALL i: NOT vars(A)(i))},
+                     stack: {S : Stack | popDepth(expr) =  S`length AND
+		                         (FORALL (i:below(S`length)): domainValue?(store`domain)(S`seq(i)))} #]
+   eS: VAR estate
+
+   goodstate: TYPE = {eS | NOT eS`error}
+   gS: VAR goodstate
+
+    letReduce(D)((K | pure?(K)), (A: (pureLetRedex?)))(gS | gS`expr = fill(K, A)): estate =
+      (# error := FALSE,
+         expr := fill(K, pop(body(A))),
+         store := gS`store, 
+         stack := (IF variable?(letrhs(A))
+	              THEN push(get(gS`stack)(letrhs(A)), gS`stack)
+		      ELSE push(letrhs(A), gS`stack) ENDIF) #)
+
+    updateReduce(D)((K | pure?(K)), (A: (updateRedex?)))(gS | gS`expr = fill(K, A)): estate =
+      (LET stack = gS`stack,
+           store = gS`store,
+    	   expr = gS`expr,
+    	   aval = get(stack)(target(A)),
+    	   lval = get(stack)(lhs(A)),
+    	   rval = get(stack)(rhs(A)) 
+	 IN
+         IF (ref?(aval) AND constant?(lval))
+ 	  THEN
+	  (LET oldref = refindex(aval),
+               newref = choose! i: NOT store`domain(i),
+	       newstore = store WITH [`domain := add(newref, store`domain),
+	                              `map(newref) := store`map(oldref)
+				                      WITH [`seq(value(lval)) := rval]]
+             IN
+	     (# error := FALSE,
+	        expr := fill(K, ref(newref)),
+		store := newstore,
+		stack := stack #))
+           ELSE gS WITH [error := TRUE]
+	   ENDIF)
+
+   
+
+     
+
+   
+   
+
+  
+
+  
+
+  END intermediateLanguage

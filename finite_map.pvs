@@ -1,0 +1,21 @@
+finite_map   [dom, range: TYPE ]
+		: THEORY
+
+  BEGIN
+
+   x, y, z: VAR dom
+   u, v, w: VAR range
+
+   finite_map: TYPE = [# domain: finite_set[dom],
+                         map: [(domain) -> range] #]
+
+   F, G: VAR finite_map
+
+   empty: finite_map = (# domain := emptyset,
+                          map := (LAMBDA (i: (emptyset[dom])): choose! (x: range): TRUE) #)
+
+   add(x, u, F): finite_map =
+     (# domain := add(x, F`domain),
+        map := F`map WITH [(x) := u] #)
+
+  END finite_map

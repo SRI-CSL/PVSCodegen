@@ -1,0 +1,129 @@
+finseq_theorems  [T: TYPE]
+		: THEORY
+
+  BEGIN
+
+  P: VAR [T -> bool]
+  S, S1, S2: VAR finseq[T]
+
+   every(P)(S): bool = (FORALL (i: below(S`length)): P(S`seq(i)))
+
+   every_append: LEMMA
+     every(P)(S1 o S2) = (every(P)(S1) AND  every(P)(S2))
+
+   L, L1, L2: VAR list[T]
+
+   every_map[T2: TYPE]: LEMMA
+   (FORALL (Q: [T2 -> bool], f: [(P) -> (Q)]):
+     every(P)(L) => every(Q)(map(f)(L)))
+
+   count(P, L): RECURSIVE nat =
+   (CASES L OF
+     cons(a, L1): IF P(a) THEN 1 + count(P, L1) ELSE count(P, L1) ENDIF,
+     null: 0
+     ENDCASES)
+     MEASURE length(L)
+
+   count_append: LEMMA
+     count(P, append(L1, L2)) = count(P, L1) + count(P, L2)
+
+   l : VAR nat
+
+   nonempty_fs: TYPE = {S | S`length > 0}
+   nS: VAR nonempty_fs
+
+   head(nS): T = nS`seq(nS`length - 1)
+
+   head_compose: LEMMA head(S o nS) = head(nS)
+
+   tail(nS): finseq[T] =
+     nS WITH [`length := nS`length - 1,
+              `seq := (LAMBDA (i: below(nS`length - 1)): nS`seq(i))]
+
+   tail_compose: LEMMA tail(S o nS) = S o tail(nS)
+
+   x, y, z: VAR T
+
+   lsplit(S)(i: upto(S`length)): finseq[T] =
+     (# length := i, seq := (LAMBDA (j: below(i)): S(j)) #)
+
+   rsplit(S)(i: upto(S`length)): finseq[T] =
+    (LET newlen = S`length - i
+     IN 
+     (# length := newlen, seq := (LAMBDA (j: below(newlen)): S(i + j)) #))
+
+   recompose: LEMMA (FORALL (i : upto(S`length)): (lsplit(S)(i) o rsplit(S)(i)) = S)
+
+   finseqtolist(S): RECURSIVE list[T] =
+     (IF S`length > 0 THEN cons(head(S), finseqtolist(tail(S))) ELSE null[T] ENDIF)
+     MEASURE S`length
+
+   count(P, S): nat = count(P, finseqtolist(S))%this is the count above with a finseq2list conversion
+
+   head_add: LEMMA head(add(x, S)) = x
+   tail_add: LEMMA tail(add(x, S)) = S
+
+   add_head_tail: LEMMA
+     add(head(nS), tail(nS)) = nS
+
+   head_update: LEMMA
+   (FORALL (i:below(nS`length)): 
+     head(nS WITH [`seq(i) := x]) =
+     (IF i = nS`length - 1 THEN x ELSE head(nS) ENDIF))
+
+   tail_update: LEMMA
+   (FORALL (i:below(nS`length)): 
+     tail(nS WITH [`seq(i) := x]) =
+     (IF i = nS`length - 1 THEN tail(nS) ELSE tail(nS) WITH [`seq(i) := x] ENDIF))
+
+   count_decompose: LEMMA
+    count(P, nS) = (IF P(head(nS)) THEN 1 + count(P, tail(nS)) ELSE count(P, tail(nS)) ENDIF)
+
+   count_add: LEMMA
+    count(P, add(x, S)) = (IF P(x) THEN 1 + count(P, S) ELSE count(P, S) ENDIF)
+
+   Q: VAR pred[finseq[T]]
+
+   finseq_induct: LEMMA
+     Q(empty_seq) AND (FORALL x, S: Q(S) IMPLIES Q(add(x, S))) IMPLIES (FORALL S: Q(S))
+   
+
+   count_update: LEMMA
+    FORALL (i: below(S`length)): 
+     count(P, S WITH [`seq(i) := x]) =
+     (LET k = (IF P(S`seq(i)) THEN 1 ELSE 0 ENDIF),
+          j = (IF P(x) THEN 1 ELSE 0 ENDIF)
+       IN 
+      count(P, S) + j - k)
+
+   finseqtolist_append: LEMMA
+     l = S2`length => 
+         finseqtolist(S1 o S2) = append(finseqtolist(S2), finseqtolist(S1))
+
+   count_compose: LEMMA
+     count(P, S1 o S2) = count(P, S1) + count(P, S2)
+
+   count_elem: LEMMA
+    (EXISTS (i: below(S`length)): S`seq(i) = x) AND P(x) 
+     IMPLIES count(P, S) > 0
+
+   locate(P, (L | EXISTS (a : (P)): member(a, L))): RECURSIVE
+    {i : below(length(L)) | P(nth(L, length(L) - i - 1))} 
+   =
+   (CASES L OF
+     cons(a, L1): IF P(a) THEN length(L1) ELSE locate(P, L1) ENDIF,
+     null: 0
+     ENDCASES)
+     MEASURE length(L)
+
+   a: VAR T
+
+   some_nth: LEMMA
+     some(P)(L) IFF (EXISTS (i :below(length(L))): P(nth(L, i)))
+
+   member_nth: LEMMA
+   (FORALL (i: nat | i < length(L)): 
+     member(nth(L, i), L))
+    
+
+  END finseq_theorems
