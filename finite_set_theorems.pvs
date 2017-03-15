@@ -33,13 +33,12 @@ finite_set_theorems : THEORY
 
     f: VAR [nat -> nat]
 
-    IMPORTING sigma_set@sigma_countable[nat]
-
-    sigma(X, f):nat =
+    Sigma(X, f): RECURSIVE nat =
      IF empty?(X)
       THEN 0
-      ELSE sigma[below[card(X)]](0, card(X) - 1, f o finite_enumeration(X))
+      ELSE f(choose(X)) + Sigma(remove(choose(X), X), f)
       ENDIF
+      MEASURE card(X)
 
     list2finset[T: TYPE](LL: list[T]):  finite_set[T]  =
      list2set(LL)
@@ -47,5 +46,13 @@ finite_set_theorems : THEORY
     finite_set_induction: LEMMA
       (FORALL (P: PRED[finite_set[nat]]):
         P(emptyset) AND (FORALL X: nonempty?(X) AND P(remove(choose(X), X)) => P(X)) => (FORALL X: P(X)))
+
+    IMPORTING sigma_set@sigma_set
+
+   finite_nonzero_elts: LEMMA
+     is_finite(nonzero_elts(f, X))
+
+    sigma_sigma_set: LEMMA
+      Sigma(X, f) = sigma_set.sigma(X, f)
 
   END finite_set_theorems
