@@ -32,6 +32,19 @@ preprocess  % [ parameters ]
     refs_release_set: LEMMA
       refs(release_set(A, X))(i) = refs(A)(i)
 
+    top_releases(A): RECURSIVE nat =
+      CASES A OF
+        release(x, B): 1 + top_releases(B)
+	ELSE 0
+      ENDCASES
+    MEASURE A BY <<
+
+    releaset_set_top: LEMMA
+      top_releases(release_set(A, X)) = ccard(X) + top_releases(A)
+
+    eq_release_set: LEMMA
+      release_set(A, X) = A IMPLIES empty?(X)
+
     mv: VAR bool %for marked variable
 
     markvar(x): (variable?) = x WITH [`marked := TRUE]
@@ -108,6 +121,14 @@ preprocess  % [ parameters ]
    refs_mark: LEMMA refs(mark(X)(A))(i) = refs(A)(i)
 
    popDepth_mark: LEMMA popDepth(mark(X)(A)) = popDepth(A)
+
+
+    top_releases_mark: LEMMA
+      top_releases(mark(X)(A)) = top_releases(A)
+
+    eq_mark_release_set: LEMMA
+      release_set(mark(Y)(A), X) = A IMPLIES empty?(X)
+
 
 
 %i is the index of a marked variable in A

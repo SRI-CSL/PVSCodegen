@@ -55,4 +55,18 @@ finite_set_theorems : THEORY
     sigma_sigma_set: LEMMA
       Sigma(X, f) = sigma_set.sigma(X, f)
 
+    g : VAR [nat -> nat]
+
+    sigma_eq: LEMMA
+      (FORALL (x : (X)): f(x) = g(x)) IMPLIES Sigma(X, f) = Sigma(X, g)
+
+    sigma_zero: LEMMA
+      (FORALL (x : (X)): f(x) = 0) IMPLIES Sigma(X, f) = 0
+
+    sigma_with: LEMMA
+      g = f WITH [(i) := j] AND member(i, X) IMPLIES Sigma(X, g) = Sigma(X, f) + j - f(i)
+
+    sigma_add: LEMMA
+      member(i, X) IMPLIES Sigma(X, f) = f(i) + Sigma(remove(i, X), f)
+
   END finite_set_theorems

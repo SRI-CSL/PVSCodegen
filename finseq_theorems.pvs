@@ -107,6 +107,12 @@ finseq_theorems  [T: TYPE]
     (EXISTS (i: below(S`length)): S`seq(i) = x) AND P(x) 
      IMPLIES count(P, S) > 0
 
+   count_none: LEMMA
+    (FORALL (i: below(S`length)): NOT P(S`seq(i))) IFF count(P, S) = 0
+
+    count_none_zero: LEMMA	  
+        (FORALL (i: below(S`length)): NOT P(S`seq(i))) IMPLIES count(P, S) = 0
+
    locate(P, (L | EXISTS (a : (P)): member(a, L))): RECURSIVE
     {i : below(length(L)) | P(nth(L, length(L) - i - 1))} 
    =
