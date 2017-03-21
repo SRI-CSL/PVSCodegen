@@ -1,4 +1,4 @@
-rreduction	: THEORY
+rreduction      : THEORY
 
   BEGIN
 
@@ -65,29 +65,37 @@ rreduction	: THEORY
 
 
     rstate: TYPE = [# error: bool,
-                     domain: finite_set[nat],
-                     store: Store(domain),
-		     contextvars: finite_set[nat],
-                     stack: {S : Stack | every(domainValue?(domain))(S)},
-		     redex: {A | (FORALL i: refs(A)(i)  IMPLIES domain(i))
-				 AND (FORALL i: vars(A)(i) IMPLIES i + popDepth(A) < stack`length)
-				 AND popDepth(A) <= stack`length
-				 AND contextPure?(A)
-				 AND mark(contextvars)(A) = A
-		             },
-		     count: [i:(domain) -> {j | j = refcount(domain, store, stack, redex)(i)}]
-                     				 #]
-   rS, rS1, rS2: VAR rstate
+                      domain: finite_set[nat],
+                      store: Store(domain),
+                      stack: {S : Stack | every(domainValue?(domain))(S)},
+                      context: {K | cpure?(K) AND markc(emptyset)(K) = K},
+                      redex: {A | (FORALL i: refs(A)(i)  IMPLIES domain(i))
+                                  AND (FORALL i: vars(A)(i) IMPLIES i + popDepth(A) < stack`length)
+                                  AND (FORALL i: vars(context)(i) IMPLIES i + popDepth(context) + popDepth(A) < stack`length)
+                                  AND popDepth(A) + popDepth(context) <= stack`length
+                                  AND contextPure?(A)
+                                  AND mark(cvars(context))(A) = A
+                              },
+                      count: [i:(domain) -> {j | j = refcount(domain, store, stack, redex)(i)}]
+                   #]
 
-   noDanglingRefs?(rS): bool =
-     (FORALL (i: below(rS`stack`length)): ref?(rS`stack`seq(rS`stack`length - i - 1)) IMPLIES vars(rS`redex)(i) OR rS`contextvars(i))
+    rS, rS1, rS2: VAR rstate
+
+    noDanglingRefs?(rS): bool =
+      (FORALL (i: below(rS`stack`length)):
+        ref?(rS`stack`seq(rS`stack`length - i - 1)) IMPLIES vars(rS`redex)(i) OR (i >= popDepth(rS`context) AND vars(rS`context)(i - popDepth(rS`context))))
+
+    rtopstate: TYPE = {rS | rS`context = hole}
+    to_topstate(rS) : rtopstate =
+      rS WITH [`context := hole, `redex := fill(rS`context, rS`redex)]
+
 
     refcountStore_ref: LEMMA
-    (FORALL (r, i: (rS`domain)), (j : below(rS`store(r)`length)): 
-         rS`store(r)`seq(j) = ref(i) => refcountStore(rS`domain, rS`store)(i) > 0)
+      (FORALL (r, i: (rS`domain)), (j : below(rS`store(r)`length)): 
+        rS`store(r)`seq(j) = ref(i) => refcountStore(rS`domain, rS`store)(i) > 0)
 
-   refcountArray_update: LEMMA
-   (FORALL  (j: below(V`length)): 
+    refcountArray_update: LEMMA
+      (FORALL  (j: below(V`length)): 
     ref?(V`seq(j)) AND refindex(V`seq(j)) = i => 
     refcountArray(V WITH [`seq(j) := nil])(i) = refcountArray(V)(i) - 1)
 
@@ -130,35 +138,35 @@ rreduction	: THEORY
      decref(rS: (noDanglingRefs?), (r: (rS`domain)), (i: upto(rS`store(r)`length))):
      RECURSIVE {rS1 | allcountStore(rS1) <= allcountStore(rS) AND rS1`domain = rS`domain AND (FORALL (s : (rS`domain)): rS1`store(s)`length = rS`store(s)`length
           AND rS1`count(s) <= rS`count(s)
-	  AND (rS1`count(s) = 0 or rS1`store(s) = rS`store(s)))
-	  AND noDanglingRefs?(rS1)
-	  } =
+          AND (rS1`count(s) = 0 or rS1`store(s) = rS`store(s)))
+          AND noDanglingRefs?(rS1)
+          } =
       (IF rS`count(r) = 0
         THEN (IF i = 0 THEN rS
         ELSE
-	 (LET subref = rS`store(r)`seq(i-1),
-	      newrS = (IF ref?(subref)
-	              THEN
-	                 (LET subrefindex: (rS`domain) = refindex(subref),
-			      newsubrefcount = rS`count(subrefindex) - 1,
-			      newrS = rS WITH [`store(r)`seq(i-1) := nil,
-		                     `count(subrefindex) := newsubrefcount]
-		           IN 
-	               decref(newrS, subrefindex, rS`store(subrefindex)`length))
-		      ELSE rS ENDIF)
-          IN 		    
+         (LET subref = rS`store(r)`seq(i-1),
+              newrS = (IF ref?(subref)
+                      THEN
+                         (LET subrefindex: (rS`domain) = refindex(subref),
+                              newsubrefcount = rS`count(subrefindex) - 1,
+                              newrS = rS WITH [`store(r)`seq(i-1) := nil,
+                                     `count(subrefindex) := newsubrefcount]
+                           IN 
+                       decref(newrS, subrefindex, rS`store(subrefindex)`length))
+                      ELSE rS ENDIF)
+          IN                
           decref(newrS, r, i - 1))
-	  ENDIF)
-	  ELSE rS ENDIF)
-	MEASURE
-	lex2(allcountStore(rS), i)
+          ENDIF)
+          ELSE rS ENDIF)
+        MEASURE
+        lex2(allcountStore(rS), i)
 
-   rstate2estate(rS): estate =
-     (# error := rS`error,
-        domain := rS`domain,
-	store := rS`store,
-	stack := rS`stack,
-	redex := rS`redex #)
+   % rstate2estate(rS): estate =
+   %   (# error := rS`error,
+   %      domain := rS`domain,
+   %      store := rS`store,
+   %      stack := rS`stack,
+   %      redex := rS`redex #)
 
    goodrstate: TYPE = {rS | NOT rS`error}
    grS: VAR goodrstate
@@ -169,8 +177,8 @@ rreduction	: THEORY
 
    mark_letApply: LEMMA %not proved
      (FORALL i: vars(A)(i) => i < length(L)) => 
-	  mark(X)(letApply(length(L), L, mark(emptyset)(A))) =
-	  letApply(length(L), markvars(X)(L), mark(emptyset)(A))
+          mark(X)(letApply(length(L), L, mark(emptyset)(A))) =
+          letApply(length(L), markvars(X)(L), mark(emptyset)(A))
 
    check_marked(rS)(x : {x | index(x) < rS`stack`length}): rstate =
      IF marked(x) THEN
@@ -178,8 +186,8 @@ rreduction	: THEORY
        LET vx = get(stack)(x) IN
        IF ref?(vx) THEN
          decref(rS WITH [`stack`seq(stack`length - index(x) - 1) := nil,
-	                 `count(refindex(vx)) := rS`count(refindex(vx)) - 1],
-	        refindex(vx), rS`store(refindex(vx))`length)
+                         `count(refindex(vx)) := rS`count(refindex(vx)) - 1],
+                refindex(vx), rS`store(refindex(vx))`length)
        ELSE
          rS
        ENDIF
@@ -187,42 +195,42 @@ rreduction	: THEORY
        rS
      ENDIF
 
-   release_marked(rS)(x | index(x) < rS`stack`length AND (marked(x) IMPLIES (NOT member(index(x), rS`contextvars) AND NOT member(index(x), vars(rS`redex))))): rstate =
+   release_marked(rS)(x | index(x) < rS`stack`length AND (marked(x) IMPLIES NOT member(index(x), vars(rS`redex)))): rstate =
      IF marked(x) THEN rS WITH [`redex := release(x, rS`redex)] ELSE rS ENDIF
 
    applyReduce(D)(grS | applyRedex?(grS`redex)): rstate =
     (LET stack = grS`stack,
          store = grS`store,
-	 domain = grS`domain,
-	 count = grS`count,
-    	 expr = grS`redex,
-	 fun = fun(expr),
-	 args: list[(variable?)] = args(expr),
-	 lenargs = length(args)
+         domain = grS`domain,
+         count = grS`count,
+         expr = grS`redex,
+         fun = fun(expr),
+         args: list[(variable?)] = args(expr),
+         lenargs = length(args)
      IN (IF fun < D`length
          THEN LET def = D`seq(fun),
-	          arity = def`arity,
-	          body = def`body
+                  arity = def`arity,
+                  body = def`body
                IN IF lenargs = arity
-	           THEN grS WITH [`redex := letApply(arity, args, mark(emptyset)(body))]
-		   ELSE grS WITH [error := TRUE]
-		   ENDIF
-	ELSE grS WITH [error := TRUE]
-	ENDIF))
+                   THEN grS WITH [`redex := letApply(arity, args, mark(emptyset)(body))]
+                   ELSE grS WITH [error := TRUE]
+                   ENDIF
+        ELSE grS WITH [error := TRUE]
+        ENDIF))
 
      ifReduce(D)(grS | pureIftRedex?(grS`redex)): rstate =
      LET stack = grS`stack,
           store = grS`store,
-    	  expr = grS`redex,
-	  condition = condition(expr),
-	  thenexpr = thenexpr(expr),
-	  elseexpr = elseexpr(expr)
+          expr = grS`redex,
+          condition = condition(expr),
+          thenexpr = thenexpr(expr),
+          elseexpr = elseexpr(expr)
        IN
        release_marked(
          IF get(stack)(condition) = constant(0) THEN
-	   grS WITH [`redex := elseexpr]
-	 ELSE
-	   grS WITH [`redex := thenexpr]
+           grS WITH [`redex := elseexpr]
+         ELSE
+           grS WITH [`redex := thenexpr]
          ENDIF)(condition)
 
      setRedex(rS | pure?(rS`redex), vv : (domainValue?(rS`domain))): rstate =
@@ -236,28 +244,28 @@ rreduction	: THEORY
      (LET stack = grS`stack,
           domain = grS`domain,
           store = grS`store,
-    	  expr = grS`redex,
-	  avar = arrayvalue(expr),
-	  pos = position(expr),
-	  aval = get(stack)(avar),
-	  pval = get(stack)(pos)
+          expr = grS`redex,
+          avar = arrayvalue(expr),
+          pos = position(expr),
+          aval = get(stack)(avar),
+          pval = get(stack)(pos)
        IN IF (ref?(aval) AND domain(refindex(aval))
                AND constant?(pval) AND 0 <= value(pval) AND value(pval) < store(refindex(aval))`length)
           THEN
-	    LET rval = store(refindex(aval))`seq(value(pval)) IN
-	    release_marked(setRedex(grS, rval))(avar)
-	  ELSE
-	    grS WITH [`error := TRUE]
-	  ENDIF)
+            LET rval = store(refindex(aval))`seq(value(pval)) IN
+            release_marked(setRedex(grS, rval))(avar)
+          ELSE
+            grS WITH [`error := TRUE]
+          ENDIF)
 
       newintReduce(D)(grS | newintRedex?(grS`redex)): rstate =
       (LET stack = grS`stack,
            domain = grS`domain,
-	   store = grS`store,
-	   expr = grS`redex,
-	   size = size(expr),
-	   newrefredex = least_out(domain),
-	   newdomain = add(newrefredex, domain)
+           store = grS`store,
+           expr = grS`redex,
+           size = size(expr),
+           newrefredex = least_out(domain),
+           newdomain = add(newrefredex, domain)
        IN
        grS WITH [`redex := ref(newrefredex),
                  `domain := newdomain,
@@ -268,11 +276,11 @@ rreduction	: THEORY
       newrefReduce(D)(grS | newrefRedex?(grS`redex)): rstate =
       (LET stack = grS`stack,
            domain = grS`domain,
-	   store = grS`store,
-	   expr = grS`redex,
-	   size = size(expr),
-	   newrefredex = least_out(domain),
-	   newdomain = add(newrefredex, domain)
+           store = grS`store,
+           expr = grS`redex,
+           size = size(expr),
+           newrefredex = least_out(domain),
+           newdomain = add(newrefredex, domain)
        IN
        grS WITH [`redex := ref(newrefredex),
                  `domain := newdomain,
@@ -283,20 +291,20 @@ rreduction	: THEORY
      popReduce(D)(grS | popRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
       (LET stack = grS`stack,
            store = grS`store,
-    	   expr = grS`redex,
-	   body = pbody(expr)
+           expr = grS`redex,
+           body = pbody(expr)
        IN
        IF value?(body) THEN
          grS WITH [`redex := body,
-	           `stack := pop(stack)]
+                   `stack := pop(stack)]
        ELSE
          LET value = get(stack)(body) IN
-	 IF marked(body) AND ref?(value) THEN
-	   grS WITH [`redex := value,
-	             `stack := pop(grS`stack WITH [`seq(stack`length - index(body) - 1) := nil])]
+         IF marked(body) AND ref?(value) THEN
+           grS WITH [`redex := value,
+                     `stack := pop(grS`stack WITH [`seq(stack`length - index(body) - 1) := nil])]
          ELSE
-	   setRedex(grS, value)
-	 ENDIF
+           setRedex(grS, value)
+         ENDIF
        ENDIF)
 
      releaseReduce(D)(grS | pureReleaseRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
@@ -305,14 +313,90 @@ rreduction	: THEORY
            vx = get(stack)(x) IN
        IF ref?(vx) THEN
          decref(grS WITH [`stack`seq(stack`length - index(x) - 1) := nil,
-	                  `count(refindex(vx)) := grS`count(refindex(vx)) - 1,
-			  `redex := rexpr(grS`redex)
-			 ],
-	        refindex(vx), grS`store(refindex(vx))`length)
+                          `count(refindex(vx)) := grS`count(refindex(vx)) - 1,
+                          `redex := rexpr(grS`redex)
+                         ],
+                refindex(vx), grS`store(refindex(vx))`length)
        ELSE
          grS WITH [`redex := rexpr(grS`redex)]
        ENDIF
 
+    letReduce(D)(grS | pureLetRedex?(grS`redex)): rstate =
+     (LET stack = grS`stack,
+           store = grS`store,
+           expr = grS`redex
+      IN
+      IF variable?(letrhs(expr)) THEN
+        LET value = get(stack)(letrhs(expr)) IN
+        LET nredex =
+          IF marked(letrhs(expr)) THEN
+            pop(release(letrhs(expr), body(expr)))
+          ELSE
+            pop(body(expr))
+          ENDIF
+        IN        
+        grS WITH [`redex := nredex,
+                  `stack := push(value, stack),
+                  `count := IF ref?(value) THEN
+                              grS`count WITH [(refindex(value)) |-> grS`count(refindex(value)) + 1]
+                            ELSE
+                              grS`count
+                            ENDIF
+                 ]
+      ELSE
+        grS WITH [`redex := pop(body(expr)),
+                  `stack := push(letrhs(expr), stack)
+                 ]
+      ENDIF
+     )
+
+    updateReduce(D)(grS | updateRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
+      (LET stack = grS`stack,
+           domain = grS`domain,
+           store = grS`store,
+           expr = grS`redex,
+           aval = get(stack)(target(expr)),
+           lval = get(stack)(lhs(expr)),
+           rval = get(stack)(rhs(expr)) 
+       IN
+       IF (ref?(aval) AND constant?(lval) AND value(lval) >= 0
+                      AND value(lval) < store(refindex(aval))`length) THEN
+         IF grS`count(refindex(aval)) > 1 THEN
+           (LET oldref = refindex(aval),
+                newref = least_out(domain),
+                newdomain = add(newref, domain),
+                newstore = store WITH [(newref) |-> store(oldref) WITH [`seq(value(lval)) := rval]],
+                count = grS`count WITH [(newref) |-> 1, (oldref) |-> grS`count(oldref) - 1]
+            IN
+            %grS WITH [`redex := ref(newref),
+            %          `domain := newdomain,
+            %          `store := newstore,
+            %          `count := count
+            %         ]
+            grS WITH [`error := TRUE] % TODO
+           )
+         ELSE
+           (LET oldref = refindex(aval),
+                newstore = store WITH [(oldref)`seq(value(lval)) := rval],
+                oldvalue = store(oldref)`seq(value(lval))
+            IN
+            IF ref?(oldvalue) THEN
+              LET orf = refindex(oldvalue) IN
+              decref(grS WITH [
+                `redex := aval,
+                `store := newstore,
+                `count := grS`count WITH [(orf) := grS`count(orf) - 1]
+              ], orf, newstore(orf)`length)
+            ELSE
+              grS WITH [
+                `redex := aval,
+                `store := newstore
+              ]
+            ENDIF)
+         ENDIF
+       ELSE
+         grS WITH [error := TRUE]
+       ENDIF)
 
 
 

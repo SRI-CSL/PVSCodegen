@@ -112,8 +112,9 @@ IL  		: THEORY
    contextPure?(A): RECURSIVE bool =
     (CASES A OF
       letexpr(B, C): contextPure?(B) AND pure?(C),
-%      ift(x, B, C): pure?(B) AND pure?(C),
-      pop(B): contextPure?(B)
+      ift(x, B, C): pure?(B) AND pure?(C),
+      pop(B): contextPure?(B),
+      release(x, B): pure?(B)
       ELSE TRUE
       ENDCASES)
       MEASURE A BY <<
@@ -146,8 +147,23 @@ IL  		: THEORY
    pureRedexContextPure: LEMMA
     pureRedex?(A) IMPLIES contextPure?(A)
 
-   ContextPurePureRedex: LEMMA  %%conjecture?
+   ContextPurePureRedex: LEMMA
      redex?(A) AND contextPure?(A) => pureRedex?(A)
+
+   buildRedex(A): RECURSIVE {(K, B) | fill(K, B) = A} = 
+    CASES A OF
+      letexpr(B, C):
+        IF atom?(B) THEN (hole, A)
+        ELSE LET (K, B1) = buildRedex(B) IN (letc(K, C), B1) ENDIF,
+      pop(B):
+        IF atom?(B) THEN (hole, A)
+        ELSE LET (K, B1) = buildRedex(B) IN (popc(K), B1) ENDIF
+      ELSE (hole, A)
+      ENDCASES
+      MEASURE A BY <<
+
+   buildRedexPure: RECURSIVE JUDGEMENT
+     buildRedex(A: (contextPure?)) HAS_TYPE {(K, B) | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}
 
    F: VAR finite_set[nat]
 
@@ -289,5 +305,6 @@ IL  		: THEORY
 
     vars_finite: LEMMA
         is_finite(vars(A))
+
 
   END IL
