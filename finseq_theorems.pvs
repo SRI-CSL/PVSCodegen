@@ -130,6 +130,9 @@ finseq_theorems  [T: TYPE]
    member_nth: LEMMA
    (FORALL (i: nat | i < length(L)): 
      member(nth(L, i), L))
-    
+
+   some_map[T2: TYPE]: LEMMA
+     FORALL (f: [T -> T2], Q: [T2 -> bool]):
+       some(Q)(map(f)(L)) = some(Q o f)(L)
 
   END finseq_theorems

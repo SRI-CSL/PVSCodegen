@@ -76,11 +76,26 @@ preprocess  % [ parameters ]
 
 %marking is idempotent
   markvars_idem: LEMMA
-   markvars(X)(markvars(X)(L)) = markvars(X)(L)
+   markvars(X)(markvars(Y)(L)) = markvars(X)(L)
+
+  markvars_varlist: LEMMA
+   in_varlist(markvars(X)(L)) = in_varlist(L)
+
+  markvars_repeat: LEMMA
+     (FORALL (i: (X)): Y(i) OR NOT in_varlist(L)(i)) AND (FORALL (i: (Y)): X(i)) IMPLIES
+       markvars(X)(markvars(Y)(L)) = markvars(Y)(L)
+
+  markvars_bump: LEMMA
+    map(lambda x: x WITH [`index := 1 + index(x)])(markvars(X)(L)) =
+      markvars(bump(X))(map(lambda x: x WITH [`index := 1 + index(x)])(L))
+
 %marks x if it is not in X
    markv(X)(x): (variable?) =
    (LET j = index(x) IN 
     IF X(j) THEN variable(j, FALSE) ELSE variable(j, TRUE) ENDIF)
+
+   markv_idem: LEMMA
+     markv(X)(markv(Y)(x)) = markv(X)(x)
 
 %marks the last occurrence of variables in A not in X
     mark(X)(A): RECURSIVE IExpression
@@ -117,6 +132,10 @@ preprocess  % [ parameters ]
     (mark(X)(release_set(A, Y)) = release_set(mark(X)(A), Y))
 
    mark_idem: LEMMA mark(X)(mark(X)(A)) = mark(X)(A)
+
+   mark_repeat: LEMMA
+     (FORALL (i: (X)): Y(i) OR NOT vars(A)(i)) AND (FORALL (i: (Y)): X(i)) IMPLIES
+       mark(X)(mark(Y)(A)) = mark(Y)(A)
 
    refs_mark: LEMMA refs(mark(X)(A))(i) = refs(A)(i)
 
@@ -190,6 +209,18 @@ preprocess  % [ parameters ]
       ELSE emptyset
       ENDCASES)
       MEASURE K BY <<
+    cvars(A): RECURSIVE finite_set[nat] =
+    (CASES A OF
+      letexpr(B, C): union(cvars(B), bumpn(drop(vars(C)), popDepth(B))),
+      pop(B): cvars(B),
+      release(x, B): cvars(B)
+      ELSE vars(A)
+      ENDCASES)
+      MEASURE A BY <<
+
+    cvars_fill: LEMMA
+      cvars(fill(K, A))(i) = (bumpn(cvars(K), popDepth(A))(i) OR cvars(A)(i))
+
 %marking a decomposition
     mark_fill: LEMMA
       mark(X)(fill(K, A)) = fill(markc(X)(K), mark(union(cvars(K), bumpn(X, popDepth(K))))(A))

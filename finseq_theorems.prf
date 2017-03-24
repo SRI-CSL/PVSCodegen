@@ -1158,5 +1158,20 @@
     (number nonempty-type-decl nil numbers nil)
     (boolean nonempty-type-decl nil booleans nil)
     (list type-decl nil list_adt nil))
+   shostak))
+ (some_map 0
+  (some_map-1 nil 3699197959
+   ("" (induct L) (("1" (grind) nil nil) ("2" (grind) nil nil)) nil)
+   ((list_induction formula-decl nil list_adt nil)
+    (T formal-type-decl nil finseq_theorems nil)
+    (O const-decl "T3" function_props nil)
+    (map adt-def-decl "list[T1]" list_adt_map nil)
+    (some adt-def-decl "boolean" list_adt nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (T2 decl-formal-type nil finseq_theorems nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (list type-decl nil list_adt nil))
    shostak)))
 

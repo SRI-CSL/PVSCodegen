@@ -114,7 +114,7 @@ IL  		: THEORY
       letexpr(B, C): contextPure?(B) AND pure?(C),
       ift(x, B, C): pure?(B) AND pure?(C),
       pop(B): contextPure?(B),
-      release(x, B): pure?(B)
+      release(x, B): contextPure?(B)
       ELSE TRUE
       ENDCASES)
       MEASURE A BY <<
@@ -138,7 +138,7 @@ IL  		: THEORY
    pureIftRedex?(A): bool =
     (iftRedex?(A) AND pure?(thenexpr(A)) AND pure?(elseexpr(A)))
 
-   pureReleaseRedex?(A): bool = (releaseRedex?(A) AND pure?(rexpr(A)))
+   pureReleaseRedex?(A): bool = (releaseRedex?(A) AND contextPure?(rexpr(A)))
 
    pureRedex?(A): bool =
     (pureLetRedex?(A) OR applyRedex?(A) OR pureIftRedex?(A) OR updateRedex?(A) OR
@@ -229,7 +229,8 @@ IL  		: THEORY
    popDepth(A): RECURSIVE nat =
     CASES A OF
       pop(B): 1 + popDepth(B),
-      letexpr(B, C): popDepth(B) 
+      letexpr(B, C): popDepth(B),
+      release(x, B): popDepth(B)
       %      ift(x, B, C): max(popDepth(B), popDepth(C))
       ELSE 0
       ENDCASES
