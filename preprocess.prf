@@ -97,6 +97,8 @@
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (add const-decl "(nonempty?)" sets nil)
+    (x!3 skolem-const-decl "nat" preprocess nil)
+    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
     (nonempty_finite_union1 application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (nonempty_add_finite application-judgement
@@ -105,6 +107,8 @@
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (emptyset const-decl "set" sets nil)
     (member const-decl "bool" sets nil)
@@ -114,6 +118,7 @@
     (finite_set_induction formula-decl nil finite_set_theorems nil)
     (union const-decl "set" sets nil)
     (release_set def-decl "IExpression" preprocess nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
@@ -186,6 +191,8 @@
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (finite_set_induction formula-decl nil finite_set_theorems nil)
     (release_set def-decl "IExpression" preprocess nil)
@@ -213,7 +220,15 @@
    shostak))
  (top_releases_TCC1 0
   (top_releases_TCC1-1 nil 3698775181 ("" (termination-tcc) nil nil)
-   nil nil))
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (<< adt-def-decl "(strict_well_founded?[IExpression])"
+     IExpression_adt nil))
+   nil))
  (releaset_set_top 0
   (releaset_set_top-1 nil 3698775280
    ("" (induct "X" :name "finite_set_induction")
@@ -249,16 +264,16 @@
    ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil)
     (nonempty? const-decl "bool" sets nil)
-    (variable? adt-recognizer-decl "[IExpression -> boolean]"
-               IExpression_adt nil)
-    (release? adt-recognizer-decl "[IExpression -> boolean]"
+    (TRUE const-decl "bool" booleans nil)
+    (choose const-decl "(p)" sets nil)
+    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
      IExpression_adt nil)
     (release adt-constructor-decl
      "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
-    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
+    (release? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
-    (choose const-decl "(p)" sets nil)
-    (TRUE const-decl "bool" booleans nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
     (card_remove formula-decl nil finite_sets nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
@@ -351,6 +366,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (length def-decl "nat" list_props nil))
@@ -378,6 +394,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (real_lt_is_strict_total_order name-judgement
@@ -411,6 +428,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
@@ -446,6 +464,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (real_lt_is_strict_total_order name-judgement
@@ -479,6 +498,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
@@ -499,6 +519,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (number nonempty-type-decl nil numbers nil)
@@ -550,6 +571,10 @@
     (nnint_plus_posint_is_posint application-judgement "posint"
      integers nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
+    (i skolem-const-decl "below(length(cons(cons1_var, cons2_var)))"
+       preprocess nil)
+    (cons2_var skolem-const-decl "list[(variable?)]" preprocess nil)
+    (cons1_var skolem-const-decl "(variable?)" preprocess nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
@@ -570,6 +595,7 @@
     (list type-decl nil list_adt nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (PRED type-eq-decl nil defined_types nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (number nonempty-type-decl nil numbers nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
@@ -599,6 +625,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (number nonempty-type-decl nil numbers nil)
@@ -665,9 +692,13 @@
    ((real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (cons1_var skolem-const-decl "(variable?)" preprocess nil)
+    (i skolem-const-decl "below(length(cons(cons1_var, cons2_var)))"
+       preprocess nil)
     (in_varlist const-decl "finite_set[nat]" IL nil)
     (markvar const-decl "(variable?)" preprocess nil)
     (unmarkvar const-decl "(variable?)" preprocess nil)
+    (cons2_var skolem-const-decl "list[(variable?)]" preprocess nil)
     (nnint_plus_posint_is_posint application-judgement "posint"
      integers nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
@@ -676,6 +707,7 @@
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (some_nth formula-decl nil finseq_theorems nil)
+    (some adt-def-decl "boolean" list_adt nil)
     (cons adt-constructor-decl "[[T, list] -> (cons?)]" list_adt nil)
     (cons? adt-recognizer-decl "[list -> boolean]" list_adt nil)
     (real_lt_is_strict_total_order name-judgement
@@ -695,6 +727,7 @@
     (list type-decl nil list_adt nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (PRED type-eq-decl nil defined_types nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (number nonempty-type-decl nil numbers nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
@@ -759,13 +792,18 @@
       nil)
      ("3" (hide 2) (("3" (grind) nil nil)) nil))
     nil)
-   ((cons? adt-recognizer-decl "[list -> boolean]" list_adt nil)
+   ((some adt-def-decl "boolean" list_adt nil)
+    (cons? adt-recognizer-decl "[list -> boolean]" list_adt nil)
     (cons adt-constructor-decl "[[T, list] -> (cons?)]" list_adt nil)
     (unmarkvar const-decl "(variable?)" preprocess nil)
     (nnint_plus_posint_is_posint application-judgement "posint"
      integers nil)
     (in_varlist const-decl "finite_set[nat]" IL nil)
     (markvar const-decl "(variable?)" preprocess nil)
+    (j skolem-const-decl "below(length(cons(cons1_var, cons2_var)))"
+     preprocess nil)
+    (cons2_var skolem-const-decl "list[(variable?)]" preprocess nil)
+    (cons1_var skolem-const-decl "(variable?)" preprocess nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
@@ -793,6 +831,7 @@
     (list type-decl nil list_adt nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (PRED type-eq-decl nil defined_types nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (number nonempty-type-decl nil numbers nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
@@ -851,6 +890,7 @@
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
     (number nonempty-type-decl nil numbers nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (list type-decl nil list_adt nil))
@@ -873,9 +913,9 @@
    ((in_varlist const-decl "finite_set[nat]" IL nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (< const-decl "bool" reals nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil naturalnumbers nil)
     (markvars_index formula-decl nil preprocess nil)
     (some_nth formula-decl nil finseq_theorems nil)
     (IExpression type-decl nil IExpression_adt nil)
@@ -883,6 +923,8 @@
                IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (some adt-def-decl "boolean" list_adt nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
            nil)
@@ -960,42 +1002,44 @@
         nil))
       nil))
     nil)
-   ((list type-decl nil list_adt nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (PRED type-eq-decl nil defined_types nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (set type-eq-decl nil sets nil)
-    (is_finite const-decl "bool" finite_sets nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (in_varlist const-decl "finite_set[nat]" IL nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (length def-decl "nat" list_props nil)
-    (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
-    (variable? adt-recognizer-decl "[IExpression -> boolean]"
-               IExpression_adt nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (IExpression type-decl nil IExpression_adt nil)
-    (list_induction formula-decl nil list_adt nil)
-    (unmarkvar const-decl "(variable?)" preprocess nil)
-    (markvars_varlist formula-decl nil preprocess nil)
+   ((markvar const-decl "(variable?)" preprocess nil)
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
            nil)
-    (markvar const-decl "(variable?)" preprocess nil))
+    (markvars_varlist formula-decl nil preprocess nil)
+    (unmarkvar const-decl "(variable?)" preprocess nil)
+    (some adt-def-decl "boolean" list_adt nil)
+    (list_induction formula-decl nil list_adt nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
+    (length def-decl "nat" list_props nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (in_varlist const-decl "finite_set[nat]" IL nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (list type-decl nil list_adt nil))
    shostak))
  (markvars_bump 0
   (markvars_bump-1 nil 3699206885
@@ -1074,12 +1118,12 @@
     (cons? adt-recognizer-decl "[list -> boolean]" list_adt nil)
     (IExpression_variable_extensionality formula-decl nil
      IExpression_adt nil)
+    (cons adt-constructor-decl "[[T, list] -> (cons?)]" list_adt nil)
+    (FALSE const-decl "bool" booleans nil)
     (marked adt-accessor-decl "[(variable?) -> bool]" IExpression_adt
      nil)
-    (FALSE const-decl "bool" booleans nil)
-    (cons adt-constructor-decl "[[T, list] -> (cons?)]" list_adt nil)
-    (bumpn const-decl "finite_set[nat]" IL nil)
     (unmarkvar const-decl "(variable?)" preprocess nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
@@ -1095,7 +1139,8 @@
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
            nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil) nil
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (map adt-def-decl "list[T1]" list_adt_map nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
@@ -1111,7 +1156,8 @@
     (number_field nonempty-type-from-decl nil number_fields nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
-    (number nonempty-type-decl nil numbers nil) nil
+    (number nonempty-type-decl nil numbers nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (list type-decl nil list_adt nil)
@@ -1283,6 +1329,7 @@
      integers nil)
     (list type-decl nil list_adt nil)
     (PRED type-eq-decl nil defined_types nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (in_varlist const-decl "finite_set[nat]" IL nil)
     (length def-decl "nat" list_props nil)
     (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
@@ -1316,6 +1363,8 @@
     (bumpn const-decl "finite_set[nat]" IL nil)
     (bump const-decl "finite_set[nat]" IL nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[nat]" countability
@@ -1339,6 +1388,7 @@
     (is_finite const-decl "bool" finite_sets nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (mark def-decl "IExpression" preprocess nil)
     (IExpression_induction formula-decl nil IExpression_adt nil))
    shostak))
@@ -1406,13 +1456,16 @@
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_intersection1 application-judgement "finite_set[nat]"
+    (finite_intersection2 application-judgement "finite_set[nat]"
      countability "sets_aux/")
     (finite_set_induction formula-decl nil finite_set_theorems nil)
     (release_set def-decl "IExpression" preprocess nil)
     (mark def-decl "IExpression" preprocess nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (union const-decl "set" sets nil)
     (disjoint? const-decl "bool" sets nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
@@ -1490,7 +1543,7 @@
       nil)
      ("6" (skeep*)
       (("6" (expand mark 1)
-        (("6" (decompose-equality 1)
+        (("6" (decompose-equality)
           (("1" (rewrite vars_release_set)
             (("1" (rewrite vars_release_set)
               (("1" (rewrite vars_mark)
@@ -1498,12 +1551,12 @@
                   (("1"
                     (case-replace "union(union(vars(ift2_var),
                         difference(vars(ift3_var),
-                                   union(vars(ift2_var), Y))),
+                                   union(vars(ift2_var), X))),
                   union(union(vars(ift3_var),
                               difference(vars(ift2_var),
-                                         union(vars(ift3_var), Y))),
+                                         union(vars(ift3_var), X))),
                         X)) = union(vars(ift2_var), union(vars(ift3_var), X))")
-                    (("1" (use markv_idem) nil nil)
+                    (("1" (grind) nil nil)
                      ("2" (delete 2)
                       (("2" (expand union)
                         (("2" (expand difference)
@@ -1517,102 +1570,185 @@
                 nil))
               nil))
             nil)
-           ("2" (rewrite mark_release_set)
-            (("1" (rewrite vars_release_set)
-              (("1" (rewrite vars_release_set)
-                (("1" (rewrite vars_mark)
-                  (("1" (rewrite vars_mark)
-                    (("1" (rewrite -2) (("1" (postpone) nil nil)) nil))
+           ("2"
+            (case-replace
+             "difference(vars(release_set(mark(X)(ift3_var),
+                                              difference
+                                              (vars(ift2_var),
+                                               union(vars(ift3_var), X)))),
+                             union(vars(release_set
+                                        (mark(X)(ift2_var),
+                                         difference
+                                         (vars(ift3_var),
+                                          union(vars(ift2_var), X)))),
+                                   X)) = emptyset")
+            (("1" (simplify)
+              (("1" (expand release_set 1 1)
+                (("1" (expand empty?)
+                  (("1" (expand emptyset 1)
+                    (("1" (expand member 1)
+                      (("1" (rewrite mark_release_set)
+                        (("1" (rewrite -3) nil nil)
+                         ("2" (expand disjoint?)
+                          (("2" (expand empty?)
+                            (("2" (expand intersection)
+                              (("2"
+                                (expand difference)
+                                (("2"
+                                  (rewrite vars_mark)
+                                  (("2"
+                                    (expand union)
+                                    (("2"
+                                      (expand member)
+                                      (("2" (grind) nil nil))
+                                      nil))
+                                    nil))
+                                  nil))
+                                nil))
+                              nil))
+                            nil))
+                          nil))
+                        nil))
+                      nil))
                     nil))
                   nil))
                 nil))
               nil)
-             ("2" (postpone) nil nil))
+             ("2" (delete 2)
+              (("2" (rewrite vars_release_set)
+                (("2" (rewrite vars_release_set)
+                  (("2" (rewrite vars_mark)
+                    (("2" (rewrite vars_mark)
+                      (("2" (grind-with-ext) nil nil)) nil))
+                    nil))
+                  nil))
+                nil))
+              nil))
             nil)
-           ("3" (postpone) nil nil))
+           ("3"
+            (case-replace
+             "difference(vars(release_set(mark(X)(ift2_var),
+                                              difference
+                                              (vars(ift3_var),
+                                               union(vars(ift2_var), X)))),
+                             union(vars(release_set
+                                        (mark(X)(ift3_var),
+                                         difference
+                                         (vars(ift2_var),
+                                          union(vars(ift3_var), X)))),
+                                   X)) = emptyset")
+            (("1" (rewrite mark_release_set)
+              (("1" (rewrite -4) (("1" (grind) nil nil)) nil)
+               ("2" (rewrite vars_mark) (("2" (grind) nil nil)) nil))
+              nil)
+             ("2" (delete 2)
+              (("2" (rewrite vars_release_set)
+                (("2" (rewrite vars_release_set)
+                  (("2" (rewrite vars_mark)
+                    (("2" (rewrite vars_mark)
+                      (("2" (grind-with-ext) nil nil)) nil))
+                    nil))
+                  nil))
+                nil))
+              nil))
+            nil))
           nil))
         nil))
       nil)
-     ("7" (postpone) nil nil) ("8" (postpone) nil nil)
-     ("9" (postpone) nil nil) ("10" (postpone) nil nil)
-     ("11" (postpone) nil nil) ("12" (postpone) nil nil)
-     ("13" (postpone) nil nil))
+     ("7" (grind) nil nil) ("8" (grind) nil nil) ("9" (grind) nil nil)
+     ("10" (grind) nil nil) ("11" (grind) nil nil)
+     ("12" (grind) nil nil) ("13" (grind) nil nil))
     nil)
-   ((variable? adt-recognizer-decl "[IExpression -> boolean]"
+   ((IExpression type-decl nil IExpression_adt nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (markv const-decl "(variable?)" preprocess nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (list type-decl nil list_adt nil)
+    (markvars_idem formula-decl nil preprocess nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
+    (vars_mark formula-decl nil preprocess nil)
+    (add const-decl "(nonempty?)" sets nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (member const-decl "bool" sets nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_letexpr_extensionality formula-decl nil
+     IExpression_adt nil)
+    (TRUE const-decl "bool" booleans nil)
+    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
+     IExpression_adt nil)
+    (release adt-constructor-decl
+     "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
+    (release? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (bump const-decl "finite_set[nat]" IL nil)
+    (drop const-decl "finite_set[nat]" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (IF const-decl "[boolean, T, T -> T]" if_def nil)
+    (union const-decl "set" sets nil)
+    (letexpr adt-constructor-decl
+     "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
+     preprocess nil)
+    (emptyset const-decl "set" sets nil)
+    (mark_release_set formula-decl nil preprocess nil)
+    (intersection const-decl "set" sets nil)
+    (disjoint? const-decl "bool" sets nil)
+    (finite_intersection2 application-judgement "finite_set[nat]"
+     countability "sets_aux/")
+    (empty? const-decl "bool" sets nil)
+    (finite_emptyset name-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
+    (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (vars_release_set formula-decl nil preprocess nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression_ift_extensionality formula-decl nil IExpression_adt
+     nil)
     (ift? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
+    (difference const-decl "set" sets nil)
+    (release_set def-decl "IExpression" preprocess nil)
     (ift adt-constructor-decl
      "[[(variable?), IExpression, IExpression] -> (ift?)]"
      IExpression_adt nil)
     (finite_difference application-judgement "finite_set[nat]"
      countability "sets_aux/")
-    (difference const-decl "set" sets nil)
-    (vars_release_set formula-decl nil preprocess nil)
-    (IExpression_ift_extensionality formula-decl nil IExpression_adt
-     nil)
-    (release_set def-decl "IExpression" preprocess nil)
-    (remove const-decl "set" sets nil)
-    (/= const-decl "boolean" notequal nil)
-    (finite_remove application-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (mark_release_set formula-decl nil preprocess nil)
-    (finite_emptyset name-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countable_props
-     "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (empty? const-decl "bool" sets nil)
-    (finite_intersection1 application-judgement "finite_set[nat]"
-     countability "sets_aux/")
-    (intersection const-decl "set" sets nil)
-    (disjoint? const-decl "bool" sets nil)
-    (emptyset const-decl "set" sets nil)
-    (union const-decl "set" sets nil)
-    (bumpn const-decl "finite_set[nat]" IL nil)
-    (member const-decl "bool" sets nil)
-    (add const-decl "(nonempty?)" sets nil)
-    (bump const-decl "finite_set[nat]" IL nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
     (injective? const-decl "bool" functions nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
-     preprocess nil)
-    (finite_union application-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (nonempty_add_finite application-judgement
-     "non_empty_finite_set[nat]" countability "sets_aux/")
-    (drop const-decl "finite_set[nat]" IL nil)
-    (vars_mark formula-decl nil preprocess nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil)
-    (nonempty? const-decl "bool" sets nil)
-    (markvars_idem formula-decl nil preprocess nil)
-    (markv const-decl "(variable?)" preprocess nil)
-    (IExpression_induction formula-decl nil IExpression_adt nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (is_finite const-decl "bool" finite_sets nil)
-    (set type-eq-decl nil sets nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (>= const-decl "bool" reals nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number nonempty-type-decl nil numbers nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (IExpression type-decl nil IExpression_adt nil))
+     real_props nil))
    shostak))
  (mark_repeat 0
   (mark_repeat-1 nil 3699193091
@@ -2024,136 +2160,165 @@
         nil))
       nil))
     nil)
-   ((IExpression type-decl nil IExpression_adt nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
+   ((release1_var skolem-const-decl "(variable?)" preprocess nil)
+    (X skolem-const-decl "finite_set[nat]" preprocess nil)
+    (Y skolem-const-decl "finite_set[nat]" preprocess nil)
+    (release2_var skolem-const-decl "IExpression" preprocess nil)
+    (pop adt-constructor-decl "[IExpression -> (pop?)]" IExpression_adt
+         nil)
+    (IExpression_pop_extensionality formula-decl nil IExpression_adt
      nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (set type-eq-decl nil sets nil)
-    (is_finite const-decl "bool" finite_sets nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (IExpression_induction formula-decl nil IExpression_adt nil)
-    (singleton const-decl "(singleton?)" sets nil)
-    (markv const-decl "(variable?)" preprocess nil)
-    (emptyset const-decl "set" sets nil)
-    (markvars_repeat formula-decl nil preprocess nil)
-    (in_varlist const-decl "finite_set[nat]" IL nil)
-    (application? adt-recognizer-decl "[IExpression -> boolean]"
-                  IExpression_adt nil)
-    (IExpression_application_extensionality formula-decl nil
+    (pop? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
-    (list type-decl nil list_adt nil)
-    (PRED type-eq-decl nil defined_types nil)
-    (variable? adt-recognizer-decl "[IExpression -> boolean]"
-               IExpression_adt nil)
-    (application adt-constructor-decl
-     "[[nat, list[(variable?)]] -> (application?)]" IExpression_adt
-     nil)
-    (length def-decl "nat" list_props nil)
-    (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
-    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
-     preprocess nil)
-    (nonempty_add_finite application-judgement
-     "non_empty_finite_set[nat]" countability "sets_aux/")
-    (finite_union application-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (letexpr adt-constructor-decl
-     "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
-    (union const-decl "set" sets nil)
-    (IF const-decl "[boolean, T, T -> T]" if_def nil)
-    (drop const-decl "finite_set[nat]" IL nil)
-    (nonempty? const-decl "bool" sets nil)
-    (add const-decl "(nonempty?)" sets nil)
-    (TRUE const-decl "bool" booleans nil)
-    (release? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (release adt-constructor-decl
-     "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
-    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
-     IExpression_adt nil)
-    (IExpression_letexpr_extensionality formula-decl nil
-     IExpression_adt nil)
-    (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (member const-decl "bool" sets nil)
-    (IExpression_release_extensionality formula-decl nil
-     IExpression_adt nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (bumpn const-decl "finite_set[nat]" IL nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (vars_mark formula-decl nil preprocess nil)
-    (bump const-decl "finite_set[nat]" IL nil)
-    (mark_release_set formula-decl nil preprocess nil)
-    (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set[T]" sigma_set
-     "sigma_set/")
-    (finite_emptyset name-judgement "finite_set[T]" countable_props
-     "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (empty? const-decl "bool" sets nil)
-    (finite_intersection2 application-judgement "finite_set[nat]"
-     countability "sets_aux/")
-    (disjoint? const-decl "bool" sets nil)
-    (intersection const-decl "set" sets nil)
-    (vars_release_set formula-decl nil preprocess nil)
-    (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
-           nil)
-    (ift? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (IExpression_ift_extensionality formula-decl nil IExpression_adt
-     nil)
-    (ift adt-constructor-decl
-     "[[(variable?), IExpression, IExpression] -> (ift?)]"
-     IExpression_adt nil)
-    (release_set def-decl "IExpression" preprocess nil)
-    (difference const-decl "set" sets nil)
-    (finite_difference application-judgement "finite_set[nat]"
-     countability "sets_aux/")
-    (update? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (IExpression_update_extensionality formula-decl nil IExpression_adt
-     nil)
-    (update adt-constructor-decl
-     "[[(variable?), (variable?), (variable?)] -> (update?)]"
-     IExpression_adt nil)
-    (lookup? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (IExpression_lookup_extensionality formula-decl nil IExpression_adt
-     nil)
+    (Y skolem-const-decl "finite_set[nat]" preprocess nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil nat_types nil)
+    (i!1 skolem-const-decl "(bump(Y))" preprocess nil)
+    (i!1 skolem-const-decl "(bump(Y))" preprocess nil)
+    (injective? const-decl "bool" functions nil)
+    (X skolem-const-decl "finite_set[nat]" preprocess nil)
+    (i!1 skolem-const-decl "(bump(X))" preprocess nil)
     (lookup adt-constructor-decl
             "[[(variable?), (variable?)] -> (lookup?)]" IExpression_adt
             nil)
-    (injective? const-decl "bool" functions nil)
-    (below type-eq-decl nil nat_types nil)
-    (< const-decl "bool" reals nil)
-    (pop? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (IExpression_pop_extensionality formula-decl nil IExpression_adt
+    (IExpression_lookup_extensionality formula-decl nil IExpression_adt
      nil)
-    (pop adt-constructor-decl "[IExpression -> (pop?)]" IExpression_adt
-         nil))
+    (lookup? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (lookup1_var skolem-const-decl "(variable?)" preprocess nil)
+    (X skolem-const-decl "finite_set[nat]" preprocess nil)
+    (update adt-constructor-decl
+     "[[(variable?), (variable?), (variable?)] -> (update?)]"
+     IExpression_adt nil)
+    (IExpression_update_extensionality formula-decl nil IExpression_adt
+     nil)
+    (update? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (update1_var skolem-const-decl "(variable?)" preprocess nil)
+    (X skolem-const-decl "finite_set[nat]" preprocess nil)
+    (update2_var skolem-const-decl "(variable?)" preprocess nil)
+    (finite_difference application-judgement "finite_set[nat]"
+     countability "sets_aux/")
+    (difference const-decl "set" sets nil)
+    (release_set def-decl "IExpression" preprocess nil)
+    (ift adt-constructor-decl
+     "[[(variable?), IExpression, IExpression] -> (ift?)]"
+     IExpression_adt nil)
+    (IExpression_ift_extensionality formula-decl nil IExpression_adt
+     nil)
+    (ift? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
+           nil)
+    (X skolem-const-decl "finite_set[nat]" preprocess nil)
+    (ift1_var skolem-const-decl "(variable?)" preprocess nil)
+    (vars_release_set formula-decl nil preprocess nil)
+    (intersection const-decl "set" sets nil)
+    (disjoint? const-decl "bool" sets nil)
+    (finite_intersection2 application-judgement "finite_set[nat]"
+     countability "sets_aux/")
+    (empty? const-decl "bool" sets nil)
+    (finite_emptyset name-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
+    (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (x!1 skolem-const-decl "nat" preprocess nil)
+    (Y skolem-const-decl "finite_set[nat]" preprocess nil)
+    (x!1 skolem-const-decl "nat" preprocess nil)
+    (mark_release_set formula-decl nil preprocess nil)
+    (x!1 skolem-const-decl "nat" preprocess nil)
+    (x!1 skolem-const-decl "nat" preprocess nil)
+    (bump const-decl "finite_set[nat]" IL nil)
+    (vars_mark formula-decl nil preprocess nil)
+    (X skolem-const-decl "finite_set[nat]" preprocess nil)
+    (i skolem-const-decl "(bump(Y))" preprocess nil)
+    (Y skolem-const-decl "finite_set[nat]" preprocess nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (IExpression_release_extensionality formula-decl nil
+     IExpression_adt nil)
+    (i skolem-const-decl "(bump(Y))" preprocess nil)
+    (member const-decl "bool" sets nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_letexpr_extensionality formula-decl nil
+     IExpression_adt nil)
+    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
+     IExpression_adt nil)
+    (release adt-constructor-decl
+     "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
+    (release? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (TRUE const-decl "bool" booleans nil)
+    (add const-decl "(nonempty?)" sets nil)
+    (nonempty? const-decl "bool" sets nil)
+    (drop const-decl "finite_set[nat]" IL nil)
+    (IF const-decl "[boolean, T, T -> T]" if_def nil)
+    (union const-decl "set" sets nil)
+    (letexpr adt-constructor-decl
+     "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (nonempty_add_finite application-judgement
+     "non_empty_finite_set[nat]" countability "sets_aux/")
+    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
+     preprocess nil)
+    (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
+    (length def-decl "nat" list_props nil)
+    (application adt-constructor-decl
+     "[[nat, list[(variable?)]] -> (application?)]" IExpression_adt
+     nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (list type-decl nil list_adt nil)
+    (IExpression_application_extensionality formula-decl nil
+     IExpression_adt nil)
+    (application? adt-recognizer-decl "[IExpression -> boolean]"
+                  IExpression_adt nil)
+    (in_varlist const-decl "finite_set[nat]" IL nil)
+    (markvars_repeat formula-decl nil preprocess nil)
+    (emptyset const-decl "set" sets nil)
+    (markv const-decl "(variable?)" preprocess nil)
+    (singleton const-decl "(singleton?)" sets nil)
+    (Y skolem-const-decl "finite_set[nat]" preprocess nil)
+    (variable1_var skolem-const-decl "nat" preprocess nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil))
    shostak))
  (refs_mark 0
   (refs_mark-1 nil 3693113889
@@ -2167,6 +2332,9 @@
     nil)
    ((bumpn const-decl "finite_set[nat]" IL nil)
     (add const-decl "(nonempty?)" sets nil)
+    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (refs_release_set formula-decl nil preprocess nil)
@@ -2179,6 +2347,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (union const-decl "set" sets nil)
     (drop const-decl "finite_set[nat]" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (injective? const-decl "bool" functions nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -2232,6 +2401,7 @@
     (is_finite const-decl "bool" finite_sets nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
+    (popDepth def-decl "nat" IL nil)
     (mark def-decl "IExpression" preprocess nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
@@ -2241,6 +2411,7 @@
     (bump const-decl "finite_set[nat]" IL nil)
     (union const-decl "set" sets nil)
     (drop const-decl "finite_set[nat]" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (member const-decl "bool" sets nil)
     (difference const-decl "set" sets nil)
     (empty? const-decl "bool" sets nil)
@@ -2545,6 +2716,7 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (real_lt_is_strict_total_order name-judgement
@@ -2642,6 +2814,8 @@
     (member const-decl "bool" sets nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil)
     (popdepth_fill formula-decl nil IL nil)
@@ -2649,20 +2823,19 @@
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (union const-decl "set" sets nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
     (emptyset const-decl "set" sets nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
     (IContext_induction formula-decl nil IL nil)
     (popDepth def-decl "nat" IL nil)
     (cvars def-decl "finite_set[nat]" preprocess nil)
     (bumpn const-decl "finite_set[nat]" IL nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
     (fill def-decl "IExpression" IL nil)
     (cvars def-decl "finite_set[nat]" preprocess nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
-    (OR const-decl "[bool, bool -> bool]" booleans nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (>= const-decl "bool" reals nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -2735,6 +2908,8 @@
     nil)
    ((posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
+    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (bumpn_bump formula-decl nil IL nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
@@ -2745,7 +2920,11 @@
     (even_minus_odd_is_odd application-judgement "odd_int" integers
      nil)
     (bump const-decl "finite_set[nat]" IL nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
+    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
     (drop const-decl "finite_set[nat]" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
     (union_associative formula-decl nil sets_lemmas nil)
     (bumpn_union formula-decl nil IL nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
@@ -2753,18 +2932,24 @@
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
      preprocess nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
+    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
     (emptyset const-decl "set" sets nil)
     (union_commutative formula-decl nil sets_lemmas nil)
     (bumpn_zero formula-decl nil IL nil)
     (union_empty formula-decl nil sets_lemmas nil)
     (IContext_induction formula-decl nil IL nil)
-    (bumpn const-decl "finite_set[nat]" IL nil) nil
+    (popDepth def-decl "nat" IL nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
     (union const-decl "set" sets nil)
     (markc def-decl "IContext" preprocess nil)
     (fill def-decl "IExpression" IL nil)
@@ -2836,8 +3021,10 @@
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_intersection1 application-judgement "finite_set[nat]"
+    (finite_intersection2 application-judgement "finite_set[nat]"
      countability "sets_aux/")
     (emptyset const-decl "set" sets nil)
     (member const-decl "bool" sets nil)
@@ -2845,6 +3032,7 @@
     (empty? const-decl "bool" sets nil)
     (finite_set_induction formula-decl nil finite_set_theorems nil)
     (release_set def-decl "IExpression" preprocess nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (disjoint? const-decl "bool" sets nil)
     (wellformed? def-decl "bool" preprocess nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
@@ -2882,7 +3070,7 @@
     nil)
    ((markv const-decl "(variable?)" preprocess nil)
     (wellformed_release_set formula-decl nil preprocess nil)
-    (finite_intersection1 application-judgement "finite_set[nat]"
+    (finite_intersection2 application-judgement "finite_set[nat]"
      countability "sets_aux/")
     (intersection const-decl "set" sets nil)
     (disjoint? const-decl "bool" sets nil)
@@ -2893,6 +3081,7 @@
     (empty? const-decl "bool" sets nil)
     (union const-decl "set" sets nil)
     (drop const-decl "finite_set[nat]" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (vars_mark formula-decl nil preprocess nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
@@ -2971,6 +3160,8 @@
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (finite_set_induction formula-decl nil finite_set_theorems nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
@@ -3034,36 +3225,23 @@
                  ("2" (skeep)
                   (("2" (rewrite "every_nth")
                     (("2" (inst - "i_1")
-                      (("1" (inst?)
-                        (("1" (use "markvars_index")
-                          (("1" (grind)
-                            (("1"
+                      (("2" (inst?)
+                        (("2" (use "markvars_index")
+                          (("2" (grind)
+                            (("2"
                               (typepred "nth(application2_var, i_1)")
-                              (("1"
+                              (("2"
                                 (grind)
-                                (("1"
-                                  (expand "mark")
-                                  (("1"
-                                    (lift-if)
-                                    (("1"
-                                      (ground)
-                                      (("1"
-                                        (ground)
-                                        (("1" (grind) nil nil))
-                                        nil))
-                                      nil))
+                                (("2"
+                                  (grind)
+                                  (("2"
+                                    (use markvars_markX)
+                                    (("2" (grind) nil nil))
                                     nil))
                                   nil))
                                 nil))
                               nil))
                             nil))
-                          nil))
-                        nil)
-                       ("2" (grind)
-                        (("2" (typepred "i_1")
-                          (("2"
-                            (typepred "markvars(X)(application2_var)")
-                            (("2" (grind) nil nil)) nil))
                           nil))
                         nil))
                       nil))
@@ -3189,121 +3367,130 @@
         nil))
       nil))
     nil)
-   ((lookup? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (lookup adt-constructor-decl
-            "[[(variable?), (variable?)] -> (lookup?)]" IExpression_adt
-            nil)
-    (finite_emptyset name-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countable_props
-     "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (nonempty? const-decl "bool" sets nil)
-    (update? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (update adt-constructor-decl
-     "[[(variable?), (variable?), (variable?)] -> (update?)]"
-     IExpression_adt nil)
-    (difference const-decl "set" sets nil)
-    (release_set def-decl "IExpression" preprocess nil)
-    (nonempty_singleton_finite application-judgement
-     "non_empty_finite_set[nat]" countability "sets_aux/")
-    (nonempty_add_finite application-judgement
-     "non_empty_finite_set[nat]" countability "sets_aux/")
-    (add const-decl "(nonempty?)" sets nil)
-    (mvars_release_set formula-decl nil preprocess nil)
-    (finite_difference application-judgement "finite_set[nat]"
-     countability "sets_aux/")
-    (ift? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (ift adt-constructor-decl
-     "[[(variable?), IExpression, IExpression] -> (ift?)]"
-     IExpression_adt nil)
-    (union const-decl "set" sets nil)
-    (drop const-decl "finite_set[nat]" IL nil)
-    (IF const-decl "[boolean, T, T -> T]" if_def nil)
-    (bump const-decl "finite_set[nat]" IL nil)
-    (release? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (release adt-constructor-decl
-     "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (bumpn const-decl "finite_set[nat]" IL nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (member const-decl "bool" sets nil)
-    (finite_union application-judgement "finite_set[nat]" countability
-     "sets_aux/")
-    (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (letexpr adt-constructor-decl
-     "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
-    (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
-    (length def-decl "nat" list_props nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil)
-    (markvars_mark formula-decl nil preprocess nil)
-    (IExpression_variable_extensionality formula-decl nil
-     IExpression_adt nil)
-    (below type-eq-decl nil nat_types nil)
-    (nth def-decl "T" list_props nil)
-    (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
-           nil)
-    (every_nth formula-decl nil list_props nil)
-    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
-     preprocess nil)
-    (in_varlist const-decl "finite_set[nat]" IL nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (< const-decl "bool" reals nil)
-    (markvars_index formula-decl nil preprocess nil)
-    (some_nth formula-decl nil finseq_theorems nil)
-    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
-     IExpression_adt nil)
-    (TRUE const-decl "bool" booleans nil)
+   ((IExpression type-decl nil IExpression_adt nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (mvars def-decl "bool" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (injective? const-decl "bool" functions nil)
+    (singleton const-decl "(singleton?)" sets nil)
+    (markv const-decl "(variable?)" preprocess nil)
+    (emptyset const-decl "set" sets nil)
+    (list type-decl nil list_adt nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (application? adt-recognizer-decl "[IExpression -> boolean]"
+                  IExpression_adt nil)
     (application adt-constructor-decl
      "[[nat, list[(variable?)]] -> (application?)]" IExpression_adt
      nil)
-    (application? adt-recognizer-decl "[IExpression -> boolean]"
-                  IExpression_adt nil)
-    (variable? adt-recognizer-decl "[IExpression -> boolean]"
-               IExpression_adt nil)
-    (PRED type-eq-decl nil defined_types nil)
-    (list type-decl nil list_adt nil)
-    (emptyset const-decl "set" sets nil)
-    (markv const-decl "(variable?)" preprocess nil)
-    (singleton const-decl "(singleton?)" sets nil)
-    (injective? const-decl "bool" functions nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (IExpression_induction formula-decl nil IExpression_adt nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (mvars def-decl "bool" preprocess nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (is_finite const-decl "bool" finite_sets nil)
-    (set type-eq-decl nil sets nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (>= const-decl "bool" reals nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number nonempty-type-decl nil numbers nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (IExpression type-decl nil IExpression_adt nil))
+    (TRUE const-decl "bool" booleans nil)
+    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
+     IExpression_adt nil)
+    (some_nth formula-decl nil finseq_theorems nil)
+    (markvars_index formula-decl nil preprocess nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (in_varlist const-decl "finite_set[nat]" IL nil)
+    (nonempty_singleton_finite application-judgement
+     "non_empty_finite_set[nat]" countability "sets_aux/")
+    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
+     preprocess nil)
+    (every_nth formula-decl nil list_props nil)
+    (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
+           nil)
+    (markvars_markX formula-decl nil preprocess nil)
+    (nth def-decl "T" list_props nil)
+    (below type-eq-decl nil nat_types nil)
+    (IExpression_variable_extensionality formula-decl nil
+     IExpression_adt nil)
+    (markvars_mark formula-decl nil preprocess nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (length def-decl "nat" list_props nil)
+    (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
+    (letexpr adt-constructor-decl
+     "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
+    (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (member const-decl "bool" sets nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (release adt-constructor-decl
+     "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
+    (release? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (bump const-decl "finite_set[nat]" IL nil)
+    (IF const-decl "[boolean, T, T -> T]" if_def nil)
+    (drop const-decl "finite_set[nat]" IL nil)
+    (union const-decl "set" sets nil)
+    (ift adt-constructor-decl
+     "[[(variable?), IExpression, IExpression] -> (ift?)]"
+     IExpression_adt nil)
+    (ift? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (finite_difference application-judgement "finite_set[nat]"
+     countability "sets_aux/")
+    (mvars_release_set formula-decl nil preprocess nil)
+    (add const-decl "(nonempty?)" sets nil)
+    (nonempty_add_finite application-judgement
+     "non_empty_finite_set[nat]" countability "sets_aux/")
+    (release_set def-decl "IExpression" preprocess nil)
+    (difference const-decl "set" sets nil)
+    (update adt-constructor-decl
+     "[[(variable?), (variable?), (variable?)] -> (update?)]"
+     IExpression_adt nil)
+    (update? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (nonempty? const-decl "bool" sets nil)
+    (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (lookup adt-constructor-decl
+            "[[(variable?), (variable?)] -> (lookup?)]" IExpression_adt
+            nil)
+    (lookup? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
+    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
+    (N!1 skolem-const-decl "nat" preprocess nil)
+    (N!1 skolem-const-decl "nat" preprocess nil))
    shostak))
  (pure_release_set 0
   (pure_release_set-1 nil 3693353022
@@ -3318,24 +3505,24 @@
         nil))
       nil))
     nil)
-   ((nonempty? const-decl "bool" sets nil)
+   ((remove const-decl "set" sets nil)
     (/= const-decl "boolean" notequal nil)
-    (remove const-decl "set" sets nil)
+    (nonempty? const-decl "bool" sets nil)
     (finite_remove application-judgement "finite_set[nat]" countability
      "sets_aux/")
     (NOT const-decl "[bool -> bool]" booleans nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
-    (TRUE const-decl "bool" booleans nil)
-    (choose const-decl "(p)" sets nil)
-    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (release? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
     (release adt-constructor-decl
      "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
-    (release? adt-recognizer-decl "[IExpression -> boolean]"
+    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
      IExpression_adt nil)
-    (variable? adt-recognizer-decl "[IExpression -> boolean]"
-               IExpression_adt nil)
+    (choose const-decl "(p)" sets nil)
+    (TRUE const-decl "bool" booleans nil)
     (emptyset const-decl "set" sets nil)
     (member const-decl "bool" sets nil)
     (empty? const-decl "bool" sets nil)
@@ -3343,6 +3530,8 @@
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (finite_set_induction formula-decl nil finite_set_theorems nil)
     (release_set def-decl "IExpression" preprocess nil)
@@ -3383,6 +3572,7 @@
     (bumpn const-decl "finite_set[nat]" IL nil)
     (union const-decl "set" sets nil)
     (drop const-decl "finite_set[nat]" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (bump const-decl "finite_set[nat]" IL nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
