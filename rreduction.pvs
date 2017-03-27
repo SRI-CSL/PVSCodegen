@@ -117,6 +117,11 @@ rreduction      : THEORY
           refcountStore(rS`domain, rS`store WITH [(r)`seq(j) := nil])(i) =
             refcountStore(rS`domain, rS`store)(i) - 1
 
+    refcountStore_set: LEMMA
+      FORALL (R : Store(dom), r, i: (dom), j : below(R(r)`length), nv : (domainValue?(dom))):
+        refcountStore(dom, R WITH [(r)`seq(j) := nv])(i) =
+          refcountStore(dom, R)(i) - IF refs(R(r)`seq(j))(i) THEN 1 ELSE 0 ENDIF + IF refs(nv)(i) THEN 1 ELSE 0 ENDIF
+
     refcount_stack_outside_domain: LEMMA
       FORALL i: NOT member(i, rS`domain) IMPLIES refcountStack(rS`stack)(i) = 0
 
@@ -244,20 +249,20 @@ rreduction      : THEORY
            mark(X)(letApply(length(L), L, mark(emptyset)(A))) =
            letApply(length(L), markvars(X)(L), mark(emptyset)(A))
 
-    check_marked(rS)(x : {x | index(x) < rS`stack`length}): rstate =
-      IF marked(x) THEN
-        LET stack = rS`stack IN
-        LET vx = get(stack)(x) IN
-        IF ref?(vx) THEN
-          decref(rS WITH [`stack`seq(stack`length - index(x) - 1) := nil,
-                          `count(refindex(vx)) := rS`count(refindex(vx)) - 1],
-                 refindex(vx), rS`store(refindex(vx))`length)
-        ELSE
-          rS
-        ENDIF
-      ELSE
-        rS
-      ENDIF
+    % check_marked(rS)(x : {x | index(x) < rS`stack`length}): rstate =
+    %   IF marked(x) THEN
+    %     LET stack = rS`stack IN
+    %     LET vx = get(stack)(x) IN
+    %     IF ref?(vx) THEN
+    %       decref(rS WITH [`stack`seq(stack`length - index(x) - 1) := nil,
+    %                       `count(refindex(vx)) := rS`count(refindex(vx)) - 1],
+    %              refindex(vx), rS`store(refindex(vx))`length)
+    %     ELSE
+    %       rS
+    %     ENDIF
+    %   ELSE
+    %     rS
+    %   ENDIF
 
     release_marked(rS)(x | index(x) + popDepth(rS`redex) < rS`stack`length AND (marked(x) IMPLIES NOT member(index(x), vars(rS`redex)) AND NOT member(index(x), cvars(rS`context)))): rstate =
       IF marked(x) THEN rS WITH [`redex := release(x, rS`redex)] ELSE rS ENDIF
@@ -447,14 +452,17 @@ rreduction      : THEORY
       (LET stack = grS`stack,
            domain = grS`domain,
            store = grS`store,
-           expr = grS`redex,
+           expr : { A | index(target(A)) < stack`length
+                       AND index(lhs(A)) < stack`length
+                       AND index(rhs(A)) < stack`length
+                  } = grS`redex,
            aval : (domainValue?(domain)) = get(stack)(target(expr)),
            lval : (domainValue?(domain)) = get(stack)(lhs(expr)),
            rval : (domainValue?(domain)) = get(stack)(rhs(expr)) 
        IN
        IF (ref?(aval) AND constant?(lval) AND value(lval) >= 0
                       AND value(lval) < store(refindex(aval))`length) THEN
-         LET nstack =
+         LET nstack : { S : Stack | every(domainValue?(domain))(S) AND S`length = stack`length } =
            IF ref?(rval) AND marked(rhs(expr)) THEN
              stack WITH [`seq(stack`length - index(rhs(expr)) - 1) := nil]
            ELSE
@@ -478,7 +486,7 @@ rreduction      : THEORY
            LET oldref = refindex(aval),
                newref = least_out(domain),
                newdomain = add(newref, domain),
-               nnstack =
+               nnstack : { S : Stack | every(domainValue?(newdomain))(S) AND S`length = stack`length } =
                  IF marked(target(expr)) THEN
                    nstack WITH [`seq(stack`length - index(target(expr)) - 1) := nil]
                  ELSE
@@ -486,13 +494,13 @@ rreduction      : THEORY
                  ENDIF,
                nncount = ncount WITH
                  [(newref) |-> 1,
-                  (oldref) |-> ncount(oldref) - IF marked(target(expr)) AND NOT index(target(expr)) = index(rhs(expr)) THEN 1 ELSE 0 ENDIF],
-               nstore = store WITH
-                 [(newref) |-> store(oldref)],
-               nnncount : [i:(newdomain) -> {j | j = refcount(newdomain, nstore, nnstack, ref(newref))(i)}] = count_copy(newdomain, nncount, store(oldref), store(oldref)`length),
+                  (oldref) |-> ncount(oldref) - IF marked(target(expr)) THEN 1 ELSE 0 ENDIF],
+               copied : finseq[(domainValue?(newdomain))] = store(oldref),
+               nstore = store WITH [(newref) |-> copied],
+               nnncount : [i:(newdomain) -> {j | j = refcount(newdomain, nstore, nnstack, ref(newref))(i)}] = count_copy(newdomain, nncount, copied, copied`length),
                nnstore = nstore WITH [(newref)`seq(value(lval)) := rval],
-               oldvalue = store(oldref)`seq(value(lval)),
-               nnnncount =
+               oldvalue = copied`seq(value(lval)),
+               nnnncount : [(newdomain) -> nat] =
                  IF ref?(oldvalue) THEN
                    nnncount WITH [(refindex(oldvalue)) := nnncount(refindex(oldvalue)) - 1]
                  ELSE
@@ -516,8 +524,9 @@ rreduction      : THEORY
            LET oldref = refindex(aval),
                newstore = store WITH [(oldref)`seq(value(lval)) := rval],
                oldvalue = store(oldref)`seq(value(lval)),
-               nnstack = nstack WITH [`seq(stack`length - 1 - index(target(expr))) := nil],
-               nncount =
+               nnstack : { S : Stack | every(domainValue?(domain))(S) AND S`length = stack`length } =
+                 nstack WITH [`seq(stack`length - 1 - index(target(expr))) := nil],
+               nncount : [(domain) -> nat] =
                  IF ref?(rval) THEN
                    ncount WITH [(refindex(rval)) := ncount(refindex(rval)) + 1]
                  ELSE
