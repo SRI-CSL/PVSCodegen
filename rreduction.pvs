@@ -448,7 +448,7 @@ rreduction      : THEORY
       FORALL (cnt: [(dom) -> nat], i: (dom), (V: finseq[(domainValue?(dom))])):
         count_copy(dom, cnt, V, V`length)(i) = cnt(i) + refcountArray(V)(i)
 
-    updateReduce(D)(grS | updateRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
+    updateReduce(D)(grS | updateRedex?(grS`redex) AND noDanglingRefs?(grS)): (noDanglingRefs?) =
       (LET stack = grS`stack,
            domain = grS`domain,
            store = grS`store,
@@ -553,6 +553,60 @@ rreduction      : THEORY
        ELSE
          grS WITH [error := TRUE]
        ENDIF)
+
+    letReduce_ndr: JUDGEMENT
+      letReduce(D)(grS | noDanglingRefs?(grS) AND pureLetRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    applyReduce_ndr: JUDGEMENT
+      applyReduce(D)(grS | noDanglingRefs?(grS) AND applyRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    ifReduce_ndr: JUDGEMENT
+      ifReduce(D)(grS | noDanglingRefs?(grS) AND pureIftRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    lookupReduce_ndr: JUDGEMENT
+      lookupReduce(D)(grS | noDanglingRefs?(grS) AND lookupRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    newintReduce_ndr: JUDGEMENT
+      newintReduce(D)(grS | noDanglingRefs?(grS) AND newintRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    newrefReduce_ndr: JUDGEMENT
+      newrefReduce(D)(grS | noDanglingRefs?(grS) AND newrefRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    popReduce_ndr: JUDGEMENT
+      popReduce(D)(grS | noDanglingRefs?(grS) AND popRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+    releaseReduce_ndr: JUDGEMENT
+      releaseReduce(D)(grS | noDanglingRefs?(grS) AND pureReleaseRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
+
+    reduce(D)(grS | noDanglingRefs?(grS)): rstate =
+      LET t = to_topstate(grS) IN
+      IF atom?(t`redex) THEN
+        t
+      ELSE
+        LET (ctx, redex) = buildRedex(t`redex),
+            nS : (noDanglingRefs?) = t WITH [`context := ctx, `redex := redex]
+        IN
+        IF pureLetRedex?(redex) THEN
+          letReduce(D)(nS)
+        ELSIF applyRedex?(redex) THEN
+          applyReduce(D)(nS)
+        ELSIF pureIftRedex?(redex) THEN
+          ifReduce(D)(nS)
+        ELSIF updateRedex?(redex) THEN
+          updateReduce(D)(nS)
+        ELSIF lookupRedex?(redex) THEN
+          lookupReduce(D)(nS)
+        ELSIF newintRedex?(redex) THEN
+          newintReduce(D)(nS)
+        ELSIF newrefRedex?(redex) THEN
+          newrefReduce(D)(nS)
+        ELSIF popRedex?(redex) THEN
+          popReduce(D)(nS)
+        ELSE
+          releaseReduce(D)(nS)
+        ENDIF
+      ENDIF
 
 
 

@@ -213,10 +213,13 @@ preprocess  % [ parameters ]
     (CASES A OF
       letexpr(B, C): union(cvars(B), bumpn(drop(vars(C)), popDepth(B))),
       pop(B): cvars(B),
-      release(x, B): cvars(B)
+      release(x, B): add(index(x), cvars(B))
       ELSE vars(A)
       ENDCASES)
       MEASURE A BY <<
+
+    cvars_pure: LEMMA
+      pure?(A) IMPLIES cvars(A) = vars(A)
 
     cvars_fill: LEMMA
       cvars(fill(K, A))(i) = (bumpn(cvars(K), popDepth(A))(i) OR cvars(A)(i))
@@ -252,5 +255,8 @@ preprocess  % [ parameters ]
 
     pure_mark: LEMMA
        pure?(mark(X)(A)) = pure?(A)
+
+    fill_mark_inj: LEMMA
+      fill(K, A) = fill(markc(X)(K), mark(Y)(A)) IMPLIES K = markc(X)(K) AND A = mark(Y)(A)
 
  END preprocess
