@@ -117,7 +117,7 @@ preprocess  % [ parameters ]
 			      markv(X)(z)),
       lookup(x, y): lookup(markv(add(index(y), X))(x), markv(X)(y)),
       pop(B): pop(mark(bump(X))(B)),
-      release(x, B): release(markv(union(vars(B), X))(x), mark(X)(B)) %no need to mark released var
+      release(x, B): release(markv(union(vars(B), X))(x), mark(X)(B))
       ELSE A
       ENDCASES)
       MEASURE A BY <<
@@ -189,6 +189,24 @@ preprocess  % [ parameters ]
       ELSE A
       ENDCASES)
       MEASURE A BY <<
+
+    unmark_pure: RECURSIVE JUDGEMENT
+      unmark(A | pure?(A)) HAS_TYPE (pure?)
+
+    unmark_contextPure: RECURSIVE JUDGEMENT
+      unmark(A | contextPure?(A)) HAS_TYPE (contextPure?)
+
+    unmark_refs: LEMMA
+      refs(unmark(A)) = refs(A)
+
+    unmark(K): RECURSIVE IContext =
+      CASES K OF
+        letc(K1, B): letc(unmark(K1), unmark(B)),
+        popc(K1): popc(unmark(K1)),
+        hole: hole
+      ENDCASES
+    MEASURE K BY <<
+
 %marks the variables in context K that don't occur in X
     markc(X)(K): RECURSIVE IContext =
     (CASES K OF
@@ -213,7 +231,7 @@ preprocess  % [ parameters ]
     (CASES A OF
       letexpr(B, C): union(cvars(B), bumpn(drop(vars(C)), popDepth(B))),
       pop(B): cvars(B),
-      release(x, B): add(index(x), cvars(B))
+      release(x, B): add(index(x) + popDepth(B), cvars(B))
       ELSE vars(A)
       ENDCASES)
       MEASURE A BY <<
@@ -223,6 +241,12 @@ preprocess  % [ parameters ]
 
     cvars_fill: LEMMA
       cvars(fill(K, A))(i) = (bumpn(cvars(K), popDepth(A))(i) OR cvars(A)(i))
+
+    cvars_vars: LEMMA
+      vars(A)(i) = cvars(A)(i + popDepth(A))
+
+    cvars_vars_ctx: LEMMA
+      vars(K)(i) = cvars(K)(i + popDepth(K))
 
 %marking a decomposition
     mark_fill: LEMMA
@@ -237,6 +261,16 @@ preprocess  % [ parameters ]
       ELSE TRUE
       ENDCASES)
       MEASURE A BY <<
+
+    allReleaseMarked?(A): RECURSIVE bool =
+      CASES A OF
+        letexpr(B, C): allReleaseMarked?(B) AND allReleaseMarked?(C),
+        ift(x, B, C): allReleaseMarked?(B) AND allReleaseMarked?(C),
+        pop(B): allReleaseMarked?(B),
+        release(x, B): allReleaseMarked?(B) AND marked(x)
+        ELSE TRUE
+      ENDCASES
+    MEASURE A BY <<
 
     wellformed_release_set: LEMMA
       wellformed?(A) AND disjoint?(X, vars(A)) IMPLIES wellformed?(release_set(A, X))

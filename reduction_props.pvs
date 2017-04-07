@@ -1,0 +1,375 @@
+reduction_props: THEORY
+  BEGIN
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, preprocess, reduction, rreduction
+
+    A, B, C: VAR IExpression
+    K, K1, K2: VAR IContext
+  
+    a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k, r: VAR nat
+    F, X, Y: VAR finite_set[nat]
+
+    S, S1, S2: VAR Stack
+    nS: VAR neStack
+
+    dom, dom1, dom2: VAR finite_set[nat]
+
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND FORALL i: vars(A)(i) IMPLIES i < arity} #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+    eS, eS2: VAR estate
+    gS, gS2: VAR goodstate
+    rS, rS2: VAR rstate
+    trS: VAR rtopstate
+    goodrstate: TYPE = {rS | NOT rS`error}
+    grS: VAR goodrstate
+    grdS: VAR {grS | noDanglingRefs?(grS)}
+
+    decref_induction: LEMMA
+      FORALL (P: pred[rstate]):
+        (FORALL (rS, (r: (rS`domain)), (i: below(rS`store(r)`length))):
+          P(rS) AND rS`count(r) = 0 AND ref?(rS`store(r)`seq(i)) IMPLIES
+              P(rS WITH [`store(r)`seq(i) := nil,
+                         `count(refindex(rS`store(r)`seq(i))) := rS`count(refindex(rS`store(r)`seq(i))) - 1])
+        ) IMPLIES
+        FORALL (rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)):
+          P(rS) IMPLIES P(decref(rS, r, i))
+
+    % decref_preserves: RECURSIVE JUDGEMENT
+    %   decref(rS: (noDanglingRefs?), (r: (rS`domain)), (i: upto(rS`store(r)`length))) HAS_TYPE
+    %     {rS2 | rS2`redex = rS`redex AND rS2`stack = rS`stack AND rS2`context = rS`context AND rS2`error = rS`error}
+    decref_preserves: LEMMA
+      FORALL (rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)):
+        decref(rS, r, i)`redex = rS`redex AND
+        decref(rS, r, i)`stack = rS`stack AND
+        decref(rS, r, i)`context = rS`context AND
+        decref(rS, r, i)`error = rS`error
+
+    decref_preserves_jdg: JUDGEMENT
+      decref(rS: (noDanglingRefs?), r: (rS`domain), t: upto(rS`store(r)`length)) HAS_TYPE
+        { rS2 | rS2`redex = rS`redex AND rS2`stack = rS`stack AND rS2`context = rS`context AND rS2`error = rS`error }
+
+    % has_wfStore?(rS): bool = wfStore?(rS`domain)(rS`store)
+
+    % decref_wfStore: RECURSIVE JUDGEMENT
+    %  decref(rS: (noDanglingRefs?) | wfStore?(rS`domain)(rS`store),
+    %    (r: (rS`domain)), (i: upto(rS`store(r)`length))) HAS_TYPE
+    %      {rS2 | wfStore?(rS2`domain)(rS2`store)}
+
+    % decref_has_wfStore: LEMMA
+    %   FORALL (rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)):
+    %     has_wfStore?(rS) IMPLIES has_wfStore?(decref(rS, r, i))
+
+    % wfStore_add: LEMMA
+    %   FORALL (store: Store(dom), r: nat, T: finseq[(domainValue?(dom))]):
+    %     wfStore?(dom)(store) AND NOT dom(r) IMPLIES
+    %       wfStore?(add(r, dom))(store WITH [(r) |-> T])
+
+    % rupdate_wfStore: LEMMA
+    %   updateRedex?(grdS`redex) AND has_wfStore?(grdS) IMPLIES
+    %     has_wfStore?(updateReduce(D)(grdS))
+
+    % rreduce_wfStore: LEMMA
+    %   has_wfStore?(grdS) IMPLIES has_wfStore?(reduce(D)(grdS))
+
+    % translate_refs((dom, dom1), translation: [(dom) -> (dom1)])(A | contextPure?(A) AND FORALL i: refs(A)(i) IMPLIES dom(i)): RECURSIVE IExpression =
+    %   CASES A OF
+    %     ref(r): ref(translation(r)),
+    %     letexpr(B, C): letexpr(translate_refs(dom, dom1, translation)(B),
+    %                            translate_refs(dom, dom1, translation)(C)),
+    %     ift(x, B, C): ift(x, translate_refs(dom, dom1, translation)(B),
+    %                          translate_refs(dom, dom1, translation)(C)),
+    %     pop(B): pop(translate_refs(dom, dom1, translation)(B)),
+    %     release(x, B): release(x, translate_refs(dom, dom1, translation)(B))
+    %     ELSE A
+    %   ENDCASES
+    % MEASURE A BY <<
+
+    % translate_refs_pure: LEMMA
+    %   FORALL (translation: [(dom) -> (dom1)]):
+    %     pure?(A) IMPLIES pure?(translate_refs(dom, dom1, translation)(A))
+
+    % translate_refs_restrict: LEMMA
+    %   (FORALL (i: (dom2)): dom(i)) AND (FORALL i: refs(A)(i) IMPLIES dom2(i)) AND contextPure?(A) IMPLIES
+    %     FORALL (translation: [(dom) -> (dom1)]):
+    %       translate_refs(dom, dom1, translation)(A) = translate_refs(dom2, dom1, LAMBDA (i: (dom2)): translation(i))(A)
+
+    % translate_refs_restrict2: LEMMA
+    %   FORALL (translation: [(dom) -> (dom1)], translation2: [(dom2) -> (dom1)]):
+    %     (FORALL (i: (dom2)): dom(i)) AND (FORALL i: refs(A)(i) IMPLIES dom2(i)) AND contextPure?(A) AND (FORALL (i: (dom2)): translation(i) = translation2(i)) IMPLIES
+    %       translate_refs(dom, dom1, translation)(A) = translate_refs(dom2, dom1, translation2)(A)
+
+    % %translate_stack(dom, dom1, translation)(S | every(domainValue?(dom))(S)):
+    % %    {S1 | every(domainValue?(dom1))(S)} =
+    % %  map(translate_refs(dom, dom1, translation))(S)
+
+    % stack_matches((dom, dom1), translation: [(dom) -> (dom1)])((S | every(domainValue?(dom))(S)), (S1 | every(domainValue?(dom1))(S1)), X: finite_set[nat]): boolean =
+    %   S`length = S1`length AND
+    %     FORALL (i: (X)):
+    %       (i < S`length AND
+    %       translate_refs(dom, dom1, translation)(S`seq(S`length - i - 1)) =
+    %         S1`seq(S1`length - i - 1))
+
+    % store_matches((dom, dom1), translation: [(dom) -> (dom1)])(store: Store(dom), store1: Store(dom1)): boolean =
+    %   FORALL (r: (dom)): store1(translation(r))`length = store(r)`length AND
+    %     FORALL (j: below(store(r)`length)):
+    %       translate_refs(dom, dom1, translation)(store(r)`seq(j)) = store1(translation(r))`seq(j)
+
+    % state_matches(eS: estate, rS: rstate)(translate: [{r: (rS`domain) | rS`count(r) > 0} -> (eS`domain)]): boolean =
+    %   LET dom = {r: (rS`domain) | rS`count(r) > 0} IN
+    %       eS`error = rS`error
+    %     AND translate_refs(dom, eS`domain, translate)(unmark(rS`redex)) = eS`redex
+    %     AND unmark(rS`context) = eS`context
+    %     AND stack_matches(dom, eS`domain, translate)(rS`stack, eS`stack, union(cvars(rS`redex), bumpn(cvars(rS`context), popDepth(rS`redex))))
+    %     AND store_matches(dom, eS`domain, translate)((LAMBDA (r: (dom)): rS`store(r)), eS`store)
+
+    % extend_finite: LEMMA
+    %   FORALL (dom_pred: pred[(dom)]):
+    %     is_finite[nat](extend[nat, (dom), bool, FALSE]({r: (dom) | dom_pred(r)}))
+
+    % redex_stillmatch: LEMMA
+    %   LET dom = {r: (rS`domain) | rS`count(r) > 0},
+    %       dom2 = {r: (rS2`domain) | rS2`count(r) > 0}
+    %   IN
+    %   FORALL (translate: [(dom) -> (eS`domain)], translate2: [(dom2) -> (eS`domain)]):
+    %     rS`domain = rS2`domain AND
+    %     rS`redex = rS2`redex AND
+    %     (FORALL (r: (rS`domain)): rS`count(r) = 0 IMPLIES rS2`count(r) = 0) AND
+    %     translate_refs(dom, eS`domain, translate)(unmark(rS`redex)) = eS`redex AND
+    %     (FORALL (r: (dom2)): translate(r) = translate2(r))
+    %   IMPLIES
+    %       translate_refs(dom2, eS`domain, translate2)(unmark(rS2`redex)) = eS`redex
+
+    % stack_stillmatch: LEMMA
+    %   LET dom = {r: (rS`domain) | rS`count(r) > 0},
+    %       dom2 = {r: (rS2`domain) | rS2`count(r) > 0} 
+    %   IN
+    %   FORALL (translate: [(dom) -> (eS`domain)], translate2: [(dom2) -> (eS`domain)]):
+    %     rS`domain = rS2`domain AND
+    %     rS`stack`length = rS2`stack`length AND
+    %     (FORALL (i: (F)): i < rS`stack`length AND rS`stack`seq(rS`stack`length - i - 1) = rS2`stack`seq(rS2`stack`length - i - 1)) AND
+    %     (FORALL (r: (rS`domain)): rS`count(r) = 0 IMPLIES rS2`count(r) = 0) AND
+    %     stack_matches(dom, eS`domain, translate)(rS`stack, eS`stack, F) AND
+    %     (FORALL (r: (dom2)): translate(r) = translate2(r))
+    %   IMPLIES
+    %       stack_matches(dom2, eS`domain, translate2)(rS2`stack, eS`stack, F)
+
+    % stack_subset_match: LEMMA
+    %   FORALL (translation: [(dom) -> (dom1)], (S | every(domainValue?(dom))(S)), (S1 | every(domainValue?(dom1))(S1)), X, Y: finite_set[nat]):
+    %     (FORALL (i: (X)): Y(i)) AND stack_matches(dom, dom1, translation)(S, S1, Y) IMPLIES
+    %       stack_matches(dom, dom1, translation)(S, S1, X)
+
+    % state_matches?(eS: estate, rS: rstate): boolean =
+    %   EXISTS (translate: [{r: (rS`domain) | rS`count(r) > 0} -> (eS`domain)]): state_matches(eS, rS)(translate)
+
+    translate, translate2: VAR [nat -> nat]
+
+    translate_refs(translate)(A): RECURSIVE IExpression =
+      CASES A OF
+        ref(r): ref(translate(r)),
+        letexpr(B, C): letexpr(translate_refs(translate)(B),
+                               translate_refs(translate)(C)),
+        ift(x, B, C): ift(x, translate_refs(translate)(B),
+                             translate_refs(translate)(C)),
+        pop(B): pop(translate_refs(translate)(B)),
+        release(x, B): release(x, translate_refs(translate)(B))
+        ELSE A
+      ENDCASES
+    MEASURE A BY <<
+
+    translate_refs_pure: RECURSIVE JUDGEMENT
+      translate_refs(translate)(A | pure?(A)) HAS_TYPE (pure?)
+
+    translate_refs_contextPure: RECURSIVE JUDGEMENT
+      translate_refs(translate)(A | contextPure?(A)) HAS_TYPE (contextPure?)
+
+    translate_refs_value: JUDGEMENT
+      translate_refs(translate)(A | value?(A)) HAS_TYPE (value?)
+
+    translate_refs_atom: JUDGEMENT
+      translate_refs(translate)(A | atom?(A)) HAS_TYPE (atom?)
+
+    translate_refs_pure_eq: LEMMA
+      pure?(A) IMPLIES translate_refs(translate)(A) = A
+
+    translate_refs_eq: LEMMA
+      contextPure?(A) AND (FORALL i: refs(A)(i) IMPLIES translate(i) = translate2(i)) IMPLIES
+        translate_refs(translate)(A) = translate_refs(translate2)(A)
+
+    translate_refs_refs: LEMMA
+      refs(A)(i) IMPLIES refs(translate_refs(translate)(A))(translate(i))
+
+    stack_matches(translate)(S, S1, X): boolean =
+      S`length = S1`length AND
+        FORALL (i: (X)):
+          (i < S`length AND
+          translate_refs(translate)(S`seq(S`length - i - 1)) =
+            S1`seq(S1`length - i - 1))
+
+    store_matches(translate)(rS, dom1, (store1: Store(dom1))): boolean =
+      FORALL (r: (rS`domain)):
+        rS`count(r) > 0 IMPLIES
+          dom1(translate(r)) AND store1(translate(r))`length = rS`store(r)`length AND
+            FORALL (j: below(rS`store(r)`length)):
+              translate_refs(translate)(rS`store(r)`seq(j)) = store1(translate(r))`seq(j)
+
+    state_matches(eS, rS)(translate): boolean =
+          eS`error = rS`error
+        AND translate_refs(translate)(unmark(rS`redex)) = eS`redex
+        AND unmark(rS`context) = eS`context
+        AND stack_matches(translate)(rS`stack, eS`stack, union(cvars(rS`redex), bumpn(cvars(rS`context), popDepth(rS`redex))))
+        AND store_matches(translate)(rS, eS`domain, eS`store)
+
+    state_matches_eq: LEMMA
+      state_matches(eS, rS)(translate) AND (FORALL (i: (rS`domain)): rS`count(i) > 0 IMPLIES translate(i) = translate2(i)) IMPLIES
+        state_matches(eS, rS)(translate2)
+
+    match_domain: LEMMA
+      noDanglingRefs?(rS) AND state_matches(eS, rS)(translate) AND rS`domain(r) AND rS`count(r) > 0 IMPLIES
+        eS`domain(translate(r))
+
+    % subs_finite: LEMMA
+    %   FORALL (dom_pred: pred[(dom)]):
+    %     is_finite[nat](extend[nat, (dom), bool, FALSE]({r: (dom) | dom_pred(r)}))
+
+    stack_stillmatch: LEMMA
+      S`length = S2`length AND
+      stack_matches(translate)(S, S1, X) AND
+      (FORALL (i: (X)):
+        S`seq(S`length - i - 1) = S2`seq(S2`length - i - 1) AND
+        (ref?(S`seq(S`length - i - 1)) IMPLIES translate(refindex(S`seq(S`length - i - 1))) = translate2(refindex(S`seq(S`length - i - 1))))
+      )
+        IMPLIES
+          stack_matches(translate2)(S2, S1, X)
+
+    store_stillmatch: LEMMA
+      FORALL (store1: Store(dom1)):
+        rS`domain = rS2`domain AND
+        (FORALL (r: (rS`domain)): rS`count(r) = 0 IMPLIES rS2`count(r) = 0) AND
+        (FORALL (r: (rS`domain)): rS2`count(r) > 0 IMPLIES rS`store(r) = rS2`store(r)) AND
+        store_matches(translate)(rS, dom1, store1)
+          IMPLIES
+            store_matches(translate)(rS2, dom1, store1)
+
+    stack_subset_match: LEMMA
+      (FORALL (i: (X)): Y(i)) AND stack_matches(translate)(S, S1, Y) IMPLIES
+          stack_matches(translate)(S, S1, X)
+
+    stack_subvar_match: LEMMA
+      rS`stack = rS2`stack AND
+        rS`context = rS2`context AND
+        popDepth(rS`redex) = 0 AND popDepth(rS2`redex) = 0 AND
+        (FORALL i: vars(rS2`redex)(i) IMPLIES vars(rS`redex)(i)) AND
+        stack_matches(translate)(rS`stack, eS`stack, union(cvars(rS`redex), bumpn(cvars(rS`context), popDepth(rS`redex))))
+      IMPLIES
+        stack_matches(translate)(rS2`stack, eS`stack, union(cvars(rS2`redex), bumpn(cvars(rS2`context), popDepth(rS2`redex))))
+
+    % subredex_stillmatch: LEMMA
+    %   state_matches(eS, rS)(translate) AND
+    %     rS2`domain = rS`domain AND
+    %     rS2`store = rS`store AND
+    %     rS2`stack = rS`stack AND
+    %     (FORALL (r: (rS`domain)): rS`count(r) = 0 IMPLIES rS2`count(r) = 0) AND
+    %     (FORALL i: refs(rS2`redex)(i) IMPLIES refs(rS`redex)(i)) AND
+    %     (FORALL i: vars(rS2`redex)(i) IMPLIES vars(rS`redex)(i)) AND
+    %     popDepth(rS2`redex) = 0 AND popDepth(rS`redex) = 0
+    %   IMPLIES
+    %     state_matches(eS, rS2)(translate)
+
+    state_matches?(eS, rS): boolean =
+      EXISTS (translate): state_matches(eS, rS)(translate)
+
+    top_releases_ct(A): RECURSIVE nat =
+      CASES A OF
+        letexpr(B, C): top_releases_ct(B),
+        pop(B): top_releases_ct(B),
+        release(x, B): 1 + top_releases_ct(B)
+        ELSE 0
+      ENDCASES
+    MEASURE A BY <<
+
+    top_releases_ct_fill: LEMMA
+      top_releases_ct(fill(K, A)) = top_releases_ct(A)
+
+    top_releases_rs(rS): nat = top_releases_ct(rS`redex)
+
+    top_releases_build_redex: LEMMA
+      top_releases_ct(A) > 0 IFF releaseRedex?(buildRedex(A)`2)
+
+    top_releases_reduce: LEMMA
+      noDanglingRefs?(grS) AND top_releases_ct(grS`redex) > 0 IMPLIES
+        top_releases_ct(reduce(D)(grS)`redex) = top_releases_ct(grS`redex) - 1
+
+    % decref_match: RECURSIVE JUDGEMENT
+    %   decref(rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)) HAS_TYPE
+    %     {rS2 | FORALL (eS, translate): state_matches(eS, rS)(translate) IMPLIES state_matches(eS, rS2)(translate)}
+
+    decref_stillmatch: LEMMA
+      FORALL (rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)):
+        state_matches(eS, rS)(translate) IMPLIES state_matches(eS, decref(rS, r, i))(translate)
+
+    releaseReduce_match: LEMMA
+      pureReleaseRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND
+        state_matches?(eS, grS) IMPLIES
+          state_matches?(eS, releaseReduce(D)(grS))
+
+
+    release_marked_match: LEMMA
+      index(x) + popDepth(rS`redex) < rS`stack`length AND
+      (marked(x) IMPLIES
+        NOT member(index(x), vars(rS`redex)) AND
+        NOT member(index(x), cvars(rS`context))) AND
+      state_matches(eS, rS)(translate) AND
+      translate_refs(translate)
+        (rS`stack`seq(rS`stack`length - index(x) - popDepth(rS`redex) - 1)) =
+           eS`stack`seq(rS`stack`length - index(x) - popDepth(rS`redex) - 1) 
+      IMPLIES
+        state_matches(eS, release_marked(rS)(x))(translate)
+
+    applyReduce_match: LEMMA
+      applyRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(applyReduce(D)(gS), applyReduce(D)(grS))
+
+    ift_match: LEMMA
+      pureIftRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        pureIftRedex?(gS`redex)
+
+    ift_condtion_match: LEMMA
+      pureIftRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        (get(grS`stack)(condition(grS`redex)) = constant(0)) =
+          (get(gS`stack)(condition(gS`redex)) = constant(0))
+
+    ifReduce_match: LEMMA
+      pureIftRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(ifReduce(D)(gS), ifReduce(D)(grS))
+
+    lookupReduce_match: LEMMA
+      lookupRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(lookupReduce(D)(gS), lookupReduce(D)(grS))
+
+    newintReduce_match: LEMMA
+      newintRedex?(grS`redex) AND state_matches?(gS, grS) AND noDanglingRefs?(grS) IMPLIES
+        state_matches?(newintReduce(D)(gS), newintReduce(D)(grS))
+
+    newrefReduce_match: LEMMA
+      newrefRedex?(grS`redex) AND state_matches?(gS, grS) AND noDanglingRefs?(grS)  IMPLIES
+        state_matches?(newrefReduce(D)(gS), newrefReduce(D)(grS))
+
+    popReduce_match: LEMMA
+      popRedex?(grS`redex) AND noDanglingRefs?(grS) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(popReduce(D)(gS), popReduce(D)(grS))
+
+    letReduce_match: LEMMA
+      pureLetRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(letReduce(D)(gS), letReduce(D)(grS))
+
+    updateReduce_match: LEMMA
+      updateRedex?(grS`redex) AND noDanglingRefs?(grS) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(updateReduce(D)(gS), updateReduce(D)(grS))
+
+END reduction_props
