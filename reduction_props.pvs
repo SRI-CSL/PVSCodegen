@@ -16,7 +16,7 @@ reduction_props: THEORY
 
     dom, dom1, dom2: VAR finite_set[nat]
 
-    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND FORALL i: vars(A)(i) IMPLIES i < arity} #]
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) IMPLIES i < arity) AND unmark(A) = A} #]
 
     Defs: TYPE = finseq[Definition]
 
@@ -204,6 +204,15 @@ reduction_props: THEORY
     translate_refs_refs: LEMMA
       refs(A)(i) IMPLIES refs(translate_refs(translate)(A))(translate(i))
 
+    value_translate_rev_ref: LEMMA
+      value?(A) AND ref?(translate_refs(translate)(A)) IMPLIES ref?(A)
+
+    value_translate_rev_constant: LEMMA
+      value?(A) AND constant?(translate_refs(translate)(A)) IMPLIES constant?(A)
+
+    value_translate_rev_nil: LEMMA
+      value?(A) AND translate_refs(translate)(A) = nil IMPLIES A = nil
+
     stack_matches(translate)(S, S1, X): boolean =
       S`length = S1`length AND
         FORALL (i: (X)):
@@ -269,6 +278,10 @@ reduction_props: THEORY
       IMPLIES
         stack_matches(translate)(rS2`stack, eS`stack, union(cvars(rS2`redex), bumpn(cvars(rS2`context), popDepth(rS2`redex))))
 
+    state_error_match: LEMMA
+      state_matches(eS, rS)(translate) IMPLIES
+        state_matches(eS WITH [`error := TRUE], rS WITH [`error := TRUE])(translate)
+
     % subredex_stillmatch: LEMMA
     %   state_matches(eS, rS)(translate) AND
     %     rS2`domain = rS`domain AND
@@ -331,6 +344,11 @@ reduction_props: THEORY
       IMPLIES
         state_matches(eS, release_marked(rS)(x))(translate)
 
+    letApply_unmark: LEMMA
+      FORALL i, (args: list[(variable?)] | length(args) = i), A: 
+       unmark(rreduction.letApply(i, args, A)) =
+         reduction.letApply(i, unmarkvars(args), unmark(A))
+
     applyReduce_match: LEMMA
       applyRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
         state_matches?(applyReduce(D)(gS), applyReduce(D)(grS))
@@ -347,6 +365,20 @@ reduction_props: THEORY
     ifReduce_match: LEMMA
       pureIftRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
         state_matches?(ifReduce(D)(gS), ifReduce(D)(grS))
+
+    lookup_match: LEMMA
+      lookupRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        lookupRedex?(gS`redex)
+
+    arrayvalue_translate: LEMMA
+      lookupRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        translate_refs(translate)(get(grS`stack)(arrayvalue(grS`redex))) =
+          get(gS`stack)(arrayvalue(gS`redex))
+
+    position_translate: LEMMA
+      lookupRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        translate_refs(translate)(get(grS`stack)(position(grS`redex))) =
+          get(gS`stack)(position(gS`redex))
 
     lookupReduce_match: LEMMA
       lookupRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
@@ -367,6 +399,84 @@ reduction_props: THEORY
     letReduce_match: LEMMA
       pureLetRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
         state_matches?(letReduce(D)(gS), letReduce(D)(grS))
+
+    % count_redundant: LEMMA
+    %   rS`error = rS2`error AND rS`domain = rS2`domain AND rS`store = rS2`store AND
+    %   rS`stack = rS2`stack AND rS`context = rS2`context AND rS`redex = rS2`redex IMPLIES
+    %     rS = rS2
+
+    % stack_clear_if_marked_ref(S)(x | index(x) < S`length): Stack =
+    %   IF marked(x) AND ref?(get(S)(x)) THEN
+    %     S WITH [`seq(S`length - index(x) - 1) := nil]
+    %   ELSE
+    %     S
+    %   ENDIF
+
+    % updateReduce_nocount(grS | updateRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
+    %   LET aval = get(grS`stack)(target(grS`redex)),
+    %       lval = get(grS`stack)(lhs(grS`redex)),
+    %       rval = get(grS`stack)(rhs(grS`redex))
+    %   IN
+    %   IF (ref?(aval) AND constant?(lval) AND value(lval) >= 0
+    %                  AND value(lval) < grS`store(refindex(aval))`length) THEN
+    %      LET nstack = stack_clear_if_marked_ref(grS`stack)(rhs(grS`redex)) IN
+    %      IF grS`count(refindex(aval)) > 1 OR NOT marked(target(grS`redex)) OR rval = aval THEN
+    %        LET newref = least_out(grS`domain),
+    %            newdomain = add(newref, grS`domain)
+    %        IN
+    %        LET nnstack = stack_clear_if_marked_ref(nstack)(target(grS`redex)) IN
+    %        grS WITH [`redex := ref(newref),
+    %                  `domain := newdomain,
+    %                  `store := grS`store WITH [(newref) |-> grS`store(refindex(aval)) WITH [`seq(value(lval)) := rval]],
+    %                  `stack := nnstack,
+    %                  `count := refcount(newdomain, (grS`store WITH [(newref) |-> grS`store(refindex(aval)) WITH [`seq(value(lval)) := rval]]), nnstack, ref(newref))]
+    %      ELSE
+    %        % Update in-place
+    %        LET oldref = refindex(aval),
+    %            newstore = grS`store WITH [(oldref)`seq(value(lval)) := rval],
+    %            oldvalue = grS`store(oldref)`seq(value(lval)),
+    %            nnstack = nstack WITH [`seq(grS`stack`length - 1 - index(target(grS`redex))) := nil],
+    %            nncount = refcount(grS`domain, newstore, nnstack, aval),
+    %            nrs = grS WITH [
+    %              `redex := aval,
+    %              `store := newstore,
+    %              `stack := nnstack,
+    %              `count := nncount
+    %            ]
+    %        IN
+    %        IF ref?(oldvalue) THEN
+    %          LET orf = refindex(oldvalue) IN
+    %          decref(nrs, orf, newstore(orf)`length)
+    %        ELSE
+    %          nrs
+    %        ENDIF
+    %      ENDIF
+    %    ELSE
+    %      grS WITH [error := TRUE]
+    %    ENDIF
+
+    % updateReduce_nocount_same: LEMMA
+    %   updateRedex?(grS`redex) AND noDanglingRefs?(grS) IMPLIES
+    %     updateReduce(D)(grS) = updateReduce_nocount(grS)
+
+    update_match: LEMMA
+      updateRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        updateRedex?(gS`redex)
+
+    target_translate: LEMMA
+      updateRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        translate_refs(translate)(get(grS`stack)(target(grS`redex))) =
+          get(gS`stack)(target(gS`redex))
+
+    lhs_translate: LEMMA
+      updateRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        translate_refs(translate)(get(grS`stack)(lhs(grS`redex))) =
+          get(gS`stack)(lhs(gS`redex))
+
+    rhs_translate: LEMMA
+      updateRedex?(grS`redex) AND state_matches(gS, grS)(translate) IMPLIES
+        translate_refs(translate)(get(grS`stack)(rhs(grS`redex))) =
+          get(gS`stack)(rhs(gS`redex))
 
     updateReduce_match: LEMMA
       updateRedex?(grS`redex) AND noDanglingRefs?(grS) AND state_matches?(gS, grS) IMPLIES

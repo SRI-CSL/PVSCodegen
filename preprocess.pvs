@@ -172,6 +172,10 @@ preprocess  % [ parameters ]
      ENDCASES)
      MEASURE length(L)
 
+
+    unmarkvars_length: RECURSIVE JUDGEMENT
+      unmarkvars(L) HAS_TYPE { J | length(J) = length(L) }
+
 %unmarks the variables in A
     unmark(A): RECURSIVE IExpression
      = 
@@ -198,6 +202,15 @@ preprocess  % [ parameters ]
 
     unmark_refs: LEMMA
       refs(unmark(A)) = refs(A)
+
+    unmarkvars_markvars: LEMMA
+      unmarkvars(markvars(X)(L)) = unmarkvars(L)
+
+    unmark_release_set: LEMMA
+      unmark(release_set(A, X)) = unmark(A)
+
+    unmark_mark: LEMMA
+      unmark(mark(X)(A)) = unmark(A)
 
     unmark(K): RECURSIVE IContext =
       CASES K OF

@@ -62,6 +62,14 @@ reduction : THEORY
                            THEN push(get(stack)(letrhs(expr)), stack)
                            ELSE push(letrhs(expr), stack) ENDIF)])
 
+    set_redex_correct: LEMMA
+      domainValue?(gS`domain)(u) IMPLIES
+        (FORALL i: refs(u)(i) IMPLIES gS`domain(i)) AND
+        (FORALL i: vars(u)(i) IMPLIES i + popDepth(u) < gS`stack`length) AND
+        (FORALL i: vars(gS`context)(i) IMPLIES i + popDepth(gS`context) + popDepth(u) < gS`stack`length) AND
+        popDepth(u) + popDepth(gS`context) <= gS`stack`length AND
+        contextPure?(u)
+
     updateReduce(D)(gS | updateRedex?(gS`redex)): estate =
       (LET stack = gS`stack,
            domain = gS`domain,

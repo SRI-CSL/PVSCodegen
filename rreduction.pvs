@@ -397,8 +397,11 @@ rreduction      : THEORY
          rS WITH [`redex := vv]
        ENDIF
 
-     lookupRedex_arrayvalue_index: JUDGEMENT
-       (grS | lookupRedex?(grS`redex))`redex HAS_TYPE { A | index(arrayvalue(A)) < grS`stack`length }
+     lookupRedex_arrayvalue_index: LEMMA
+       lookupRedex?(grS`redex) IMPLIES index(arrayvalue(grS`redex)) < grS`stack`length
+
+     lookupRedex_position_index: LEMMA
+       lookupRedex?(grS`redex) IMPLIES index(position(grS`redex)) < grS`stack`length
 
      lookupReduce(D)(grS | lookupRedex?(grS`redex)): rstate =
      (LET stack = grS`stack,
@@ -554,6 +557,16 @@ rreduction      : THEORY
     count_copy_def: LEMMA
       FORALL (cnt: [(dom) -> nat], i: (dom), (V: finseq[(domainValue?(dom))])):
         count_copy(dom, cnt, V, V`length)(i) = cnt(i) + refcountArray(V)(i)
+
+     updateRedex_target_index: LEMMA
+       updateRedex?(grS`redex) IMPLIES index(target(grS`redex)) < grS`stack`length
+
+     updateRedex_lhs_index: LEMMA
+       updateRedex?(grS`redex) IMPLIES index(lhs(grS`redex)) < grS`stack`length
+
+     updateRedex_rhs_index: LEMMA
+       updateRedex?(grS`redex) IMPLIES index(rhs(grS`redex)) < grS`stack`length
+
 
     updateReduce(D)(grS | updateRedex?(grS`redex) AND noDanglingRefs?(grS)): (noDanglingRefs?) =
       (LET stack = grS`stack,
