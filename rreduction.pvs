@@ -275,7 +275,7 @@ rreduction      : THEORY
     %   ENDIF
 
     release_marked_correct_redex: LEMMA
-      index(x) + popDepth(rS`redex) < rS`stack`length AND
+      index(x) + popDepth(rS`redex) < rS`stack`length AND marked(x) AND
         NOT member(index(x), vars(rS`redex)) AND
         NOT member(index(x), cvars(rS`context))
       IMPLIES
@@ -699,29 +699,34 @@ rreduction      : THEORY
       releaseReduce(D)(grS | noDanglingRefs?(grS) AND pureReleaseRedex?(grS`redex))
         HAS_TYPE (noDanglingRefs?)
 
+    make_redex(t: rtopstate | NOT atom?(t`redex)): {rS | pureRedex?(rS`redex)} =
+      LET (ctx, redex) = buildRedex(t`redex) IN
+      (t :: rstate) WITH [`context := ctx, `redex := redex]
+
+    make_redex_ndr: JUDGEMENT
+      make_redex(t: rtopstate | noDanglingRefs?(t) AND NOT atom?(t`redex)) HAS_TYPE (noDanglingRefs?)
+
     reduce(D)(grS | noDanglingRefs?(grS)): rstate =
       LET t = to_topstate(grS) IN
       IF atom?(t`redex) THEN
         t
       ELSE
-        LET (ctx, redex) = buildRedex(t`redex),
-            nS : (noDanglingRefs?) = t WITH [`context := ctx, `redex := redex]
-        IN
-        IF pureLetRedex?(redex) THEN
+        LET nS : (noDanglingRefs?) = make_redex(t) IN
+        IF pureLetRedex?(nS`redex) THEN
           letReduce(D)(nS)
-        ELSIF applyRedex?(redex) THEN
+        ELSIF applyRedex?(nS`redex) THEN
           applyReduce(D)(nS)
-        ELSIF pureIftRedex?(redex) THEN
+        ELSIF pureIftRedex?(nS`redex) THEN
           ifReduce(D)(nS)
-        ELSIF updateRedex?(redex) THEN
+        ELSIF updateRedex?(nS`redex) THEN
           updateReduce(D)(nS)
-        ELSIF lookupRedex?(redex) THEN
+        ELSIF lookupRedex?(nS`redex) THEN
           lookupReduce(D)(nS)
-        ELSIF newintRedex?(redex) THEN
+        ELSIF newintRedex?(nS`redex) THEN
           newintReduce(D)(nS)
-        ELSIF newrefRedex?(redex) THEN
+        ELSIF newrefRedex?(nS`redex) THEN
           newrefReduce(D)(nS)
-        ELSIF popRedex?(redex) THEN
+        ELSIF popRedex?(nS`redex) THEN
           popReduce(D)(nS)
         ELSE
           releaseReduce(D)(nS)

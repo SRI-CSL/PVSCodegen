@@ -3035,8 +3035,7 @@
     (number_field nonempty-type-from-decl nil number_fields nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
-    (number nonempty-type-decl nil numbers nil)
-    (every adt-def-decl "boolean" list_adt nil)
+    (number nonempty-type-decl nil numbers nil) nil
     (PRED type-eq-decl nil defined_types nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (list type-decl nil list_adt nil))
@@ -3160,8 +3159,7 @@
     (unmarkvars_length rec-application-judgement
      "{J | length(J) = length(L)}" preprocess nil)
     (list type-decl nil list_adt nil)
-    (PRED type-eq-decl nil defined_types nil)
-    (every adt-def-decl "boolean" list_adt nil)
+    (PRED type-eq-decl nil defined_types nil) nil
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (application adt-constructor-decl
@@ -3175,12 +3173,9 @@
     (application? adt-recognizer-decl "[IExpression -> boolean]"
                   IExpression_adt nil)
     (unmarkvars_markvars formula-decl nil preprocess nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (vars def-decl "finite_set[nat]" IL nil)
+    (NOT const-decl "[bool -> bool]" booleans nil) nil
     (drop const-decl "finite_set[nat]" IL nil)
-    (union const-decl "set" sets nil)
-    (X!1 skolem-const-decl "finite_set[nat]" preprocess nil)
-    (N!1 skolem-const-decl "nat" preprocess nil)
+    (union const-decl "set" sets nil) nil nil
     (bumpn const-decl "finite_set[nat]" IL nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -3589,6 +3584,19 @@
     (IContext type-decl nil IL nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/"))
+   shostak))
+ (arm_fill 0
+  (arm_fill-1 nil 3701182175 ("" (induct-and-simplify K) nil nil)
+   ((IContext type-decl nil IL nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (allReleaseMarked? def-decl "bool" preprocess nil)
+    (fill def-decl "IExpression" IL nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (armc? def-decl "bool" preprocess nil)
+    (IContext_induction formula-decl nil IL nil))
    shostak))
  (wellformed_release_set 0
   (wellformed_release_set-1 nil 3656869616

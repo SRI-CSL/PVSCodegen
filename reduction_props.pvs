@@ -482,4 +482,54 @@ reduction_props: THEORY
       updateRedex?(grS`redex) AND noDanglingRefs?(grS) AND state_matches?(gS, grS) IMPLIES
         state_matches?(updateReduce(D)(gS), updateReduce(D)(grS))
 
+    arm_release_set: LEMMA
+      allReleaseMarked?(A) IMPLIES allReleaseMarked?(release_set(A, X))
+
+    arm_mark_unmark: LEMMA
+      allReleaseMarked?(mark(X)(unmark(A)))
+
+    arm_letApply: LEMMA
+      FORALL i, (args: list[(variable?)] | length(args) = i), A: 
+       allReleaseMarked?(A) IMPLIES allReleaseMarked?(rreduction.letApply(i, args, A))
+
+    releaseReduce_arm: LEMMA
+      pureReleaseRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(releaseReduce(D)(grS)`redex) AND armc?(releaseReduce(D)(grS)`context)
+
+    applyReduce_arm: LEMMA
+      applyRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(applyReduce(D)(grS)`redex) AND armc?(applyReduce(D)(grS)`context)
+
+    ifReduce_arm: LEMMA
+      pureIftRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(ifReduce(D)(grS)`redex) AND armc?(ifReduce(D)(grS)`context)
+
+    lookupReduce_arm: LEMMA
+      lookupRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(lookupReduce(D)(grS)`redex) AND armc?(lookupReduce(D)(grS)`context)
+
+    newintReduce_arm: LEMMA
+      newintRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(newintReduce(D)(grS)`redex) AND armc?(newintReduce(D)(grS)`context)
+
+    newrefReduce_arm: LEMMA
+      newrefRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(newrefReduce(D)(grS)`redex) AND armc?(newrefReduce(D)(grS)`context)
+
+    popReduce_arm: LEMMA
+      popRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(popReduce(D)(grS)`redex) AND armc?(popReduce(D)(grS)`context)
+
+    letReduce_arm: LEMMA
+      pureLetRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(letReduce(D)(grS)`redex) AND armc?(letReduce(D)(grS)`context)
+
+    updateReduce_arm: LEMMA
+      updateRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(updateReduce(D)(grS)`redex) AND armc?(updateReduce(D)(grS)`context)
+
+    reduce_arm: JUDGEMENT
+      reduce(D)(grS | noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)) HAS_TYPE
+        { rS | allReleaseMarked?(rS`redex) AND armc?(rS`context) }
+
 END reduction_props

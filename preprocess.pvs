@@ -285,6 +285,17 @@ preprocess  % [ parameters ]
       ENDCASES
     MEASURE A BY <<
 
+    armc?(K): RECURSIVE bool =
+      CASES K OF
+        popc(K1): armc?(K1),
+        letc(K1, B): armc?(K1) AND allReleaseMarked?(B),
+        hole: TRUE
+      ENDCASES
+    MEASURE K BY <<
+
+    arm_fill: LEMMA
+      allReleaseMarked?(fill(K, A)) = (allReleaseMarked?(A) AND armc?(K))
+
     wellformed_release_set: LEMMA
       wellformed?(A) AND disjoint?(X, vars(A)) IMPLIES wellformed?(release_set(A, X))
 
