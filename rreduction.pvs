@@ -739,6 +739,6 @@ rreduction      : THEORY
       ENDIF
 
     reduce_ndr: JUDGEMENT
-      reduce(D)(grS : (noDanglingRefs?)) HAS_TYPE (noDanglingRefs?)
+      reduce(D)(grS | noDanglingRefs?(grS)) HAS_TYPE (noDanglingRefs?)
 
   END rreduction

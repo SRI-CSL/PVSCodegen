@@ -323,6 +323,10 @@ reduction_props: THEORY
     top_releases_build_redex: LEMMA
       top_releases_ct(A) > 0 IFF releaseRedex?(buildRedex(A)`2)
 
+    top_release_reduce: LEMMA
+      noDanglingRefs?(grS) AND top_releases_ct(grS`redex) > 0 IMPLIES
+        reduce(D)(grS) = releaseReduce(D)(make_redex(to_topstate(grS)))
+
     top_releases_reduce: LEMMA
       noDanglingRefs?(grS) AND top_releases_ct(grS`redex) > 0 IMPLIES
         top_releases_ct(reduce(D)(grS)`redex) = top_releases_ct(grS`redex) - 1
@@ -545,9 +549,6 @@ reduction_props: THEORY
       IF n = 0 OR rS`error THEN rS ELSE rreduce_n(D)(n - 1, reduce(D)(rS)) ENDIF
     MEASURE n
 
-    record_update_self: LEMMA
-      FORALL (eS: topstate): eS WITH [`redex := eS`redex, `context := hole] = eS
-
     build_redex_match: LEMMA
       contextPure?(A) AND contextPure?(B) AND
       translate_refs(translate)(unmark(A)) = B AND NOT release?(buildRedex(A)`2) IMPLIES
@@ -559,10 +560,6 @@ reduction_props: THEORY
         NOT atom?(rS`redex) AND NOT atom?(eS`redex) AND
         NOT releaseRedex?(make_redex(rS)`redex) AND state_matches?(eS, rS) IMPLIES
           state_matches?(make_redex_e(eS), make_redex(rS))
-
-    top_release_reduce: LEMMA
-      noDanglingRefs?(grS) AND top_releases_ct(grS`redex) > 0 IMPLIES
-        reduce(D)(grS) = releaseReduce(D)(make_redex(to_topstate(grS)))
 
     to_topstate_match: LEMMA
       state_matches(eS, rS)(translate) IMPLIES
