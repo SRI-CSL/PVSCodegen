@@ -3035,7 +3035,7 @@
     (number_field nonempty-type-from-decl nil number_fields nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
-    (number nonempty-type-decl nil numbers nil) nil
+    (number nonempty-type-decl nil numbers nil)
     (PRED type-eq-decl nil defined_types nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (list type-decl nil list_adt nil))
@@ -3159,7 +3159,7 @@
     (unmarkvars_length rec-application-judgement
      "{J | length(J) = length(L)}" preprocess nil)
     (list type-decl nil list_adt nil)
-    (PRED type-eq-decl nil defined_types nil) nil
+    (PRED type-eq-decl nil defined_types nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (application adt-constructor-decl
@@ -3173,9 +3173,9 @@
     (application? adt-recognizer-decl "[IExpression -> boolean]"
                   IExpression_adt nil)
     (unmarkvars_markvars formula-decl nil preprocess nil)
-    (NOT const-decl "[bool -> bool]" booleans nil) nil
+    (NOT const-decl "[bool -> bool]" booleans nil)
     (drop const-decl "finite_set[nat]" IL nil)
-    (union const-decl "set" sets nil) nil nil
+    (union const-decl "set" sets nil)
     (bumpn const-decl "finite_set[nat]" IL nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -3225,12 +3225,230 @@
     (IExpression_lookup_extensionality formula-decl nil IExpression_adt
      nil))
    shostak))
+ (unmark_atom 0
+  (unmark_atom-1 nil 3701451146 ("" (induct-and-simplify A) nil nil)
+   ((IExpression type-decl nil IExpression_adt nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (atom? const-decl "bool" IL nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (value? const-decl "bool" IL nil))
+   nil))
  (unmark_TCC4 0
   (unmark_TCC4-1 nil 3699881944 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IContext])" IL nil)) nil))
  (unmark_TCC5 0
   (unmark_TCC5-1 nil 3699881944 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IContext])" IL nil)) nil))
+ (unmark_fill 0
+  (unmark_fill-1 nil 3701524673 ("" (induct-and-simplify K) nil nil)
+   ((IContext type-decl nil IL nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (fill def-decl "IExpression" IL nil)
+    (unmark def-decl "IContext" preprocess nil)
+    (IContext_induction formula-decl nil IL nil))
+   shostak))
+ (unmark_cpure_TCC1 0
+  (unmark_cpure_TCC1-1 nil 3701526124
+   ("" (recursive-judgement-tcc) nil nil) nil nil))
+ (unmark_cpure_TCC2 0
+  (unmark_cpure_TCC2-1 nil 3701526124
+   ("" (recursive-judgement-tcc) nil nil) nil nil))
+ (unmark_cpure_TCC3 0
+  (unmark_cpure_TCC3-1 nil 3701526124
+   ("" (recursive-judgement-tcc) nil nil) nil nil))
+ (unmark_cpure_TCC4 0
+  (unmark_cpure_TCC4-1 nil 3701526124
+   ("" (recursive-judgement-tcc) nil nil) nil nil))
+ (unmark_cpure_TCC5 0
+  (unmark_cpure_TCC5-1 nil 3701526124
+   ("" (recursive-judgement-tcc) nil nil) nil nil))
+ (unmark_vars 0
+  (unmark_vars-1 nil 3701526124
+   ("" (induct A)
+    (("1" (grind) nil nil) ("2" (grind) nil nil) ("3" (grind) nil nil)
+     ("4" (skeep)
+      (("4" (skeep)
+        (("4" (expand unmark -2)
+          (("4" (expand vars (1 -2))
+            (("4" (delete -1)
+              (("4" (generalize application2_var L)
+                (("4" (induct-and-simplify L) nil nil)) nil))
+              nil))
+            nil))
+          nil))
+        nil))
+      nil)
+     ("5" (grind) nil nil) ("6" (grind) nil nil) ("7" (grind) nil nil)
+     ("8" (grind) nil nil) ("9" (grind) nil nil) ("10" (grind) nil nil)
+     ("11" (grind) nil nil) ("12" (grind) nil nil)
+     ("13" (grind) nil nil))
+    nil)
+   ((add const-decl "(nonempty?)" sets nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (member const-decl "bool" sets nil)
+    (drop const-decl "finite_set[nat]" IL nil)
+    (union const-decl "set" sets nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (unmarkvar const-decl "(variable?)" preprocess nil)
+    (unmarkvars_length rec-application-judgement
+     "{J | length(J) = length(L)}" preprocess nil)
+    (some adt-def-decl "boolean" list_adt nil)
+    (list_induction formula-decl nil list_adt nil)
+    (list type-decl nil list_adt nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (in_varlist const-decl "finite_set[nat]" IL nil)
+    (unmarkvars def-decl "list[(variable?)]" preprocess nil)
+    (emptyset const-decl "set" sets nil)
+    (singleton const-decl "(singleton?)" sets nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil))
+   shostak))
+ (unmark_vars_ctx 0
+  (unmark_vars_ctx-1 nil 3701526296
+   ("" (induct K)
+    (("1" (grind) nil nil)
+     ("2" (skeep)
+      (("2" (skeep)
+        (("2" (expand unmark -2)
+          (("2" (expand vars (1 -2))
+            (("2" (lemma unmark_vars)
+              (("2" (inst -1 letc2_var "i+1") (("2" (grind) nil nil))
+                nil))
+              nil))
+            nil))
+          nil))
+        nil))
+      nil)
+     ("3" (grind) nil nil))
+    nil)
+   ((NOT const-decl "[bool -> bool]" booleans nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (unmark_vars formula-decl nil preprocess nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (union const-decl "set" sets nil)
+    (drop const-decl "finite_set[nat]" IL nil)
+    (member const-decl "bool" sets nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (emptyset const-decl "set" sets nil)
+    (IContext_induction formula-decl nil IL nil)
+    (unmark def-decl "IContext" preprocess nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IContext type-decl nil IL nil))
+   shostak))
+ (unmark_popDepth 0
+  (unmark_popDepth-1 nil 3701526394
+   ("" (induct-and-simplify A) nil nil)
+   ((IExpression type-decl nil IExpression_adt nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (popDepth def-decl "nat" IL nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (unmarkvars_length rec-application-judgement
+     "{J | length(J) = length(L)}" preprocess nil)
+    (unmarkvar const-decl "(variable?)" preprocess nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil))
+   shostak))
+ (unmark_popDepth_ctx 0
+  (unmark_popDepth_ctx-1 nil 3701526403
+   ("" (induct-and-simplify K) nil nil)
+   ((IContext type-decl nil IL nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (popDepth def-decl "nat" IL nil)
+    (unmark def-decl "IContext" preprocess nil)
+    (IContext_induction formula-decl nil IL nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil))
+   shostak))
  (cvars_pure 0
   (cvars_pure-1 nil 3699648214
    ("" (induct A)

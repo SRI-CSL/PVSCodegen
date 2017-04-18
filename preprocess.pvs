@@ -212,6 +212,9 @@ preprocess  % [ parameters ]
     unmark_mark: LEMMA
       unmark(mark(X)(A)) = unmark(A)
 
+    unmark_atom: JUDGEMENT
+      unmark(A | atom?(A)) HAS_TYPE (atom?)
+
     unmark(K): RECURSIVE IContext =
       CASES K OF
         letc(K1, B): letc(unmark(K1), unmark(B)),
@@ -219,6 +222,24 @@ preprocess  % [ parameters ]
         hole: hole
       ENDCASES
     MEASURE K BY <<
+
+    unmark_fill: LEMMA
+      unmark(fill(K, A)) = fill(unmark(K), unmark(A))
+
+    unmark_cpure: RECURSIVE JUDGEMENT
+      unmark(K: (cpure?)) HAS_TYPE (cpure?)
+
+    unmark_vars: LEMMA
+      vars(unmark(A))(i) IMPLIES vars(A)(i)
+
+    unmark_vars_ctx: LEMMA
+      vars(unmark(K))(i) IMPLIES vars(K)(i)
+
+    unmark_popDepth: LEMMA
+      popDepth(unmark(A)) = popDepth(A)
+
+    unmark_popDepth_ctx: LEMMA
+      popDepth(unmark(K)) = popDepth(K)
 
 %marks the variables in context K that don't occur in X
     markc(X)(K): RECURSIVE IContext =

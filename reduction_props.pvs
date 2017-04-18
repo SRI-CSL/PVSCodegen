@@ -213,6 +213,15 @@ reduction_props: THEORY
     value_translate_rev_nil: LEMMA
       value?(A) AND translate_refs(translate)(A) = nil IMPLIES A = nil
 
+    translate_fill: LEMMA
+      cpure?(K) IMPLIES translate_refs(translate)(fill(K, A)) = fill(K, translate_refs(translate)(A))
+
+    translate_vars: LEMMA
+      vars(translate_refs(translate)(A)) = vars(A)
+
+    translate_popDepth: LEMMA
+      popDepth(translate_refs(translate)(A)) = popDepth(A)
+
     stack_matches(translate)(S, S1, X): boolean =
       S`length = S1`length AND
         FORALL (i: (X)):
@@ -328,8 +337,8 @@ reduction_props: THEORY
 
     releaseReduce_match: LEMMA
       pureReleaseRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND
-        state_matches?(eS, grS) IMPLIES
-          state_matches?(eS, releaseReduce(D)(grS))
+        state_matches(eS, grS)(translate) IMPLIES
+          state_matches(eS, releaseReduce(D)(grS))(translate)
 
 
     release_marked_match: LEMMA
@@ -531,5 +540,42 @@ reduction_props: THEORY
     reduce_arm: JUDGEMENT
       reduce(D)(grS | noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)) HAS_TYPE
         { rS | allReleaseMarked?(rS`redex) AND armc?(rS`context) }
+
+    rreduce_n(D)(n: nat, rS: (noDanglingRefs?)) : RECURSIVE rstate =
+      IF n = 0 OR rS`error THEN rS ELSE rreduce_n(D)(n - 1, reduce(D)(rS)) ENDIF
+    MEASURE n
+
+    record_update_self: LEMMA
+      FORALL (eS: topstate): eS WITH [`redex := eS`redex, `context := hole] = eS
+
+    build_redex_match: LEMMA
+      contextPure?(A) AND contextPure?(B) AND
+      translate_refs(translate)(unmark(A)) = B AND NOT release?(buildRedex(A)`2) IMPLIES
+        translate_refs(translate)(unmark(buildRedex(A)`2)) = buildRedex(B)`2 AND
+        unmark(buildRedex(A)`1) = buildRedex(B)`1
+
+    make_redex_match: LEMMA
+      FORALL (eS: topstate, rS: rtopstate):
+        NOT atom?(rS`redex) AND NOT atom?(eS`redex) AND
+        NOT releaseRedex?(make_redex(rS)`redex) AND state_matches?(eS, rS) IMPLIES
+          state_matches?(make_redex_e(eS), make_redex(rS))
+
+    top_release_reduce: LEMMA
+      noDanglingRefs?(grS) AND top_releases_ct(grS`redex) > 0 IMPLIES
+        reduce(D)(grS) = releaseReduce(D)(make_redex(to_topstate(grS)))
+
+    to_topstate_match: LEMMA
+      state_matches(eS, rS)(translate) IMPLIES
+        state_matches(to_topstate(eS), to_topstate(rS))(translate)
+
+    bisimulation_lemma: THEOREM
+      noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context) AND
+          state_matches?(to_topstate(gS), to_topstate(grS)) IMPLIES
+        state_matches?(reduce(D)(gS), rreduce_n(D)(top_releases_ct(grS`redex) + 1, grS))
+
+    bisimulation_theorem: THEOREM
+      noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context) AND
+          state_matches?(gS, grS) IMPLIES
+        EXISTS (n: posnat): state_matches?(reduce(D)(gS), rreduce_n(D)(n, grS))
 
 END reduction_props

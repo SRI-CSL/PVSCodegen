@@ -703,6 +703,11 @@ rreduction      : THEORY
       LET (ctx, redex) = buildRedex(t`redex) IN
       (t :: rstate) WITH [`context := ctx, `redex := redex]
 
+    make_redex_idem: LEMMA
+      FORALL (t: rtopstate):
+        NOT atom?(t`redex) IMPLIES
+          make_redex(to_topstate(make_redex(t))) = make_redex(t)
+
     make_redex_ndr: JUDGEMENT
       make_redex(t: rtopstate | noDanglingRefs?(t) AND NOT atom?(t`redex)) HAS_TYPE (noDanglingRefs?)
 
@@ -732,5 +737,8 @@ rreduction      : THEORY
           releaseReduce(D)(nS)
         ENDIF
       ENDIF
+
+    reduce_ndr: JUDGEMENT
+      reduce(D)(grS : (noDanglingRefs?)) HAS_TYPE (noDanglingRefs?)
 
   END rreduction

@@ -223,29 +223,36 @@ reduction : THEORY
        IN gS WITH [`redex := value,
                    `stack := pop(stack)])
 
+    make_redex_e(t: topstate | NOT atom?(t`redex)): {eS | pureRedex?(eS`redex)} =
+      LET (ctx, redex) = buildRedex(t`redex) IN
+      (t :: estate) WITH [`context := ctx, `redex := redex]
+
+    make_redex_e_idem: LEMMA
+      FORALL (t: topstate):
+        NOT atom?(t`redex) IMPLIES
+          make_redex_e(to_topstate(make_redex_e(t))) = make_redex_e(t)
+
     reduce(D)(gS): estate =
       LET t = to_topstate(gS) IN
       IF atom?(t`redex) THEN
         t
       ELSE
-        LET (ctx, redex) = buildRedex(t`redex),
-            nS = t WITH [`context := ctx, `redex := redex]
-        IN
-        IF pureLetRedex?(redex) THEN
+        LET nS = make_redex_e(t) IN
+        IF pureLetRedex?(nS`redex) THEN
           letReduce(D)(nS)
-        ELSIF applyRedex?(redex) THEN
+        ELSIF applyRedex?(nS`redex) THEN
           applyReduce(D)(nS)
-        ELSIF pureIftRedex?(redex) THEN
+        ELSIF pureIftRedex?(nS`redex) THEN
           ifReduce(D)(nS)
-        ELSIF updateRedex?(redex) THEN
+        ELSIF updateRedex?(nS`redex) THEN
           updateReduce(D)(nS)
-        ELSIF lookupRedex?(redex) THEN
+        ELSIF lookupRedex?(nS`redex) THEN
           lookupReduce(D)(nS)
-        ELSIF newintRedex?(redex) THEN
+        ELSIF newintRedex?(nS`redex) THEN
           newintReduce(D)(nS)
-        ELSIF newrefRedex?(redex) THEN
+        ELSIF newrefRedex?(nS`redex) THEN
           newrefReduce(D)(nS)
-        ELSIF popRedex?(redex) THEN
+        ELSIF popRedex?(nS`redex) THEN
           popReduce(D)(nS)
         ELSE %releaseRedex?
           nS WITH [`error := TRUE]
