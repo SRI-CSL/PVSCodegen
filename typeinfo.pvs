@@ -1,0 +1,8 @@
+typeinfo: DATATYPE
+  BEGIN
+    lett(lettype: nat, lrhs: typeinfo, lbody: typeinfo): lett?
+    popt(ptbody: typeinfo): popt?
+    releaset(rlexpr: typeinfo): releaset?
+    iftt(tthen, telse: typeinfo): iftt?
+    leaft(leaftype: nat): leaft?
+  END typeinfo

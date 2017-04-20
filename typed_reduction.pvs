@@ -1,0 +1,147 @@
+typed_reduction: THEORY
+  BEGIN
+
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess
+
+    typeinfo_ctx: DATATYPE
+      BEGIN
+        letct(letctype: nat, lcrhs: typeinfo_ctx, lcbody: typeinfo): letct?
+        popct(pctbody: typeinfo_ctx): popct?
+        holet: holet?
+      END typeinfo_ctx
+
+    A, B, C: VAR IExpression
+    tA, tB, tC: VAR typeinfo
+    K, K1, K2: VAR IContext
+    tK, tK1, tK2: VAR typeinfo_ctx
+  
+    a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k: VAR nat
+    F: VAR finite_set[nat]
+
+    S, S1, S2: VAR Stack
+    nS: VAR neStack
+
+    dom: VAR finite_set[nat]
+    
+    Store(dom): TYPE = [(dom) -> finseq[(domainValue?(dom))]]
+
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND FORALL i: vars(A)(i) IMPLIES i < arity} #]
+
+    tdef: TYPE = [# return_type: nat, args_type: finseq[nat] #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+    stypes: VAR finseq[nat]
+    dom_types: VAR [nat -> nat]
+    def_types: VAR finseq[tdef]
+
+    expr_type(tA): RECURSIVE nat =
+      CASES tA OF
+        lett(t, rhs, body): expr_type(body),
+        popt(pbody): expr_type(pbody),
+        releaset(rbody): expr_type(rbody),
+        iftt(tthen, telse): expr_type(tthen),
+        leaft(n): n
+      ENDCASES
+    MEASURE tA BY <<
+
+    tvars(A)(i): RECURSIVE bool =
+      CASES A OF
+        variable(j, b): i = j,
+        application(f, args): in_varlist(args)(i),
+        letexpr(B, C): tvars(B)(i) OR tvars(C)(i+1),
+        ift(x, B, C): i = index(x) OR tvars(B)(i) OR tvars(C)(i),
+        update(x, y, z): i = index(x) OR i = index(y) OR i = index(z),
+        lookup(x, y): i = index(x) OR i = index(y),
+        pop(B): i >= 1 AND tvars(B)(i-1),
+        release(x, B): i = index(x) OR tvars(B)(i)
+        ELSE FALSE
+      ENDCASES
+    MEASURE A BY <<
+
+    popn(L: finseq[nat], n: upto(L`length)): finseq[nat] =
+      (# length := L`length - n, seq := LAMBDA (i: below(L`length - n)): L`seq(i) #)
+
+    is_well_typed(A: (contextPure?), tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types): RECURSIVE bool =
+      CASES A OF
+        letexpr(rhs, body):
+          lett?(tA) AND
+          is_well_typed(rhs, lrhs(tA), stypes, dom_types, def_types) AND
+          expr_type(lrhs(tA)) = lettype(tA) AND
+          is_well_typed(body, lbody(tA), add(lettype(tA), popn(stypes, popDepth(letrhs(A)))), dom_types, def_types),
+        pop(body):
+          popt?(tA) AND is_well_typed(body, ptbody(tA), stypes, dom_types, def_types),
+        release(x, body):
+          releaset?(tA) AND is_well_typed(body, rlexpr(tA), stypes, dom_types, def_types),
+        constant(n): tA = leaft(0),
+        nil: leaft?(tA) and leaftype(tA) > 0,
+        ref(index): leaft?(tA) AND leaftype(tA) = dom_types(index) + 1,
+        variable(index, m): leaft?(tA) AND leaftype(tA) = stypes`seq(stypes`length - 1 - index),
+        ift(c, texpr, eexpr):
+          iftt?(tA) AND expr_type(tthen(tA)) = expr_type(telse(tA)) AND
+          is_well_typed(c, leaft(0), stypes, dom_types, def_types) AND
+          is_well_typed(texpr, tthen(tA), stypes, dom_types, def_types) AND
+          is_well_typed(eexpr, telse(tA), stypes, dom_types, def_types),
+        newint(n): tA = leaft(1),
+        newref(n): leaft?(tA) AND leaftype(tA) > 1,
+        lookup(arr, pos):
+          leaft?(tA) AND
+          is_well_typed(arr, leaft(leaftype(tA) + 1), stypes, dom_types, def_types) AND
+          is_well_typed(pos, leaft(0), stypes, dom_types, def_types),
+        update(arr, pos, rhs):
+          leaft?(tA) AND leaftype(tA) > 0 AND
+          is_well_typed(arr, tA, stypes, dom_types, def_types) AND
+          is_well_typed(pos, leaft(0), stypes, dom_types, def_types) AND
+          is_well_typed(rhs, leaft(leaftype(tA) - 1), stypes, dom_types, def_types),
+        application(f, args):
+          f < def_types`length AND tA = leaft(def_types`seq(f)`return_type) AND
+          length(args) = def_types`seq(f)`args_type`length AND
+          FORALL (i: below(length(args))):
+            is_well_typed(nth(args, i), leaft(def_types`seq(f)`args_type`seq(i)), stypes, dom_types, def_types)
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    ctx_type(tK, (hole_type: nat)): RECURSIVE nat =
+      CASES tK OF
+        holet: hole_type,
+        letct(n, tK1, tA): expr_type(tA),
+        popct(tK1): ctx_type(tK1, hole_type)
+      ENDCASES
+    MEASURE tK BY <<
+
+    is_well_typed_ctx(K: (cpure?), tK, (stypes | popDepth(K) <= stypes`length AND
+      FORALL i: cvars(K)(i) IMPLIES i < stypes`length), dom_types, def_types, (hole_type: nat)): RECURSIVE bool =
+        CASES K OF
+          hole: holet?(tK),
+          letc(K1, B):
+            letct?(tK) AND
+            is_well_typed_ctx(K1, lcrhs(tK), stypes, dom_types, def_types, hole_type) AND
+            ctx_type(lcrhs(tK), hole_type) = letctype(tK) AND
+            is_well_typed(B, lcbody(tK), add(letctype(tK), popn(stypes, popDepth(letcrhs(K)))), dom_types, def_types),
+          popc(K1):
+            popct?(tK) AND
+            is_well_typed_ctx(K1, pctbody(tK), stypes, dom_types, def_types, hole_type)
+        ENDCASES
+    MEASURE (K :: IContext) BY <<
+
+    typed_state: TYPE = [#
+      state: estate,
+      stack_types: {stypes | stypes`length = state`stack`length},
+      dom_types: {dom_types |
+        FORALL (r: (state`domain)):
+          FORALL (j: below(state`store(r)`length)):
+            constant?(state`store(r)`seq(j)) IFF dom_types(r) = 0
+      },
+      def_types: finseq[tdef],
+      redex_type: {tA | is_well_typed(state`redex, tA, stack_types, dom_types, def_types)},
+      context_type: {tK |
+        is_well_typed_ctx(state`context, tK, popn(stack_types, popDepth(state`redex)),
+                          dom_types, def_types, expr_type(redex_type)) }
+    #]
+
+  END typed_reduction

@@ -1,0 +1,320 @@
+%%% ADT file generated from typeinfo
+
+typeinfo_adt: THEORY
+ BEGIN
+
+  typeinfo: TYPE
+
+  lett?, popt?, releaset?, iftt?, leaft?: [typeinfo -> boolean]
+
+  lettype: [(lett?) -> nat]
+
+  lrhs: [(lett?) -> typeinfo]
+
+  lbody: [(lett?) -> typeinfo]
+
+  ptbody: [(popt?) -> typeinfo]
+
+  rlexpr: [(releaset?) -> typeinfo]
+
+  tthen: [(iftt?) -> typeinfo]
+
+  telse: [(iftt?) -> typeinfo]
+
+  leaftype: [(leaft?) -> nat]
+
+  lett: [[nat, typeinfo, typeinfo] -> (lett?)]
+
+  popt: [typeinfo -> (popt?)]
+
+  releaset: [typeinfo -> (releaset?)]
+
+  iftt: [[typeinfo, typeinfo] -> (iftt?)]
+
+  leaft: [nat -> (leaft?)]
+
+  typeinfo_ord: [typeinfo -> upto(4)]
+
+  typeinfo_ord_defaxiom: AXIOM
+         (forall (lettype: nat, lrhs: typeinfo, lbody: typeinfo):
+            typeinfo_ord(lett(lettype, lrhs, lbody)) = 0)
+     AND (forall (ptbody: typeinfo): typeinfo_ord(popt(ptbody)) = 1)
+     AND (forall (rlexpr: typeinfo): typeinfo_ord(releaset(rlexpr)) = 2)
+     AND (forall (tthen: typeinfo, telse: typeinfo):
+            typeinfo_ord(iftt(tthen, telse)) = 3)
+     AND forall (leaftype: nat): typeinfo_ord(leaft(leaftype)) = 4;
+
+  ord(x: typeinfo): upto(4) =
+      CASES x
+        OF lett(lett1_var, lett2_var, lett3_var): 0,
+           popt(popt1_var): 1,
+           releaset(releaset1_var): 2,
+           iftt(iftt1_var, iftt2_var): 3,
+           leaft(leaft1_var): 4
+        ENDCASES
+
+  typeinfo_lett_extensionality: AXIOM
+    FORALL (lett?_var: (lett?), lett?_var2: (lett?)):
+      lettype(lett?_var) = lettype(lett?_var2) AND
+       lrhs(lett?_var) = lrhs(lett?_var2) AND
+        lbody(lett?_var) = lbody(lett?_var2)
+       IMPLIES lett?_var = lett?_var2;
+
+  typeinfo_lett_eta: AXIOM
+    FORALL (lett?_var: (lett?)):
+      lett(lettype(lett?_var), lrhs(lett?_var), lbody(lett?_var)) =
+       lett?_var;
+
+  typeinfo_popt_extensionality: AXIOM
+    FORALL (popt?_var: (popt?), popt?_var2: (popt?)):
+      ptbody(popt?_var) = ptbody(popt?_var2) IMPLIES popt?_var = popt?_var2;
+
+  typeinfo_popt_eta: AXIOM
+    FORALL (popt?_var: (popt?)): popt(ptbody(popt?_var)) = popt?_var;
+
+  typeinfo_releaset_extensionality: AXIOM
+    FORALL (releaset?_var: (releaset?), releaset?_var2: (releaset?)):
+      rlexpr(releaset?_var) = rlexpr(releaset?_var2) IMPLIES
+       releaset?_var = releaset?_var2;
+
+  typeinfo_releaset_eta: AXIOM
+    FORALL (releaset?_var: (releaset?)):
+      releaset(rlexpr(releaset?_var)) = releaset?_var;
+
+  typeinfo_iftt_extensionality: AXIOM
+    FORALL (iftt?_var: (iftt?), iftt?_var2: (iftt?)):
+      tthen(iftt?_var) = tthen(iftt?_var2) AND
+       telse(iftt?_var) = telse(iftt?_var2)
+       IMPLIES iftt?_var = iftt?_var2;
+
+  typeinfo_iftt_eta: AXIOM
+    FORALL (iftt?_var: (iftt?)):
+      iftt(tthen(iftt?_var), telse(iftt?_var)) = iftt?_var;
+
+  typeinfo_leaft_extensionality: AXIOM
+    FORALL (leaft?_var: (leaft?), leaft?_var2: (leaft?)):
+      leaftype(leaft?_var) = leaftype(leaft?_var2) IMPLIES
+       leaft?_var = leaft?_var2;
+
+  typeinfo_leaft_eta: AXIOM
+    FORALL (leaft?_var: (leaft?)): leaft(leaftype(leaft?_var)) = leaft?_var;
+
+  typeinfo_lettype_lett: AXIOM
+    FORALL (lett1_var: nat, lett2_var: typeinfo, lett3_var: typeinfo):
+      lettype(lett(lett1_var, lett2_var, lett3_var)) = lett1_var;
+
+  typeinfo_lrhs_lett: AXIOM
+    FORALL (lett1_var: nat, lett2_var: typeinfo, lett3_var: typeinfo):
+      lrhs(lett(lett1_var, lett2_var, lett3_var)) = lett2_var;
+
+  typeinfo_lbody_lett: AXIOM
+    FORALL (lett1_var: nat, lett2_var: typeinfo, lett3_var: typeinfo):
+      lbody(lett(lett1_var, lett2_var, lett3_var)) = lett3_var;
+
+  typeinfo_ptbody_popt: AXIOM
+    FORALL (popt1_var: typeinfo): ptbody(popt(popt1_var)) = popt1_var;
+
+  typeinfo_rlexpr_releaset: AXIOM
+    FORALL (releaset1_var: typeinfo):
+      rlexpr(releaset(releaset1_var)) = releaset1_var;
+
+  typeinfo_tthen_iftt: AXIOM
+    FORALL (iftt1_var: typeinfo, iftt2_var: typeinfo):
+      tthen(iftt(iftt1_var, iftt2_var)) = iftt1_var;
+
+  typeinfo_telse_iftt: AXIOM
+    FORALL (iftt1_var: typeinfo, iftt2_var: typeinfo):
+      telse(iftt(iftt1_var, iftt2_var)) = iftt2_var;
+
+  typeinfo_leaftype_leaft: AXIOM
+    FORALL (leaft1_var: nat): leaftype(leaft(leaft1_var)) = leaft1_var;
+
+  typeinfo_inclusive: AXIOM
+    FORALL (typeinfo_var: typeinfo):
+           lett?(typeinfo_var) OR popt?(typeinfo_var)
+       OR releaset?(typeinfo_var) OR iftt?(typeinfo_var)
+       OR leaft?(typeinfo_var);
+
+  typeinfo_induction: AXIOM
+    FORALL (p: [typeinfo -> boolean]):
+      (     (forall (lett1_var: nat, lett2_var: typeinfo,
+                     lett3_var: typeinfo):
+               p(lett2_var) AND p(lett3_var) IMPLIES
+                p(lett(lett1_var, lett2_var, lett3_var)))
+        AND (forall (popt1_var: typeinfo):
+               p(popt1_var) IMPLIES p(popt(popt1_var)))
+        AND (forall (releaset1_var: typeinfo):
+               p(releaset1_var) IMPLIES p(releaset(releaset1_var)))
+        AND (forall (iftt1_var: typeinfo, iftt2_var: typeinfo):
+               p(iftt1_var) AND p(iftt2_var) IMPLIES
+                p(iftt(iftt1_var, iftt2_var)))
+        AND forall (leaft1_var: nat): p(leaft(leaft1_var)))
+       IMPLIES FORALL (typeinfo_var: typeinfo): p(typeinfo_var);
+
+  subterm(x: typeinfo, y: typeinfo):  boolean =
+      x = y OR
+       CASES y
+         OF lett(lett1_var, lett2_var, lett3_var):
+              subterm(x, lett2_var) OR subterm(x, lett3_var),
+            popt(popt1_var): subterm(x, popt1_var),
+            releaset(releaset1_var): subterm(x, releaset1_var),
+            iftt(iftt1_var, iftt2_var):
+              subterm(x, iftt1_var) OR subterm(x, iftt2_var),
+            leaft(leaft1_var): FALSE
+         ENDCASES;
+
+  <<:  (strict_well_founded?[typeinfo]) =
+      LAMBDA (x, y: typeinfo):
+        CASES y
+          OF lett(lett1_var, lett2_var, lett3_var):
+               (x = lett2_var OR x << lett2_var) OR
+                x = lett3_var OR x << lett3_var,
+             popt(popt1_var): x = popt1_var OR x << popt1_var,
+             releaset(releaset1_var):
+               x = releaset1_var OR x << releaset1_var,
+             iftt(iftt1_var, iftt2_var):
+               (x = iftt1_var OR x << iftt1_var) OR
+                x = iftt2_var OR x << iftt2_var,
+             leaft(leaft1_var): FALSE
+          ENDCASES;
+
+  typeinfo_well_founded: AXIOM strict_well_founded?[typeinfo](<<);
+
+  reduce_nat(lett?_fun: [[nat, nat, nat] -> nat], popt?_fun: [nat -> nat],
+             releaset?_fun: [nat -> nat], iftt?_fun: [[nat, nat] -> nat],
+             leaft?_fun: [nat -> nat]):
+        [typeinfo -> nat] =
+      LAMBDA (typeinfo_adtvar: typeinfo):
+        LET red: [typeinfo -> nat] =
+              reduce_nat(lett?_fun, popt?_fun, releaset?_fun, iftt?_fun,
+                         leaft?_fun)
+          IN
+          CASES typeinfo_adtvar
+            OF lett(lett1_var, lett2_var, lett3_var):
+                 lett?_fun(lett1_var, red(lett2_var), red(lett3_var)),
+               popt(popt1_var): popt?_fun(red(popt1_var)),
+               releaset(releaset1_var): releaset?_fun(red(releaset1_var)),
+               iftt(iftt1_var, iftt2_var):
+                 iftt?_fun(red(iftt1_var), red(iftt2_var)),
+               leaft(leaft1_var): leaft?_fun(leaft1_var)
+            ENDCASES;
+
+  REDUCE_nat(lett?_fun: [[nat, nat, nat, typeinfo] -> nat],
+             popt?_fun: [[nat, typeinfo] -> nat],
+             releaset?_fun: [[nat, typeinfo] -> nat],
+             iftt?_fun: [[nat, nat, typeinfo] -> nat],
+             leaft?_fun: [[nat, typeinfo] -> nat]):
+        [typeinfo -> nat] =
+      LAMBDA (typeinfo_adtvar: typeinfo):
+        LET red: [typeinfo -> nat] =
+              REDUCE_nat(lett?_fun, popt?_fun, releaset?_fun, iftt?_fun,
+                         leaft?_fun)
+          IN
+          CASES typeinfo_adtvar
+            OF lett(lett1_var, lett2_var, lett3_var):
+                 lett?_fun(lett1_var, red(lett2_var), red(lett3_var),
+                           typeinfo_adtvar),
+               popt(popt1_var): popt?_fun(red(popt1_var), typeinfo_adtvar),
+               releaset(releaset1_var):
+                 releaset?_fun(red(releaset1_var), typeinfo_adtvar),
+               iftt(iftt1_var, iftt2_var):
+                 iftt?_fun(red(iftt1_var), red(iftt2_var),
+                           typeinfo_adtvar),
+               leaft(leaft1_var): leaft?_fun(leaft1_var, typeinfo_adtvar)
+            ENDCASES;
+
+  reduce_ordinal(lett?_fun: [[nat, ordinal, ordinal] -> ordinal],
+                 popt?_fun: [ordinal -> ordinal],
+                 releaset?_fun: [ordinal -> ordinal],
+                 iftt?_fun: [[ordinal, ordinal] -> ordinal],
+                 leaft?_fun: [nat -> ordinal]):
+        [typeinfo -> ordinal] =
+      LAMBDA (typeinfo_adtvar: typeinfo):
+        LET red: [typeinfo -> ordinal] =
+              reduce_ordinal(lett?_fun, popt?_fun, releaset?_fun,
+                             iftt?_fun, leaft?_fun)
+          IN
+          CASES typeinfo_adtvar
+            OF lett(lett1_var, lett2_var, lett3_var):
+                 lett?_fun(lett1_var, red(lett2_var), red(lett3_var)),
+               popt(popt1_var): popt?_fun(red(popt1_var)),
+               releaset(releaset1_var): releaset?_fun(red(releaset1_var)),
+               iftt(iftt1_var, iftt2_var):
+                 iftt?_fun(red(iftt1_var), red(iftt2_var)),
+               leaft(leaft1_var): leaft?_fun(leaft1_var)
+            ENDCASES;
+
+  REDUCE_ordinal(lett?_fun: [[nat, ordinal, ordinal, typeinfo] -> ordinal],
+                 popt?_fun: [[ordinal, typeinfo] -> ordinal],
+                 releaset?_fun: [[ordinal, typeinfo] -> ordinal],
+                 iftt?_fun: [[ordinal, ordinal, typeinfo] -> ordinal],
+                 leaft?_fun: [[nat, typeinfo] -> ordinal]):
+        [typeinfo -> ordinal] =
+      LAMBDA (typeinfo_adtvar: typeinfo):
+        LET red: [typeinfo -> ordinal] =
+              REDUCE_ordinal(lett?_fun, popt?_fun, releaset?_fun,
+                             iftt?_fun, leaft?_fun)
+          IN
+          CASES typeinfo_adtvar
+            OF lett(lett1_var, lett2_var, lett3_var):
+                 lett?_fun(lett1_var, red(lett2_var), red(lett3_var),
+                           typeinfo_adtvar),
+               popt(popt1_var): popt?_fun(red(popt1_var), typeinfo_adtvar),
+               releaset(releaset1_var):
+                 releaset?_fun(red(releaset1_var), typeinfo_adtvar),
+               iftt(iftt1_var, iftt2_var):
+                 iftt?_fun(red(iftt1_var), red(iftt2_var),
+                           typeinfo_adtvar),
+               leaft(leaft1_var): leaft?_fun(leaft1_var, typeinfo_adtvar)
+            ENDCASES;
+ END typeinfo_adt
+
+typeinfo_adt_reduce[range: TYPE]: THEORY
+ BEGIN
+
+  IMPORTING typeinfo_adt
+
+  reduce(lett?_fun: [[nat, range, range] -> range],
+         popt?_fun: [range -> range], releaset?_fun: [range -> range],
+         iftt?_fun: [[range, range] -> range],
+         leaft?_fun: [nat -> range]):
+        [typeinfo -> range] =
+      LAMBDA (typeinfo_adtvar: typeinfo):
+        LET red: [typeinfo -> range] =
+              reduce(lett?_fun, popt?_fun, releaset?_fun, iftt?_fun,
+                     leaft?_fun)
+          IN
+          CASES typeinfo_adtvar
+            OF lett(lett1_var, lett2_var, lett3_var):
+                 lett?_fun(lett1_var, red(lett2_var), red(lett3_var)),
+               popt(popt1_var): popt?_fun(red(popt1_var)),
+               releaset(releaset1_var): releaset?_fun(red(releaset1_var)),
+               iftt(iftt1_var, iftt2_var):
+                 iftt?_fun(red(iftt1_var), red(iftt2_var)),
+               leaft(leaft1_var): leaft?_fun(leaft1_var)
+            ENDCASES;
+
+  REDUCE(lett?_fun: [[nat, range, range, typeinfo] -> range],
+         popt?_fun: [[range, typeinfo] -> range],
+         releaset?_fun: [[range, typeinfo] -> range],
+         iftt?_fun: [[range, range, typeinfo] -> range],
+         leaft?_fun: [[nat, typeinfo] -> range]):
+        [typeinfo -> range] =
+      LAMBDA (typeinfo_adtvar: typeinfo):
+        LET red: [typeinfo -> range] =
+              REDUCE(lett?_fun, popt?_fun, releaset?_fun, iftt?_fun,
+                     leaft?_fun)
+          IN
+          CASES typeinfo_adtvar
+            OF lett(lett1_var, lett2_var, lett3_var):
+                 lett?_fun(lett1_var, red(lett2_var), red(lett3_var),
+                           typeinfo_adtvar),
+               popt(popt1_var): popt?_fun(red(popt1_var), typeinfo_adtvar),
+               releaset(releaset1_var):
+                 releaset?_fun(red(releaset1_var), typeinfo_adtvar),
+               iftt(iftt1_var, iftt2_var):
+                 iftt?_fun(red(iftt1_var), red(iftt2_var),
+                           typeinfo_adtvar),
+               leaft(leaft1_var): leaft?_fun(leaft1_var, typeinfo_adtvar)
+            ENDCASES;
+ END typeinfo_adt_reduce
