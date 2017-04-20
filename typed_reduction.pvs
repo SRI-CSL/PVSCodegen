@@ -14,11 +14,19 @@ typed_reduction: THEORY
     tA, tB, tC: VAR typeinfo
     K, K1, K2: VAR IContext
     tK, tK1, tK2: VAR typeinfo_ctx
-  
+
+    typeinfo_fill(tK, tA): RECURSIVE typeinfo =
+      CASES tK OF
+        holet: tA,
+        letct(n, tK1, tB): lett(n, typeinfo_fill(tK1, tA), tB),
+        popct(tK1): popt(typeinfo_fill(tK1, tA))
+      ENDCASES
+    MEASURE tK BY <<
+
     a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
-    i, j, k: VAR nat
+    i, j, k, hole_type: VAR nat
     F: VAR finite_set[nat]
 
     S, S1, S2: VAR Stack
@@ -67,6 +75,10 @@ typed_reduction: THEORY
     popn(L: finseq[nat], n: upto(L`length)): finseq[nat] =
       (# length := L`length - n, seq := LAMBDA (i: below(L`length - n)): L`seq(i) #)
 
+    popn_popn: LEMMA
+      FORALL (L: finseq[nat]):
+        i + j <= L`length IMPLIES popn(popn(L, i), j) = popn(L, i + j)
+
     is_well_typed(A: (contextPure?), tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types): RECURSIVE bool =
       CASES A OF
         letexpr(rhs, body):
@@ -77,7 +89,7 @@ typed_reduction: THEORY
         pop(body):
           popt?(tA) AND is_well_typed(body, ptbody(tA), stypes, dom_types, def_types),
         release(x, body):
-          releaset?(tA) AND is_well_typed(body, rlexpr(tA), stypes, dom_types, def_types),
+          is_well_typed(body, tA, stypes, dom_types, def_types),
         constant(n): tA = leaft(0),
         nil: leaft?(tA) and leaftype(tA) > 0,
         ref(index): leaft?(tA) AND leaftype(tA) = dom_types(index) + 1,
@@ -106,7 +118,7 @@ typed_reduction: THEORY
       ENDCASES
     MEASURE (A :: IExpression) BY <<
 
-    ctx_type(tK, (hole_type: nat)): RECURSIVE nat =
+    ctx_type(tK, hole_type): RECURSIVE nat =
       CASES tK OF
         holet: hole_type,
         letct(n, tK1, tA): expr_type(tA),
@@ -115,7 +127,7 @@ typed_reduction: THEORY
     MEASURE tK BY <<
 
     is_well_typed_ctx(K: (cpure?), tK, (stypes | popDepth(K) <= stypes`length AND
-      FORALL i: cvars(K)(i) IMPLIES i < stypes`length), dom_types, def_types, (hole_type: nat)): RECURSIVE bool =
+      FORALL i: cvars(K)(i) IMPLIES i < stypes`length), dom_types, def_types, hole_type): RECURSIVE bool =
         CASES K OF
           hole: holet?(tK),
           letc(K1, B):
@@ -143,5 +155,66 @@ typed_reduction: THEORY
         is_well_typed_ctx(state`context, tK, popn(stack_types, popDepth(state`redex)),
                           dom_types, def_types, expr_type(redex_type)) }
     #]
+
+    tS, tS1, tS2: VAR typed_state
+
+    fill_type: LEMMA
+      expr_type(typeinfo_fill(tK, tA)) = ctx_type(tK, expr_type(tA))
+
+    fill_well_typed: LEMMA
+      contextPure?(A) AND cpure?(K) AND
+      popDepth(A) + popDepth(K) <= stypes`length AND
+      (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) AND
+      (FORALL i: cvars(K)(i) IMPLIES i + popDepth(A) < stypes`length) AND
+      is_well_typed(A, tA, stypes, dom_types, def_types) AND
+      is_well_typed_ctx(K, tK, popn(stypes, popDepth(A)), dom_types, def_types, expr_type(tA)) IMPLIES
+        is_well_typed(fill(K, A), typeinfo_fill(tK, tA), stypes, dom_types, def_types)
+
+    typed_to_topstate(tS): typed_state =
+      tS WITH [`state := to_topstate(tS`state),
+               `redex_type := typeinfo_fill(tS`context_type, tS`redex_type),
+               `context_type := holet]
+
+     buildRedexType(A, tA): RECURSIVE {(tK, tB) | typeinfo_fill(tK, tB) = tA} = 
+       CASES A OF
+         letexpr(B, C):
+           IF atom?(B) OR NOT lett?(tA) THEN
+             (holet, tA)
+           ELSE
+             LET (tK, tB) = buildRedexType(B, lrhs(tA)) IN
+             (letct(lettype(tA), tK, lbody(tA)), tB)
+           ENDIF,
+         pop(B):
+           IF atom?(B) OR NOT popt?(tA) THEN
+             (holet, tA)
+           ELSE
+             LET (tK, tB) = buildRedexType(B, ptbody(tA)) IN
+             (popct(tK), tB)
+           ENDIF
+         ELSE (holet, tA)
+       ENDCASES
+     MEASURE A BY <<
+
+     buildRedexType_args_correct: LEMMA
+       LET (K, B) = buildRedex(A) IN
+       LET (tK, tB) = buildRedexType(A, tA) IN
+         contextPure?(A) AND
+         popDepth(A) <= stypes`length AND
+         (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) IMPLIES
+           contextPure?(B) AND cpure?(K) AND
+           popDepth(B) + popDepth(K) <= stypes`length AND
+           (FORALL i: cvars(B)(i) IMPLIES i < stypes`length) AND
+           (FORALL i: cvars(K)(i) IMPLIES i < popn(stypes, popDepth(B))`length)
+
+     buildRedexType_correct: LEMMA
+       LET (K, B) = buildRedex(A) IN
+       LET (tK, tB) = buildRedexType(A, tA) IN
+         contextPure?(A) AND
+         popDepth(A) <= stypes`length AND
+         (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) AND
+         is_well_typed(A, tA, stypes, dom_types, def_types) IMPLIES
+           is_well_typed(B, tB, stypes, dom_types, def_types) AND
+           is_well_typed_ctx(K, tK, popn(stypes, popDepth(B)), dom_types, def_types, expr_type(tB))
+
 
   END typed_reduction
