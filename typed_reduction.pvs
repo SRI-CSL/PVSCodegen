@@ -38,7 +38,7 @@ typed_reduction: THEORY
 
     Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND FORALL i: vars(A)(i) IMPLIES i < arity} #]
 
-    tdef: TYPE = [# return_type: nat, args_type: finseq[nat] #]
+    tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
 
     Defs: TYPE = finseq[Definition]
 
@@ -78,6 +78,13 @@ typed_reduction: THEORY
     popn_popn: LEMMA
       FORALL (L: finseq[nat]):
         i + j <= L`length IMPLIES popn(popn(L, i), j) = popn(L, i + j)
+
+    popn_zero: LEMMA
+      FORALL (L: finseq[nat]):
+        popn(L, 0) = L
+
+    AUTO_REWRITE+ popn_zero
+    AUTO_REWRITE+ popn_popn
 
     is_well_typed(A: (contextPure?), tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types): RECURSIVE bool =
       CASES A OF
@@ -141,13 +148,28 @@ typed_reduction: THEORY
         ENDCASES
     MEASURE (K :: IContext) BY <<
 
+    value_of_type(u, i, dom_types): boolean =
+      CASES u OF
+        constant(n): i = 0,
+        nil: i > 0,
+        ref(r): i > 0 and dom_types(r) = i - 1
+      ENDCASES
+
+    value_well_typed: LEMMA
+      is_well_typed(u, tA, stypes, dom_types, def_types) =
+        (leaft?(tA) AND value_of_type(u, leaftype(tA), dom_types))
+
     typed_state: TYPE = [#
       state: estate,
-      stack_types: {stypes | stypes`length = state`stack`length},
       dom_types: {dom_types |
         FORALL (r: (state`domain)):
           FORALL (j: below(state`store(r)`length)):
-            constant?(state`store(r)`seq(j)) IFF dom_types(r) = 0
+            value_of_type(state`store(r)`seq(j), dom_types(r), dom_types)
+      },
+      stack_types: {stypes |
+        stypes`length = state`stack`length AND
+        FORALL (i: below(stypes`length)):
+          value_of_type(state`stack`seq(i), stypes`seq(i), dom_types)
       },
       def_types: finseq[tdef],
       redex_type: {tA | is_well_typed(state`redex, tA, stack_types, dom_types, def_types)},
@@ -175,46 +197,101 @@ typed_reduction: THEORY
                `redex_type := typeinfo_fill(tS`context_type, tS`redex_type),
                `context_type := holet]
 
-     buildRedexType(A, tA): RECURSIVE {(tK, tB) | typeinfo_fill(tK, tB) = tA} = 
-       CASES A OF
-         letexpr(B, C):
-           IF atom?(B) OR NOT lett?(tA) THEN
-             (holet, tA)
-           ELSE
-             LET (tK, tB) = buildRedexType(B, lrhs(tA)) IN
-             (letct(lettype(tA), tK, lbody(tA)), tB)
-           ENDIF,
-         pop(B):
-           IF atom?(B) OR NOT popt?(tA) THEN
-             (holet, tA)
-           ELSE
-             LET (tK, tB) = buildRedexType(B, ptbody(tA)) IN
-             (popct(tK), tB)
-           ENDIF
-         ELSE (holet, tA)
-       ENDCASES
-     MEASURE A BY <<
+    buildRedexType(A, tA): RECURSIVE {(tK, tB) | typeinfo_fill(tK, tB) = tA} = 
+      CASES A OF
+        letexpr(B, C):
+          IF atom?(B) OR NOT lett?(tA) THEN
+            (holet, tA)
+          ELSE
+            LET (tK, tB) = buildRedexType(B, lrhs(tA)) IN
+            (letct(lettype(tA), tK, lbody(tA)), tB)
+          ENDIF,
+        pop(B):
+          IF atom?(B) OR NOT popt?(tA) THEN
+            (holet, tA)
+          ELSE
+            LET (tK, tB) = buildRedexType(B, ptbody(tA)) IN
+            (popct(tK), tB)
+          ENDIF
+        ELSE (holet, tA)
+      ENDCASES
+    MEASURE A BY <<
 
-     buildRedexType_args_correct: LEMMA
-       LET (K, B) = buildRedex(A) IN
-       LET (tK, tB) = buildRedexType(A, tA) IN
-         contextPure?(A) AND
-         popDepth(A) <= stypes`length AND
-         (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) IMPLIES
-           contextPure?(B) AND cpure?(K) AND
-           popDepth(B) + popDepth(K) <= stypes`length AND
-           (FORALL i: cvars(B)(i) IMPLIES i < stypes`length) AND
-           (FORALL i: cvars(K)(i) IMPLIES i < popn(stypes, popDepth(B))`length)
+    buildRedexType_args_correct: LEMMA
+      LET (K, B) = buildRedex(A) IN
+      LET (tK, tB) = buildRedexType(A, tA) IN
+        contextPure?(A) AND
+        popDepth(A) <= stypes`length AND
+        (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) IMPLIES
+          contextPure?(B) AND cpure?(K) AND
+          popDepth(B) + popDepth(K) <= stypes`length AND
+          (FORALL i: cvars(B)(i) IMPLIES i < stypes`length) AND
+          (FORALL i: cvars(K)(i) IMPLIES i < popn(stypes, popDepth(B))`length)
 
-     buildRedexType_correct: LEMMA
-       LET (K, B) = buildRedex(A) IN
-       LET (tK, tB) = buildRedexType(A, tA) IN
-         contextPure?(A) AND
-         popDepth(A) <= stypes`length AND
-         (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) AND
-         is_well_typed(A, tA, stypes, dom_types, def_types) IMPLIES
-           is_well_typed(B, tB, stypes, dom_types, def_types) AND
-           is_well_typed_ctx(K, tK, popn(stypes, popDepth(B)), dom_types, def_types, expr_type(tB))
+    buildRedexType_correct: LEMMA
+      LET (K, B) = buildRedex(A) IN
+      LET (tK, tB) = buildRedexType(A, tA) IN
+        contextPure?(A) AND
+        popDepth(A) <= stypes`length AND
+        (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) AND
+        is_well_typed(A, tA, stypes, dom_types, def_types) IMPLIES
+          is_well_typed(B, tB, stypes, dom_types, def_types) AND
+          is_well_typed_ctx(K, tK, popn(stypes, popDepth(B)), dom_types, def_types, expr_type(tB))
+
+    make_redex_typed(tS | tS`state`context = hole AND NOT atom?(tS`state`redex)): typed_state =
+      LET (tK, tA) = buildRedexType(tS`state`redex, tS`redex_type) IN
+      tS WITH [`state := make_redex_e(tS`state),
+               `redex_type := tA,
+               `context_type := tK]
+
+    defs_well_typed(D, def_types): boolean =
+      D`length = def_types`length AND
+      FORALL (i: below(D`length)):
+        D`seq(i)`arity = def_types`seq(i)`args_type`length AND
+        def_types`seq(i)`return_type = expr_type(def_types`seq(i)`body_type) AND
+        is_well_typed(D`seq(i)`body, def_types`seq(i)`body_type,
+                      def_types`seq(i)`args_type, (LAMBDA i: 0), def_types)
+
+    typed_reduce(D)(tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)) : typed_state =
+      LET t = typed_to_topstate(tS) IN
+      IF atom?(t`state`redex) THEN
+        t
+      ELSE
+        LET nS = make_redex_typed(t) IN
+        IF pureLetRedex?(nS`state`redex) THEN
+          nS WITH [`state := letReduce(D)(nS`state),
+                   `stack_types := add(lettype(nS`redex_type), nS`stack_types),
+                   `redex_type := popt(lbody(nS`redex_type))]
+        ELSIF applyRedex?(nS`state`redex) THEN
+          nS WITH [`state := applyReduce(D)(nS`state)]
+        ELSIF pureIftRedex?(nS`state`redex) THEN
+          nS WITH [`state := ifReduce(D)(nS`state),
+                   `redex_type :=
+                     IF get(nS`state`stack)(condition(nS`state`redex)) = constant(0) THEN
+                       telse(nS`redex_type)
+                     ELSE
+                       tthen(nS`redex_type)
+                     ENDIF
+                  ]
+        ELSIF updateRedex?(nS`state`redex) THEN
+          nS WITH [`state := updateReduce(D)(nS`state),
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type)]]
+        ELSIF lookupRedex?(nS`state`redex) THEN
+          nS WITH [`state := lookupReduce(D)(nS`state)]
+        ELSIF newintRedex?(nS`state`redex) THEN
+          nS WITH [`state := newintReduce(D)(nS`state),
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type)]]
+        ELSIF newrefRedex?(nS`state`redex) THEN
+          nS WITH [`state := newrefReduce(D)(nS`state),
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type)]]
+        ELSIF popRedex?(nS`state`redex) THEN
+          nS WITH [`state := popReduce(D)(nS`state),
+                   `stack_types := tail(nS`stack_types),
+                   `redex_type := ptbody(nS`redex_type)]
+        ELSE
+          nS WITH [`state`error := TRUE]
+        ENDIF
+      ENDIF
 
 
   END typed_reduction
