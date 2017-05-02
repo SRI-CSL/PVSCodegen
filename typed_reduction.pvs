@@ -45,7 +45,7 @@ typed_reduction: THEORY
     D: VAR Defs
 
     stypes: VAR finseq[nat]
-    dom_types: VAR [nat -> nat]
+    dom_types, dom_types2: VAR [nat -> nat]
     def_types: VAR finseq[tdef]
 
     expr_type(tA): RECURSIVE nat =
@@ -125,6 +125,31 @@ typed_reduction: THEORY
       ENDCASES
     MEASURE (A :: IExpression) BY <<
 
+    is_well_typed_dom: LEMMA
+      FORALL (A, tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, dom_types2, def_types):
+        contextPure?(A) AND (FORALL i: refs(A)(i) IMPLIES dom_types(i) = dom_types2(i)) IMPLIES
+          is_well_typed(A, tA, stypes, dom_types, def_types) =
+            is_well_typed(A, tA, stypes, dom_types2, def_types)
+
+    letApply_type(arity: nat, (args_type: list[nat] | length(args_type) = arity), tA): RECURSIVE typeinfo =
+      IF arity = 0 THEN
+        tA
+      ELSE
+        lett(car(args_type), leaft(car(args_type)), letApply_type(arity - 1, cdr(args_type), tA))
+      ENDIF
+    MEASURE arity
+
+    if_well_typed_letApply: LEMMA
+      FORALL (arity: nat, (args: list[(variable?)] | length(args) = arity),
+                          (args_type: list[nat] | length(args_type) = arity)):
+        pure?(A) AND
+        (FORALL (i: below(arity)): is_well_typed(nth(args, i), leaft(nth(args_type, i)), stypes, dom_types, def_types)) AND
+        is_well_typed(A, tA, args_type, (LAMBDA i: 0), def_types)
+        IMPLIES
+        is_well_typed(letApply(arity, args, A),
+                      letApply_type(arity, args_type, tA),
+                      stypes, dom_types, def_types)
+
     ctx_type(tK, hole_type): RECURSIVE nat =
       CASES tK OF
         holet: hole_type,
@@ -147,6 +172,13 @@ typed_reduction: THEORY
             is_well_typed_ctx(K1, pctbody(tK), stypes, dom_types, def_types, hole_type)
         ENDCASES
     MEASURE (K :: IContext) BY <<
+
+    is_well_typed_ctx_dom: LEMMA
+      FORALL (K, tK, (stypes | popDepth(K) <= stypes`length AND
+        FORALL i: cvars(K)(i) IMPLIES i < stypes`length), dom_types, dom_types2, def_types, hole_type):
+          cpure?(K) IMPLIES
+            is_well_typed_ctx(K, tK, stypes, dom_types, def_types, hole_type) =
+              is_well_typed_ctx(K, tK, stypes, dom_types2, def_types, hole_type)
 
     value_of_type(u, i, dom_types): boolean =
       CASES u OF
@@ -252,6 +284,9 @@ typed_reduction: THEORY
         is_well_typed(D`seq(i)`body, def_types`seq(i)`body_type,
                       def_types`seq(i)`args_type, (LAMBDA i: 0), def_types)
 
+    set_new_type(tS, i) : typed_state =
+      tS WITH [`dom_types(least_out(tS`state`domain)) := i]
+
     typed_reduce(D)(tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)) : typed_state =
       LET t = typed_to_topstate(tS) IN
       IF atom?(t`state`redex) THEN
@@ -275,15 +310,15 @@ typed_reduction: THEORY
                   ]
         ELSIF updateRedex?(nS`state`redex) THEN
           nS WITH [`state := updateReduce(D)(nS`state),
-                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type)]]
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type) - 1]]
         ELSIF lookupRedex?(nS`state`redex) THEN
           nS WITH [`state := lookupReduce(D)(nS`state)]
         ELSIF newintRedex?(nS`state`redex) THEN
           nS WITH [`state := newintReduce(D)(nS`state),
-                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type)]]
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type) - 1]]
         ELSIF newrefRedex?(nS`state`redex) THEN
           nS WITH [`state := newrefReduce(D)(nS`state),
-                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type)]]
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type) - 1]]
         ELSIF popRedex?(nS`state`redex) THEN
           nS WITH [`state := popReduce(D)(nS`state),
                    `stack_types := tail(nS`stack_types),
