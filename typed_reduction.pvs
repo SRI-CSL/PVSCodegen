@@ -44,7 +44,7 @@ typed_reduction: THEORY
 
     D: VAR Defs
 
-    stypes: VAR finseq[nat]
+    stypes, stypes2: VAR finseq[nat]
     dom_types, dom_types2: VAR [nat -> nat]
     def_types: VAR finseq[tdef]
 
@@ -85,6 +85,14 @@ typed_reduction: THEORY
 
     AUTO_REWRITE+ popn_zero
     AUTO_REWRITE+ popn_popn
+
+    add_append: LEMMA
+      FORALL (L, M: finseq[nat], x : nat):
+        L o add(x, M) = add(x, L o M)
+
+    popn_append: LEMMA
+      FORALL (L, M: finseq[nat]):
+        i <= M`length IMPLIES L o popn(M, i) = popn(L o M, i)
 
     is_well_typed(A: (contextPure?), tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types): RECURSIVE bool =
       CASES A OF
@@ -139,16 +147,28 @@ typed_reduction: THEORY
       ENDIF
     MEASURE arity
 
-    if_well_typed_letApply: LEMMA
+    is_well_typed_extend_stack: LEMMA
+      FORALL (A, tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), stypes2, dom_types, def_types):
+        contextPure?(A) IMPLIES
+          is_well_typed(A, tA, stypes2 o stypes, dom_types, def_types) =
+            is_well_typed(A, tA, stypes, dom_types, def_types)
+
+    is_well_typed_letApply: LEMMA
       FORALL (arity: nat, (args: list[(variable?)] | length(args) = arity),
                           (args_type: list[nat] | length(args_type) = arity)):
         pure?(A) AND
+        (FORALL i: cvars(A)(i) IMPLIES i < stypes`length + arity) AND
+        (FORALL i: in_varlist(args)(i) IMPLIES i < stypes`length) AND
         (FORALL (i: below(arity)): is_well_typed(nth(args, i), leaft(nth(args_type, i)), stypes, dom_types, def_types)) AND
-        is_well_typed(A, tA, args_type, (LAMBDA i: 0), def_types)
+        is_well_typed(A, tA, stypes o args_type, (LAMBDA i: 0), def_types)
         IMPLIES
         is_well_typed(letApply(arity, args, A),
                       letApply_type(arity, args_type, tA),
                       stypes, dom_types, def_types)
+
+    letApply_expr_type: LEMMA
+      FORALL (arity: nat, (args_type: list[nat] | length(args_type) = arity), tA):
+        expr_type(letApply_type(arity, args_type, tA)) = expr_type(tA)
 
     ctx_type(tK, hole_type): RECURSIVE nat =
       CASES tK OF
