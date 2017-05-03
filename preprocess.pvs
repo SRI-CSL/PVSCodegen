@@ -206,6 +206,9 @@ preprocess  % [ parameters ]
     unmarkvars_markvars: LEMMA
       unmarkvars(markvars(X)(L)) = unmarkvars(L)
 
+    unmarkvars_nth: LEMMA
+      FORALL (i: below(length(L))): nth(unmarkvars(L), i) = unmarkvar(nth(L, i))
+
     unmark_release_set: LEMMA
       unmark(release_set(A, X)) = unmark(A)
 
@@ -337,5 +340,26 @@ preprocess  % [ parameters ]
 
     fill_mark_inj: LEMMA
       fill(K, A) = fill(markc(X)(K), mark(Y)(A)) IMPLIES K = markc(X)(K) AND A = mark(Y)(A)
+
+    contextPure_mark: LEMMA
+      contextPure?(mark(X)(A)) = contextPure?(A)
+
+    markc_popDepth: LEMMA
+      popDepth(markc(X)(K)) = popDepth(K)
+
+    cvars_mark: LEMMA
+      cvars(mark(X)(A)) = cvars(A)
+
+    cvars_mark_ctx: LEMMA
+      cvars(markc(X)(K)) = cvars(K)
+
+    unmark_cvars: LEMMA
+      cvars(unmark(A))(i) IMPLIES cvars(A)(i)
+
+    unmark_cvars_ctx: LEMMA
+      cvars(unmark(K))(i) IMPLIES cvars(K)(i)
+
+    unmark_unmarkvar: LEMMA
+      variable?(x) IMPLIES unmark(x) = unmarkvar(x)
 
  END preprocess
