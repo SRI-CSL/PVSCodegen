@@ -152,11 +152,12 @@ rreduction      : THEORY
 
 %decref is a critical operation that (recursively decrements the reference count while releasing
 %references.  It's tricky to define since the invariant on count has to be preserved.
-     decref(rS: (noDanglingRefs?), (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+% In the past, decref required its argument to be (noDanglingRefs?)
+% This restriction is now removed, but we have to preserve compatibility
+     decref1(rS, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
      RECURSIVE {rS1 | allcountStore(rS1) <= allcountStore(rS) AND rS1`domain = rS`domain AND (FORALL (s : (rS`domain)): rS1`store(s)`length = rS`store(s)`length
           AND rS1`count(s) <= rS`count(s)
           AND (rS1`count(s) = 0 or rS1`store(s) = rS`store(s)))
-          AND noDanglingRefs?(rS1)
           } =
       (IF rS`count(r) = 0
         THEN (IF i = 0 THEN rS
@@ -169,14 +170,32 @@ rreduction      : THEORY
                               newrS = rS WITH [`store(r)`seq(i-1) := nil,
                                      `count(subrefindex) := newsubrefcount]
                            IN 
-                       decref(newrS, subrefindex, rS`store(subrefindex)`length))
+                       decref1(newrS, subrefindex, rS`store(subrefindex)`length))
                       ELSE rS ENDIF)
           IN                
-          decref(newrS, r, i - 1))
+          decref1(newrS, r, i - 1))
           ENDIF)
           ELSE rS ENDIF)
         MEASURE
         lex2(allcountStore(rS), i)
+
+    decref1_induction: LEMMA
+      FORALL (P: pred[rstate]):
+        (FORALL (rS, (r: (rS`domain)), (i: below(rS`store(r)`length))):
+          P(rS) AND rS`count(r) = 0 AND ref?(rS`store(r)`seq(i)) IMPLIES
+              P(rS WITH [`store(r)`seq(i) := nil,
+                         `count(refindex(rS`store(r)`seq(i))) := rS`count(refindex(rS`store(r)`seq(i))) - 1])
+        ) IMPLIES
+        FORALL (rS, (r: (rS`domain)), i: upto(rS`store(r)`length)):
+          P(rS) IMPLIES P(decref1(rS, r, i))
+
+    decref(rS: (noDanglingRefs?), (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+     {rS1 | allcountStore(rS1) <= allcountStore(rS) AND rS1`domain = rS`domain AND (FORALL (s : (rS`domain)): rS1`store(s)`length = rS`store(s)`length
+          AND rS1`count(s) <= rS`count(s)
+          AND (rS1`count(s) = 0 or rS1`store(s) = rS`store(s)))
+          AND noDanglingRefs?(rS1)
+     } = decref1(rS, r, i)
+
 
     % rstate2estate(rS): estate =
     %   (# error := rS`error,

@@ -43,6 +43,34 @@ reduction_props: THEORY
     % decref_preserves: RECURSIVE JUDGEMENT
     %   decref(rS: (noDanglingRefs?), (r: (rS`domain)), (i: upto(rS`store(r)`length))) HAS_TYPE
     %     {rS2 | rS2`redex = rS`redex AND rS2`stack = rS`stack AND rS2`context = rS`context AND rS2`error = rS`error}
+    decref1_preserves: LEMMA
+      FORALL (rS, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        decref1(rS, r, i)`redex = rS`redex AND
+        decref1(rS, r, i)`stack = rS`stack AND
+        decref1(rS, r, i)`context = rS`context AND
+        decref1(rS, r, i)`error = rS`error        
+
+    decref1_preserves_redex: LEMMA
+      FORALL (rS, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        decref1(rS, r, i)`redex = rS`redex
+
+    decref1_preserves_stack: LEMMA
+      FORALL (rS, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        decref1(rS, r, i)`stack = rS`stack
+
+    decref1_preserves_context: LEMMA
+      FORALL (rS, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        decref1(rS, r, i)`context = rS`context
+
+    decref1_preserves_error: LEMMA
+      FORALL (rS, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        decref1(rS, r, i)`error = rS`error
+
+    AUTO_REWRITE+ decref1_preserves_redex
+    AUTO_REWRITE+ decref1_preserves_stack
+    AUTO_REWRITE+ decref1_preserves_context
+    AUTO_REWRITE+ decref1_preserves_error
+
     decref_preserves: LEMMA
       FORALL (rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)):
         decref(rS, r, i)`redex = rS`redex AND
