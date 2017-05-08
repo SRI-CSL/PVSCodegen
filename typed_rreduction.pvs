@@ -56,6 +56,19 @@ typed_rreduction: THEORY
     #]
 
     tS, tS1, tS2: VAR typed_rstate
+    
+    is_well_typed_letApply: LEMMA
+      FORALL (arity: nat, (args: list[(variable?)] | length(args) = arity),
+                          (args_type: list[nat] | length(args_type) = arity)):
+        pure?(A) AND
+        (FORALL i: cvars(A)(i) IMPLIES i < stypes`length + arity) AND
+        (FORALL i: in_varlist(args)(i) IMPLIES i < stypes`length) AND
+        (FORALL (i: below(arity)): is_well_typed(nth(args, i), leaft(nth(args_type, i)), stypes, dom_types, def_types)) AND
+        is_well_typed(A, tA, stypes o args_type, (LAMBDA i: 0), def_types)
+        IMPLIES
+        is_well_typed(rreduction.letApply(arity, args, A),
+                      letApply_type(arity, args_type, tA),
+                      stypes, dom_types, def_types)
 
     typed_to_topstate(tS): typed_rstate =
       tS WITH [`state := to_topstate(tS`state),
@@ -152,6 +165,13 @@ typed_rreduction: THEORY
 
     AUTO_REWRITE+ decref1_preserves_store2
 
+    releaseReduce_new_store: LEMMA
+      FORALL (rS : rstate | NOT rS`error AND noDanglingRefs?(rS) AND pureReleaseRedex?(rS`redex)):
+        FORALL (r : (releaseReduce(D)(rS)`domain)):
+          rS`domain(r) AND
+          releaseReduce(D)(rS)`store(r)`length = rS`store(r)`length AND
+          (FORALL (j: below(releaseReduce(D)(rS)`store(r)`length)):
+            value_maybe_freed(rS`store(r)`seq(j), releaseReduce(D)(rS)`store(r)`seq(j)))
 
     updateReduce_new_store: LEMMA
       FORALL (rS : rstate | NOT rS`error AND noDanglingRefs?(rS) AND updateRedex?(rS`redex)):
@@ -200,7 +220,7 @@ typed_rreduction: THEORY
                    `redex_type := popt(lbody(nS`redex_type))]
         ELSIF applyRedex?(nS`state`redex) THEN
           nS WITH [`state := applyReduce(D)(nS`state),
-                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, nS`redex_type)]
+                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, nS`redex_type)] % body_type... need to wait to change this
         ELSIF pureIftRedex?(nS`state`redex) THEN
           nS WITH [`state := ifReduce(D)(nS`state),
                    `redex_type :=
