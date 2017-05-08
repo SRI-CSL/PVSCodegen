@@ -107,6 +107,77 @@ typed_rreduction: THEORY
           updateReduce(D)(rS)`stack`seq(i) = rS`stack`seq(i) OR
           (ref?(rS`stack`seq(i)) AND updateReduce(D)(rS)`stack`seq(i) = nil)
 
+    decref1_preserves_domain: LEMMA
+      FORALL (rS : rstate, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        decref1(rS, r, i)`domain = rS`domain
+
+    AUTO_REWRITE+ decref1_preserves_domain
+
+    decref1_preserves_store_length: LEMMA
+      FORALL (rS : rstate, (r: (rS`domain)), (i: upto(rS`store(r)`length))):
+        FORALL (s: (rS`domain)):
+          decref1(rS, r, i)`store(s)`length = rS`store(s)`length
+
+    AUTO_REWRITE+ decref1_preserves_store_length
+
+    value_maybe_freed(u, v): boolean =
+      u = v OR (ref?(u) AND v = nil)
+
+    value_maybe_freed2(u, v, w): boolean =
+      value_maybe_freed(u, w) OR value_maybe_freed(v, w)
+
+    value_maybe_freed_type: LEMMA
+      value_of_type(u, i, dom_types) AND value_maybe_freed(u, v) IMPLIES
+        value_of_type(v, i, dom_types)
+
+    decref1_preserves_store: LEMMA
+      FORALL (rS : rstate, (r: (rS`domain)), (i: upto(rS`store(r)`length)),
+        (s: (rS`domain)), (j: below(rS`store(s)`length)), (u: (value?))):
+          value_maybe_freed(u, rS`store(s)`seq(j)) IMPLIES
+            value_maybe_freed(u, decref1(rS, r, i)`store(s)`seq(j))
+          %value_maybe_freed(u, decref1(rS, r, i)`store(s)`seq(j)) =
+          %  (value_maybe_freed(u, rS`store(s)`seq(j)) OR
+          %    (ref?(u) AND decref1(rS, r, i)`store(s)`seq(j) = nil))
+
+    AUTO_REWRITE+ decref1_preserves_store
+
+    decref1_preserves_store2: LEMMA
+      FORALL (rS : rstate, (r: (rS`domain)), (i: upto(rS`store(r)`length)),
+        (s: (rS`domain)), (j: below(rS`store(s)`length)), (u, v: (value?))):
+          value_maybe_freed2(u, v, rS`store(s)`seq(j)) IMPLIES
+            value_maybe_freed2(u, v, decref1(rS, r, i)`store(s)`seq(j))
+          %value_maybe_freed(u, decref1(rS, r, i)`store(s)`seq(j)) =
+          %  (value_maybe_freed(u, rS`store(s)`seq(j)) OR
+          %    (ref?(u) AND decref1(rS, r, i)`store(s)`seq(j) = nil))
+
+    AUTO_REWRITE+ decref1_preserves_store2
+
+
+    updateReduce_new_store: LEMMA
+      FORALL (rS : rstate | NOT rS`error AND noDanglingRefs?(rS) AND updateRedex?(rS`redex)):
+        FORALL (r : (updateReduce(D)(rS)`domain)):
+          (r = least_out(rS`domain) AND
+           ref?(get(rS`stack)(target(rS`redex))) AND
+           updateReduce(D)(rS)`store(r)`length = rS`store(refindex(get(rS`stack)(target(rS`redex))))`length AND
+           (FORALL (j: below(updateReduce(D)(rS)`store(r)`length)):
+             value_maybe_freed2(
+               rS`store(refindex(get(rS`stack)(target(rS`redex))))`seq(j),
+               get(rS`stack)(rhs(rS`redex)),
+               updateReduce(D)(rS)`store(r)`seq(j)))
+            OR
+          (rS`domain(r) AND
+           updateReduce(D)(rS)`store(r)`length = rS`store(r)`length AND
+           (FORALL (j: below(updateReduce(D)(rS)`store(r)`length)):
+             value_maybe_freed2(
+                rS`store(r)`seq(j),
+                IF ref?(get(rS`stack)(target(rS`redex))) AND
+                    r = refindex(get(rS`stack)(target(rS`redex))) THEN
+                  get(rS`stack)(rhs(rS`redex))
+                ELSE
+                  rS`store(r)`seq(j)
+                ENDIF,
+                updateReduce(D)(rS)`store(r)`seq(j)))))
+
     updateReduce_redex: LEMMA
       FORALL (rS : rstate | NOT rS`error AND noDanglingRefs?(rS) AND updateRedex?(rS`redex)):
         updateReduce(D)(rS)`redex = ref(least_out(rS`domain)) OR
