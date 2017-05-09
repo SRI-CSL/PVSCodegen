@@ -1,7 +1,7 @@
 typed_rreduction: THEORY
   BEGIN
 
-    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, preprocess, rreduction, typeinfo, typeinfo_adt, typed_reduction, reduction_props
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, preprocess, rreduction, typeinfo, typeinfo_adt, typed_reduction, reduction_props, list2finseq_extra
 
     A, B, C: VAR IExpression
     tA, tB, tC: VAR typeinfo
@@ -94,6 +94,12 @@ typed_rreduction: THEORY
           stypes`length = S1`length AND
           (FORALL (i: below(stypes`length)):
             value_of_type(S1`seq(i), stypes`seq(i), dom_types))
+
+    is_well_typed_release_set: LEMMA
+      FORALL (A : (contextPure?), tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types, X):
+        (FORALL (x: (X)): x + popDepth(A) < stypes`length) IMPLIES
+          is_well_typed(release_set(A, X), tA, stypes, dom_types, def_types) =
+            is_well_typed(A, tA, stypes, dom_types, def_types)
 
     is_well_typed_mark: LEMMA
       FORALL (A, tA, (stypes | popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types, X):
@@ -220,7 +226,7 @@ typed_rreduction: THEORY
                    `redex_type := popt(lbody(nS`redex_type))]
         ELSIF applyRedex?(nS`state`redex) THEN
           nS WITH [`state := applyReduce(D)(nS`state),
-                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, nS`redex_type)] % body_type... need to wait to change this
+                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, tS`def_types`seq(fun(nS`state`redex))`body_type)]
         ELSIF pureIftRedex?(nS`state`redex) THEN
           nS WITH [`state := ifReduce(D)(nS`state),
                    `redex_type :=

@@ -1,0 +1,30 @@
+list2finseq_extra[T: TYPE]: THEORY BEGIN
+  l, l1, l2: VAR list[T]
+  fs: VAR finseq[T]
+  n, i: VAR nat
+
+  finseq2list_length_rec: LEMMA
+    n <= fs`length IMPLIES length(finseq2list_rec(fs, n)) = n
+
+  finseq2list_length: LEMMA
+    length(finseq2list(fs)) = fs`length
+
+  finseq2list_nth_rec: LEMMA
+    n <= fs`length AND i < n IMPLIES
+      nth(finseq2list_rec(fs, n), i) = fs`seq(fs`length - n + i)
+
+  finseq2list_nth: LEMMA
+    FORALL (i: below(fs`length)):
+      nth(finseq2list(fs), i) = fs`seq(i)
+
+  list2finseq_finseq2list: LEMMA
+    list2finseq(finseq2list(fs)) = fs
+
+  list2finseq_inj: LEMMA
+    (list2finseq(l1) = list2finseq(l2)) = (l1 = l2)
+
+  finseq2list_list2finseq: LEMMA
+    finseq2list(list2finseq(l)) = l
+
+END list2finseq_extra
+

@@ -285,6 +285,9 @@ preprocess  % [ parameters ]
     cvars_vars_ctx: LEMMA
       vars(K)(i) = cvars(K)(i + popDepth(K))
 
+    cvars_release_set: LEMMA
+      cvars(release_set(A, X)) = union(cvars(A), bumpn(X, popDepth(A)))
+
 %marking a decomposition
     mark_fill: LEMMA
       mark(X)(fill(K, A)) = fill(markc(X)(K), mark(union(cvars(K), bumpn(X, popDepth(K))))(A))
@@ -334,6 +337,12 @@ preprocess  % [ parameters ]
 
     pure_release_set: LEMMA
       pure?(release_set(A, X)) = pure?(A)
+
+    contextPure_release_set: LEMMA
+      contextPure?(release_set(A, X)) = contextPure?(A)
+
+    popDepth_release_set: LEMMA
+      popDepth(release_set(A, X)) = popDepth(A)
 
     pure_mark: LEMMA
        pure?(mark(X)(A)) = pure?(A)
