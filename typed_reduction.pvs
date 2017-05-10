@@ -356,5 +356,4 @@ typed_reduction: THEORY
       FORALL (tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)):
         typed_reduce(D)(tS)`state = reduce(D)(tS`state)
 
-
   END typed_reduction

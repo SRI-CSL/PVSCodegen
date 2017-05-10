@@ -275,8 +275,7 @@
     (number_field nonempty-type-from-decl nil number_fields nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
-    (number nonempty-type-decl nil numbers nil)
-    (every adt-def-decl "boolean" list_adt nil)
+    (number nonempty-type-decl nil numbers nil) nil
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
@@ -312,8 +311,7 @@
         nil))
       nil))
     nil)
-   ((popDepth def-decl "nat" IL nil)
-    (in_varlist const-decl "finite_set[nat]" IL nil)
+   (nil (in_varlist const-decl "finite_set[nat]" IL nil)
     (real_le_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (real_lt_is_strict_total_order name-judgement
@@ -336,9 +334,7 @@
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (below type-eq-decl nil naturalnumbers nil)
     (< const-decl "bool" reals nil)
-    (singleton const-decl "(singleton?)" sets nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
-    (vars def-decl "finite_set[nat]" IL nil)
+    (singleton const-decl "(singleton?)" sets nil) nil nil
     (nonempty_singleton_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
@@ -347,8 +343,7 @@
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
            nil)
     (length def-decl "nat" list_props nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (every adt-def-decl "boolean" list_adt nil)
+    (= const-decl "[T, T -> boolean]" equalities nil) nil
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
     (some_nth formula-decl nil finseq_theorems nil))
@@ -408,14 +403,12 @@
     (number nonempty-type-decl nil numbers nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
-    (every adt-def-decl "boolean" list_adt nil)
-    (PRED type-eq-decl nil defined_types nil)
+    nil (PRED type-eq-decl nil defined_types nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
     (list type-decl nil list_adt nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (IExpression type-decl nil IExpression_adt nil)
-    (A skolem-const-decl "IExpression" typed_rreduction nil)
+    (IExpression type-decl nil IExpression_adt nil) nil
     (pure? def-decl "bool" IL nil)
     (pure_letApply recursive-judgement-axiom nil rreduction nil))
    nil))
@@ -462,8 +455,7 @@
     (number nonempty-type-decl nil numbers nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
-    (every adt-def-decl "boolean" list_adt nil)
-    (PRED type-eq-decl nil defined_types nil)
+    nil (PRED type-eq-decl nil defined_types nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
     (list type-decl nil list_adt nil)
@@ -2196,10 +2188,7 @@
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (i skolem-const-decl "nat" typed_rreduction nil)
-    (popDepth def-decl "nat" IL nil)
-    (A skolem-const-decl "(contextPure?)" typed_rreduction nil)
-    (X skolem-const-decl "finite_set[nat]" typed_rreduction nil)
+    nil nil nil nil
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (bumpn const-decl "finite_set[nat]" IL nil)
@@ -2281,10 +2270,9 @@
     (release_set def-decl "IExpression" preprocess nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
-    (< const-decl "bool" reals nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (< const-decl "bool" reals nil) nil
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil) nil
+    (<= const-decl "bool" reals nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (finseq type-eq-decl nil finite_sequences nil)
     (below type-eq-decl nil nat_types nil)
@@ -2334,17 +2322,9 @@
     (injective? const-decl "bool" functions nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (add const-decl "(nonempty?)" sets nil)
-    (x skolem-const-decl "(remove(choose(X_1), X_1))" typed_rreduction
-     nil)
-    (remove const-decl "set" sets nil)
-    (stypes skolem-const-decl "{stypes |
-   popDepth(A) <= stypes`length AND
-    forall i: cvars(A)(i) IMPLIES i < stypes`length}" typed_rreduction
-     nil)
-    (A skolem-const-decl "(contextPure?)" typed_rreduction nil)
-    (TRUE const-decl "bool" booleans nil)
-    (X_1 skolem-const-decl "finite_set[nat]" typed_rreduction nil)
+    (add const-decl "(nonempty?)" sets nil) nil
+    (remove const-decl "set" sets nil) nil nil
+    (TRUE const-decl "bool" booleans nil) nil
     (choose const-decl "(p)" sets nil)
     (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
      IExpression_adt nil)
@@ -2362,9 +2342,7 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (i skolem-const-decl "nat" typed_rreduction nil)
-    (A skolem-const-decl "(contextPure?)" typed_rreduction nil)
-    (X skolem-const-decl "finite_set[nat]" typed_rreduction nil)
+    nil nil nil
     (int_plus_int_is_int application-judgement "int" integers nil)
     (union const-decl "set" sets nil)
     (popDepth_release_set formula-decl nil preprocess nil)
@@ -2929,13 +2907,12 @@
      preprocess nil)
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (< const-decl "bool" reals nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (< const-decl "bool" reals nil) nil
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil) nil
+    (<= const-decl "bool" reals nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (finseq type-eq-decl nil finite_sequences nil)
     (>= const-decl "bool" reals nil)
@@ -2965,8 +2942,7 @@
      IExpression_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
-    (injective? const-decl "bool" functions nil)
-    (vars def-decl "finite_set[nat]" IL nil)
+    (injective? const-decl "bool" functions nil) nil
     (singleton const-decl "(singleton?)" sets nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -2978,17 +2954,11 @@
      nil)
     (leaft adt-constructor-decl "[nat -> (leaft?)]" typeinfo_adt nil)
     (list type-decl nil list_adt nil)
-    (PRED type-eq-decl nil defined_types nil)
-    (every adt-def-decl "boolean" list_adt nil)
+    (PRED type-eq-decl nil defined_types nil) nil
     (length def-decl "nat" list_props nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (application1_var skolem-const-decl "nat" typed_rreduction nil)
-    (def_types skolem-const-decl "finseq[tdef]" typed_rreduction nil)
-    (application2_var skolem-const-decl "list[(variable?)]"
-     typed_rreduction nil)
-    (X skolem-const-decl "finite_set[nat]" typed_rreduction nil)
-    (in_varlist const-decl "finite_set[nat]" IL nil)
+    nil nil nil nil (in_varlist const-decl "finite_set[nat]" IL nil)
     (nonempty_singleton_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
@@ -3005,18 +2975,12 @@
     (markvars def-decl "{J | length(J) = length(L)}" preprocess nil)
     (lett? adt-recognizer-decl "[typeinfo -> boolean]" typeinfo_adt
      nil)
-    (letexpr1_var skolem-const-decl "IExpression" typed_rreduction nil)
+    nil
     (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
     (letexpr adt-constructor-decl
      "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
-    (letexpr2_var skolem-const-decl "IExpression" typed_rreduction nil)
-    (stypes skolem-const-decl "{stypes |
-   popDepth(letexpr(letexpr1_var, letexpr2_var)) <= stypes`length AND
-    forall i:
-      cvars(letexpr(letexpr1_var, letexpr2_var))(i) IMPLIES
-       i < stypes`length}" typed_rreduction nil)
-    (drop const-decl "finite_set[nat]" IL nil)
+    nil nil (drop const-decl "finite_set[nat]" IL nil)
     (union const-decl "set" sets nil)
     (lrhs adt-accessor-decl "[(lett?) -> typeinfo]" typeinfo_adt nil)
     (popDepth_mark formula-decl nil preprocess nil)
@@ -3051,20 +3015,13 @@
     (add const-decl "(nonempty?)" sets nil)
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
-    (cvars_pure formula-decl nil preprocess nil)
-    (stypes skolem-const-decl "{stypes |
-   popDepth(ift(ift1_var, ift2_var, ift3_var)) <= stypes`length AND
-    forall i:
-      cvars(ift(ift1_var, ift2_var, ift3_var))(i) IMPLIES i < stypes`length}"
-     typed_rreduction nil)
-    (ift3_var skolem-const-decl "IExpression" typed_rreduction nil)
-    (ift2_var skolem-const-decl "IExpression" typed_rreduction nil)
+    (cvars_pure formula-decl nil preprocess nil) nil nil nil
     (ift adt-constructor-decl
      "[[(variable?), IExpression, IExpression] -> (ift?)]"
      IExpression_adt nil)
     (ift? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
-    (ift1_var skolem-const-decl "(variable?)" typed_rreduction nil)
+    nil
     (finite_difference application-judgement "finite_set[nat]"
      countability "sets_aux/")
     (update? adt-recognizer-decl "[IExpression -> boolean]"
@@ -16215,5 +16172,36 @@
     (Definition type-eq-decl nil rreduction nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
-   nil)))
+   nil))
+ (typed_reduce_defs 0
+  (typed_reduce_defs-1 nil 3703344804
+   ("" (skeep :preds? t)
+    (("" (expand typed_reduce)
+      (("" (expand* make_redex_typed typed_to_topstate) nil nil)) nil))
+    nil)
+   ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (typed_reduce const-decl "typed_rstate" typed_rreduction nil)
+    (typed_to_topstate const-decl "typed_rstate" typed_rreduction nil)
+    (make_redex_typed const-decl "typed_rstate" typed_rreduction nil))
+   shostak))
+ (typed_reduce_state_TCC1 0
+  (typed_reduce_state_TCC1-1 nil 3703344804 ("" (subtype-tcc) nil nil)
+   nil nil))
+ (typed_reduce_state 0
+  (typed_reduce_state-1 nil 3703344859
+   ("" (skeep* :preds? t)
+    (("" (expand typed_reduce)
+      (("" (expand reduce)
+        (("" (expand* make_redex_typed typed_to_topstate) nil nil))
+        nil))
+      nil))
+    nil)
+   ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (typed_reduce const-decl "typed_rstate" typed_rreduction nil)
+    (make_redex_typed const-decl "typed_rstate" typed_rreduction nil)
+    (typed_to_topstate const-decl "typed_rstate" typed_rreduction nil)
+    (reduce const-decl "rstate" rreduction nil))
+   shostak)))
 

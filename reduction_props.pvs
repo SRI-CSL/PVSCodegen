@@ -593,6 +593,14 @@ reduction_props: THEORY
       state_matches(eS, rS)(translate) IMPLIES
         state_matches(to_topstate(eS), to_topstate(rS))(translate)
 
+    releaseReduce_reduce_match: LEMMA
+      noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context) AND
+          state_matches(to_topstate(gS), to_topstate(grS))(translate) AND
+          top_releases_ct(grS`redex) > 0
+          IMPLIES
+        state_matches(to_topstate(gS),
+          to_topstate(releaseReduce(D)(make_redex(to_topstate(grS)))))(translate)
+
     bisimulation_lemma: THEOREM
       noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context) AND
           state_matches?(to_topstate(gS), to_topstate(grS)) IMPLIES

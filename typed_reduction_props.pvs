@@ -1,0 +1,96 @@
+typed_reduction_props: THEORY
+  BEGIN
+
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, typed_reduction, typed_rreduction
+
+    A, B, C: VAR IExpression
+    tA, tB, tC: VAR typeinfo
+    K, K1, K2: VAR IContext
+    tK, tK1, tK2: VAR typeinfo_ctx
+
+    
+    a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k, hole_type: VAR nat
+    F, X: VAR finite_set[nat]
+
+    dom: VAR finite_set[nat]
+    
+    Store(dom): TYPE = [(dom) -> finseq[(domainValue?(dom))]]
+
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) IMPLIES i < arity) AND unmark(A) = A} #]
+
+    tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+    stypes, stypes2: VAR finseq[nat]
+    dom_types, dom_types2: VAR [nat -> nat]
+    def_types, def_types2: VAR finseq[tdef]
+
+    tS, tS1, tS2: VAR typed_state
+    trS, trS1, trS2: VAR typed_rstate
+
+    translate: VAR [nat -> nat]
+
+    % Note how we don't require that the domain types match.
+    % It is simpler that way, as we never require this invariant for the proof,
+    % and it would be annoying, especially with updateReduce
+    state_matches(tS, trS)(translate): boolean =
+      state_matches(tS`state, trS`state)(translate) AND
+      tS`redex_type = trS`redex_type AND
+      tS`context_type = trS`context_type AND
+      tS`stack_types = trS`stack_types AND
+      tS`def_types = trS`def_types
+
+    state_matches?(tS, trS): boolean =
+      EXISTS (translate): state_matches(tS, trS)(translate)
+
+    typed_reduce_n(D)(n: nat, (trS | defs_well_typed(D, trS`def_types))) : RECURSIVE typed_rstate =
+      IF n = 0 OR trS`state`error THEN
+        trS
+      ELSE
+        typed_reduce_n(D)(n - 1, typed_reduce(D)(trS))
+      ENDIF
+    MEASURE n
+
+    typed_reduce_n_state: LEMMA
+      FORALL (n: nat, (trS | defs_well_typed(D, trS`def_types))):
+        typed_reduce_n(D)(n, trS)`state = rreduce_n(D)(n, trS`state)
+
+    types_matches(tS, trS): boolean =
+      tS`redex_type = trS`redex_type AND
+      tS`context_type = trS`context_type AND
+      tS`stack_types = trS`stack_types AND
+      tS`def_types = trS`def_types
+
+    build_redex_match_type: LEMMA
+      contextPure?(A) AND contextPure?(B) AND
+      translate_refs(translate)(unmark(A)) = B AND NOT release?(buildRedex(A)`2) AND
+      popDepth(A) <= stypes`length AND
+        (FORALL i: cvars(A)(i) IMPLIES i < stypes`length) AND
+      popDepth(B) <= stypes2`length AND
+        (FORALL i: cvars(B)(i) IMPLIES i < stypes2`length) AND
+      is_well_typed(A, tA, stypes, dom_types, def_types) AND
+      is_well_typed(B, tA, stypes2, dom_types2, def_types2)
+      IMPLIES
+        buildRedexType(A, tA) = buildRedexType(B, tA)
+
+    make_redex_types_match: LEMMA
+      NOT atom?(tS`state`redex) AND NOT atom?(trS`state`redex) AND
+      NOT releaseRedex?(make_redex_typed(trS)`state`redex) AND
+      state_matches?(tS, trS) IMPLIES
+        types_matches(make_redex_typed(tS), make_redex_typed(trS))
+
+    bisimulation_lemma: THEOREM
+      NOT tS`state`error AND
+      NOT trS`state`error AND
+        defs_well_typed(D, tS`def_types) AND
+        state_matches?(typed_to_topstate(tS), typed_to_topstate(trS)) IMPLIES
+          state_matches?(typed_reduce(D)(tS),
+            typed_reduce_n(D)(top_releases_ct(trS`state`redex) + 1, trS))
+
+  END typed_reduction_props
