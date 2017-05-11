@@ -79,8 +79,15 @@ typed_reduction_props: THEORY
       IMPLIES
         buildRedexType(A, tA) = buildRedexType(B, tA)
 
+    translate_refs_e_pure: LEMMA
+      pure?(translate_refs(translate)(A)) = pure?(A)
+
+    unmark_e_pure: LEMMA
+      pure?(unmark(A)) = pure?(A)
+
     make_redex_types_match: LEMMA
       NOT atom?(tS`state`redex) AND NOT atom?(trS`state`redex) AND
+      tS`state`context = hole AND trS`state`context = hole AND
       NOT releaseRedex?(make_redex_typed(trS)`state`redex) AND
       state_matches?(tS, trS) IMPLIES
         types_matches(make_redex_typed(tS), make_redex_typed(trS))
