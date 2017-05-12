@@ -1,6 +1,8 @@
 creduction: THEORY
   BEGIN
 
+    IMPORTING finite_set_theorems, list2finseq_extra
+
     % All types we are considering have a size of sizeof(int) or sizeof(int*)
     % We will assume these two are equal, and every size we will
     % use will mean that size times sizeof(int)
@@ -40,6 +42,7 @@ creduction: THEORY
         sblock(bstats: finseq[cstat]): sblock?
         smalloc(msize: nat): smalloc?
         sfree(fvar: (cvar?)): sfree?
+        sreturn(rvar: (cvar?)): sreturn?
       END cstat
 
     s1, s2, s3: VAR cstat
@@ -77,9 +80,35 @@ creduction: THEORY
         sif(v1, thenc, elsec): cindex(v1) = i OR vars(thenc)(i) OR vars(elsec)(i),
         sblock(stats): EXISTS (j: below(stats`length)): vars(stats`seq(j))(i),
         smalloc(size): FALSE,
-        sfree(v1): cindex(v1) = i
+        sfree(v1): cindex(v1) = i,
+        sreturn(v1): cindex(v1) = i
       ENDCASES
     MEASURE s1 BY <<
+
+    length_cdr[T: TYPE]: LEMMA
+      FORALL (l: list[T]):
+        cons?(l) IMPLIES length(cdr(l)) = length(l) - 1
+
+    nth_cdr[T: TYPE]: LEMMA
+      FORALL (l: list[T]):
+        cons?(l) AND i < length(cdr(l)) IMPLIEs nth(cdr(l), i) = nth(l, i + 1)
+
+    measure_stat(s1): RECURSIVE posnat =
+      CASES s1 OF
+        sdecl(tp1, s2): 1 + measure_stat(s2),
+        sif(v1, thenc, elsec): 1 + measure_stat(thenc) + measure_stat(elsec),
+        sblock(stats): 1 + Sigma((LAMBDA j: j < stats`length), LAMBDA j: IF j < stats`length THEN measure_stat(stats`seq(j)) ELSE 0 ENDIF)
+        ELSE 1
+      ENDCASES
+    MEASURE s1 BY <<
+
+    measure_stat_car: LEMMA
+      sblock?(s1) AND bstats(s1)`length > 0 IMPLIES
+        measure_stat(car(bstats(s1))) < measure_stat(s1)
+
+    measure_stat_cdr: LEMMA
+      sblock?(s1) AND bstats(s1)`length > 0 IMPLIES
+        measure_stat(sblock(cdr(bstats(s1)))) < measure_stat(s1)
 
     clength(s1) : RECURSIVE nat =
       CASES s1 OF
@@ -93,14 +122,14 @@ creduction: THEORY
           ENDIF
         ELSE 1
       ENDCASES
-    MEASURE s1 BY <<
+    MEASURE measure_stat(s1)
 
     Definition: TYPE = [# arity: nat, body: {s1 | FORALL i: vars(s1)(i) IMPLIES i < arity} #]
     D: VAR finseq[Definition]
 
     cstack_frame(D): TYPE = [#
       ffct: below(D`length),
-      fpc: nat, % TODO below len ffct
+      fpc: below(clength(D`seq(ffct)`body)),
       fstack: Stack %TODO len match pc
     #]
 

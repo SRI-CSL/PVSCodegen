@@ -69,4 +69,7 @@ finite_set_theorems : THEORY
     sigma_add: LEMMA
       member(i, X) IMPLIES Sigma(X, f) = f(i) + Sigma(remove(i, X), f)
 
+    sigma_shift: LEMMA
+      Sigma(X, f) = Sigma((LAMBDA i: X(i + 1)), (LAMBDA i: f(i + 1))) + IF X(0) THEN f(0) ELSE 0 ENDIF
+
   END finite_set_theorems
