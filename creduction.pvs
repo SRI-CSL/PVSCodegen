@@ -1,0 +1,113 @@
+creduction: THEORY
+  BEGIN
+
+    % All types we are considering have a size of sizeof(int) or sizeof(int*)
+    % We will assume these two are equal, and every size we will
+    % use will mean that size times sizeof(int)
+
+    ctype: DATATYPE
+      BEGIN
+        cint: cint?
+        carray(arraytype: ctype): carray?
+        cstruct(sfields: finseq[ctype]): cstruct?
+      END ctype
+
+    tp1, tp2, tp3: VAR ctype
+
+    lvalue: DATATYPE
+      BEGIN
+        cvar(cindex: nat): cvar?
+        caccess(clhs: (cvar?), crhs: (cvar?)): caccess?
+        cfield(cval: (cvar?), cfindex:  nat): cfield?
+      END lvalue
+
+    lv1, lv2, lv3: VAR lvalue
+
+    cexpr: DATATYPE
+      BEGIN
+        elv(lval: lvalue): elv?
+        econstant(cvalue: int): econstant?
+        ecall(cfun: nat, cargs: finseq[(cvar?)]): ecall?
+      END cexpr
+
+    e1, e2, e3: VAR cexpr
+
+    cstat: DATATYPE
+      BEGIN
+        sassign(aval: lvalue, aexpr: cexpr): sassign?
+        sdecl(dtype: ctype, dstat: cstat): sdecl?
+        sif(scond: (cvar?), iftrue: cstat, iffalse: cstat): sif?
+        sblock(bstats: finseq[cstat]): sblock?
+        smalloc(msize: nat): smalloc?
+        sfree(fvar: (cvar?)): sfree?
+      END cstat
+
+    s1, s2, s3: VAR cstat
+
+    cvalue: DATATYPE
+      BEGIN
+        cref(crefindex: nat): cref?
+        cintv(cintvalue: int): cintv?
+        cnil: cnil?
+      END cvalue
+
+    dom: VAR finite_set[nat]
+    Store(dom): TYPE = [(dom) -> finseq[cvalue]]
+    Stack: TYPE = finseq[cvalue]
+    i, j, k: VAR nat
+
+    vars(lv1)(i) : bool =
+      CASES lv1 OF
+        cvar(j): i = j,
+        caccess(v1, v2): i = cindex(v1) OR i = cindex(v2),
+        cfield(v1, j): i = cindex(v1)
+      ENDCASES
+
+    vars(e1)(i) : bool =
+      CASES e1 OF
+        elv(lv1) : vars(lv1)(i),
+        econstant(c) : FALSE,
+        ecall(f, args) : EXISTS (j: below(args`length)): cindex(args`seq(j)) = i
+      ENDCASES
+
+    vars(s1)(i) : RECURSIVE bool =
+      CASES s1 OF
+        sassign(lv1, e1): vars(lv1)(i) OR vars(e1)(i),
+        sdecl(tp1, s2): vars(s2)(i + 1),
+        sif(v1, thenc, elsec): cindex(v1) = i OR vars(thenc)(i) OR vars(elsec)(i),
+        sblock(stats): EXISTS (j: below(stats`length)): vars(stats`seq(j))(i),
+        smalloc(size): FALSE,
+        sfree(v1): cindex(v1) = i
+      ENDCASES
+    MEASURE s1 BY <<
+
+    clength(s1) : RECURSIVE nat =
+      CASES s1 OF
+        sdecl(tp1, s2): clength(s2) + 2,
+        sif(v1, thenc, elsec): clength(thenc) + clength(elsec) + 2,
+        sblock(stats):
+          IF stats`length = 0 THEN
+            0
+          ELSE
+            clength(car(stats)) + clength(sblock(cdr(stats)))
+          ENDIF
+        ELSE 1
+      ENDCASES
+    MEASURE s1 BY <<
+
+    Definition: TYPE = [# arity: nat, body: {s1 | FORALL i: vars(s1)(i) IMPLIES i < arity} #]
+    D: VAR finseq[Definition]
+
+    cstack_frame(D): TYPE = [#
+      ffct: below(D`length),
+      fpc: nat, % TODO below len ffct
+      fstack: Stack %TODO len match pc
+    #]
+
+    cstate: TYPE = [#
+      callstack: finseq[cstack_frame], %todo all but top match an assign of fct value
+      domain: finite_set[nat],
+      store: Store(domain)
+    #]
+
+  END creduction
