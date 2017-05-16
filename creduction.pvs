@@ -1,7 +1,7 @@
 creduction: THEORY
   BEGIN
 
-    IMPORTING finite_set_theorems, list2finseq_extra
+    IMPORTING finite_set_theorems, list2finseq_extra, finseq_theorems
 
     % All types we are considering have a size of sizeof(int) or sizeof(int*)
     % We will assume these two are equal, and every size we will
@@ -21,16 +21,20 @@ creduction: THEORY
         cvar(cindex: nat): cvar?
         caccess(clhs: (cvar?), crhs: (cvar?)): caccess?
         cfield(cval: (cvar?), cfindex:  nat): cfield?
+        creturn: creturn?
       END lvalue
 
     lv1, lv2, lv3: VAR lvalue
+    lrvalue?(lv1) : bool = NOT creturn?(lv1)
+    lr1, lr2, lr3: VAR (lrvalue?)
 
     builtin_num: nat = 1
 
     cexpr: DATATYPE
       BEGIN
-        elv(lval: lvalue): elv?
+        elv(lval: (lrvalue?)): elv?
         econstant(cvalue: int): econstant?
+        enil: enil?
         ecall(cfun: nat, cargs: finseq[(cvar?)]): ecall?
         ebuiltin(cbuiltin: below(builtin_num), cbv1: (cvar?), cbv2: (cvar?)): ebuiltin?
       END cexpr
@@ -40,12 +44,12 @@ creduction: THEORY
     cstat: DATATYPE
       BEGIN
         sassign(aval: lvalue, aexpr: cexpr): sassign?
+        scall(sfun: nat, sargs: finseq[(cvar?)]): scall?
         sdecl(dtype: ctype, dstat: cstat): sdecl?
         sif(scond: (cvar?), iftrue: cstat, iffalse: cstat): sif?
         sblock(bstats: finseq[cstat]): sblock?
         smalloc(msize: nat): smalloc?
         sfree(fvar: (cvar?)): sfree?
-        sreturn(rvar: (cvar?)): sreturn?
       END cstat
 
     s1, s2, s3: VAR cstat
@@ -66,13 +70,15 @@ creduction: THEORY
       CASES lv1 OF
         cvar(j): i = j,
         caccess(v1, v2): i = cindex(v1) OR i = cindex(v2),
-        cfield(v1, j): i = cindex(v1)
+        cfield(v1, j): i = cindex(v1),
+        creturn: FALSE
       ENDCASES
 
     vars(e1)(i) : bool =
       CASES e1 OF
-        elv(lv1) : vars(lv1)(i),
+        elv(lr1) : vars(lr1)(i),
         econstant(c) : FALSE,
+        enil: FALSE,
         ecall(f, args) : EXISTS (j: below(args`length)): cindex(args`seq(j)) = i,
         ebuiltin(f, v1, v2) : i = cindex(v1) OR i = cindex(v2)
       ENDCASES
@@ -80,12 +86,12 @@ creduction: THEORY
     vars(s1)(i) : RECURSIVE bool =
       CASES s1 OF
         sassign(lv1, e1): vars(lv1)(i) OR vars(e1)(i),
+        scall(f, args): EXISTS (j: below(args`length)): cindex(args`seq(j)) = i,
         sdecl(tp1, s2): vars(s2)(i + 1),
         sif(v1, thenc, elsec): cindex(v1) = i OR vars(thenc)(i) OR vars(elsec)(i),
         sblock(stats): EXISTS (j: below(stats`length)): vars(stats`seq(j))(i),
         smalloc(size): FALSE,
-        sfree(v1): cindex(v1) = i,
-        sreturn(v1): cindex(v1) = i
+        sfree(v1): cindex(v1) = i
       ENDCASES
     MEASURE s1 BY <<
 
@@ -123,14 +129,12 @@ creduction: THEORY
             0
           ELSE
             clength(car(stats)) + clength(sblock(cdr(stats)))
-          ENDIF
+          ENDIF,
+        scall(f, args): 1 + args`length,
+        sassign(lv1, e1): IF ecall?(e1) THEN 1 + cargs(e1)`length ELSE 1 ENDIF
         ELSE 1
       ENDCASES
     MEASURE measure_stat(s1)
-
-    %TODO definitions are well typed
-    Definition: TYPE = [# arity: nat, body: {s1 | FORALL i: vars(s1)(i) IMPLIES i < arity} #]
-    D: VAR finseq[Definition]
 
     stack_size_at(s1)(i: below(clength(s1))) : RECURSIVE nat =
       CASES s1 OF
@@ -162,51 +166,219 @@ creduction: THEORY
       ENDCASES
     MEASURE measure_stat(s1)
 
-    is_fun_call_at(s1)(i: below(clength(s1))) : RECURSIVE bool =
+    stack_size_at_zero: LEMMA
+      FORALL (s1 | clength(s1) > 0):
+        stack_size_at(s1)(0) = 0
+
+    % is_fun_call_at(s1)(i: below(clength(s1))) : RECURSIVE bool =
+    %   CASES s1 OF
+    %     sdecl(tp1, s2):
+    %       IF i = 0 THEN
+    %         FALSE
+    %       ELSIF i < clength(s2) + 1 THEN
+    %         is_fun_call_at(s2)(i - 1)
+    %       ELSE
+    %         FALSE
+    %       ENDIF,
+    %     sif(v1, thenc, elsec):
+    %       IF i = 0 THEN
+    %         FALSE
+    %       ELSIF i < clength(thenc) + 1 THEN
+    %         is_fun_call_at(thenc)(i - 1)
+    %       ELSIF i < clength(thenc) + clength(elsec) + 1 THEN
+    %         is_fun_call_at(elsec)(i - 1 - clength(thenc))
+    %       ELSE
+    %         FALSE
+    %       ENDIF,
+    %     sblock(stats):
+    %       IF i < clength(car(stats)) THEN
+    %         is_fun_call_at(car(stats))(i)
+    %       ELSE
+    %         is_fun_call_at(sblock(cdr(stats)))(i-clength(car(stats)))
+    %       ENDIF,
+    %     sassign(lv1, e1): ecall?(e1),
+    %     scall(f, args): TRUE
+    %     ELSE FALSE
+    %   ENDCASES
+    % MEASURE measure_stat(s1)
+    
+    executable_stat?(s1, (i: below(clength(s1)))): bool =
+      CASES s1 OF
+        sdecl(tp1, s2): i = 0 OR i = 1 + clength(s2),
+        sif(v1, thenc, elsec): i = 0 OR i = 1 + clength(thenc) + clength(elsec),
+        sblock(stats): FALSE
+        ELSE TRUE
+      ENDCASES
+
+    extract_stat(s1)(i: below(clength(s1))) : RECURSIVE
+        {(s2, j) | j < clength(s2) AND executable_stat?(s2, j)} =
       CASES s1 OF
         sdecl(tp1, s2):
           IF i = 0 THEN
-            FALSE
-          ELSIF i < clength(s2) + 1 THEN
-            is_fun_call_at(s2)(i - 1)
+            (s1, i)
+          ELSIF i < 1 + clength(s2) THEN
+            extract_stat(s2)(i - 1)
           ELSE
-            FALSE
+            (s1, i)
           ENDIF,
         sif(v1, thenc, elsec):
           IF i = 0 THEN
-            FALSE
-          ELSIF i < clength(thenc) + 1 THEN
-            is_fun_call_at(thenc)(i - 1)
-          ELSIF i < clength(thenc) + clength(elsec) + 1 THEN
-            is_fun_call_at(elsec)(i - 1 - clength(thenc))
+            (s1, i)
+          ELSIF i < 1 + clength(thenc) THEN
+            extract_stat(thenc)(i - 1)
+          ELSIF i < 1 + clength(thenc) + clength(elsec) THEN
+            extract_stat(elsec)(i - 1 - clength(thenc))
           ELSE
-            FALSE
+            (s1, i)
           ENDIF,
         sblock(stats):
           IF i < clength(car(stats)) THEN
-            is_fun_call_at(car(stats))(i)
+            extract_stat(car(stats))(i)
           ELSE
-            is_fun_call_at(sblock(cdr(stats)))(i-clength(car(stats)))
-          ENDIF,
-        sassign(lv1, e1): ecall?(e1)
-        ELSE FALSE
+            extract_stat(sblock(cdr(stats)))(i-clength(car(stats)))
+          ENDIF
+        ELSE (s1, i)
       ENDCASES
     MEASURE measure_stat(s1)
+
+    is_return?(s1) : bool =
+      sassign?(s1) AND creturn?(aval(s1))
+
+    is_fun_call_at(s1)(i: below(clength(s1))) : bool =
+      LET (s2, j) = extract_stat(s1)(i) IN
+      (sassign?(s2) AND ecall?(aexpr(s2)) AND j = cargs(aexpr(s2))`length) OR
+        (scall?(s2) AND j = sargs(s2)`length)
+
+    %TODO definitions are well typed
+    Definition: TYPE = [#
+        arity: nat,
+        body: {s1 |
+            (FORALL i: vars(s1)(i) IMPLIES i < arity)
+          AND clength(s1) > 0
+          AND is_return?(extract_stat(s1)(clength(s1) - 1)`1)
+        }
+    #]
+    D: VAR finseq[Definition]
 
     cstack_frame(D): TYPE = [#
       ffct: below(D`length),
       fpc: below(clength(D`seq(ffct)`body)),
-      fstack: {S : Stack | S`length = stack_size_at(D`seq(ffct)`body)(fpc) + D`seq(ffct)`arity}
+      %fstack: {S : Stack | S`length = stack_size_at(D`seq(ffct)`body)(fpc) + D`seq(ffct)`arity}
+      fdepth: nat %TODO constraints?
     #]
 
     cstate: TYPE = [#
+      error: boolean,
       cdefs: finseq[Definition],
       callstack: {C : finseq[cstack_frame(cdefs)] |
-        FORALL (i: below(C`length - 1)):
+        FORALL (i | i < C`length - 1):
           is_fun_call_at(cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc)
       },
+      stack: Stack,
       domain: finite_set[nat],
-      store: Store(domain)
+      store: Store(domain),
+      return_value: cvalue
     #]
+
+    cS, cS1, cS2: VAR cstate
+
+    next_pc(s1)(i | i < clength(s1) - 1) : RECURSIVE below(clength(s1)) =
+      CASES s1 OF
+        sdecl(tp1, s2):
+          IF i = 0 THEN
+            1
+          ELSIF i < clength(s2) THEN
+            1 + next_pc(s2)(i - 1)
+          ELSE
+            1 + clength(s2)
+          ENDIF,
+        sif(v1, thenc, elsec):
+          IF i = 0 THEN % this should never matter however
+            1
+          ELSIF i < clength(thenc) THEN
+            1 + next_pc(thenc)(i - 1)
+          ELSIF i = clength(thenc) THEN
+            1 + clength(thenc) + clength(elsec)
+          ELSIF i < clength(thenc) + clength(elsec) THEN
+            1 + clength(thenc) + next_pc(elsec)(i - 1 - clength(thenc))
+          ELSE
+            1 + clength(thenc) + clength(elsec)
+          ENDIF,
+        sblock(stats):
+          IF i < clength(car(stats)) - 1 THEN
+            next_pc(car(stats))(i)
+          ELSIF i = clength(car(stats)) - 1 THEN
+            clength(car(stats))
+          ELSE
+            clength(car(stats)) + next_pc(sblock(cdr(stats)))(i-clength(car(stats)))
+          ENDIF
+        ELSE i + 1
+      ENDCASES
+    MEASURE measure_stat(s1)
+
+    pop(S: Stack | S`length > 0) : Stack =
+      (# length := S`length - 1,
+         seq := LAMBDA (i: below(S`length - 1)): S`seq(i)
+       #)
+
+    reduce(cS | NOT cS`error): cstate =
+      IF cS`callstack`length = 0 THEN
+        cS
+      ELSE
+        LET lf = cS`callstack(cS`callstack`length - 1) IN
+        LET fbody = cS`cdefs`seq(lf`ffct)`body IN
+        LET (s1, i) = extract_stat(fbody)(lf`fpc) IN
+        CASES s1 OF
+          sdecl(tp, s2):
+            IF i = 0 THEN % Push new variable
+              cS WITH [`stack := add(IF tp = cint THEN cintv(0) ELSE cnil ENDIF, cS`stack),
+                       `callstack`seq(cS`callstack`length - 1) :=
+                         lf WITH [
+                          `fdepth := lf`fdepth + 1,
+                          `fpc := next_pc(fbody)(lf`fpc)
+                         ]
+                      ]
+
+            ELSE
+              cS WITH [`stack := pop(cS`stack),
+                       `callstack`seq(cS`callstack`length - 1) :=
+                         lf WITH [
+                          `fdepth := lf`fdepth - 1,
+                          `fpc := next_pc(fbody)(lf`fpc)
+                         ]
+                      ]
+            ENDIF,
+          sif(v1, cthen, celse):
+            IF i = 0 THEN % Check condition
+              LET x = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+              IF x = cintv(0) OR x = cnil THEN
+                cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + clength(cthen) + 1]
+              ELSE
+                cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1]
+              ENDIF
+            ELSE % Nop
+              cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc :=
+                         next_pc(fbody)(lf`fpc)]
+            ENDIF,
+          sfree(v1):
+            LET x = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+            % Freeing an int or something outside the domain is liable to memory
+            % corruption, so this is an error.
+            % However, freeing null it legal and is a nop.
+            IF cintv?(x) OR (cref?(x) AND NOT cS`domain(crefindex(x))) THEN
+              cS WITH [`error := TRUE]
+            ELSE
+              cS WITH [`domain := IF x = cnil THEN cS`domain ELSE remove(cS`domain, crefindex(x)),
+                       `callstack`seq(cS`callstack`length - 1)`fpc :=
+                         next_pc(fbody)(lf`fpc)]
+            ENDIF,
+          smalloc(n):
+            cS,
+          scall(f, args):
+            cS,
+          sassign(lv1, e1):
+            cS
+        ENDCASES
+      ENDIF
 
   END creduction

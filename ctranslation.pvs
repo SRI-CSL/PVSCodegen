@@ -1,0 +1,26 @@
+ctranslation: THEORY
+  BEGIN
+
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, typed_reduction, typed_rreduction, typed_reduction_props, creduction
+
+
+    
+    % A should have type
+    translate_statement(A: (pure?), rv: lvalue): cstat =
+      CASES A OF
+        variable(j, b): sassign(rv, elv(cvar(j))), % TODO maybe release
+        constant(n): sassign(rv, econstant(n)),
+        nil: sassign(rv, enil),
+        application(f, args): sassign(rv, ecall(f, empty_seq)), % TODO; beware marked args -> all functions should use their args, so that there is no need to release; functions are responsible for freeing their args before returning
+        letexpr(B, C): ,% TODO need the type
+        ift(x, B, C): sif(cvar(index(x)),
+                        translate_statement(B, rv),
+                        translate_statement(C, rv)),
+        update(target, lhs, rhs): ,%TODO
+        lookup(arr, pos): sassign(rv, elv(caccess(cvar(arr), cvar(pos)))), % TODO release
+        newint(n): ,%TODO
+        newref(n): ,%TODO
+        release(x, B):%TODO
+      ENDCASES
+
+  END ctranslation
