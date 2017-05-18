@@ -6,6 +6,7 @@ ctranslation: THEORY
 
     
     % A should have type
+    % add some shift number for nested lets
     translate_statement(A: (pure?), rv: lvalue): cstat =
       CASES A OF
         variable(j, b): sassign(rv, elv(cvar(j))), % TODO maybe release
@@ -21,6 +22,31 @@ ctranslation: THEORY
         newint(n): ,%TODO
         newref(n): ,%TODO
         release(x, B):%TODO
+      ENDCASES
+
+    % A should have type?
+    reconstruct_redex(A: (pure?), rv: lvalue, i: nat, cS: cstate): [IExpression, IContext] =
+      CASES A OF
+        letexpr(B, C):
+          IF i = 0 THEN
+
+          ELSIF i < ... THEN
+
+          ELSIF i < ... THEN
+
+          ELSE
+
+          ENDIF,
+        ift(x, B, C):
+          IF i = 0 THEN
+            (A, hole)
+          ELSIF i < 1 + clength(translate_statement(B, rv)) THEN
+            reconstruct_redex(B, rv, i - 1)
+          ELSE
+            reconstruct_redex(C, rv, i - 1 - clength(translate_statement(B, rv)))
+          ENDIF,
+        release(x, B): %TODO
+        ELSE (A, hole)
       ENDCASES
 
   END ctranslation

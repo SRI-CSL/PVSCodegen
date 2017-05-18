@@ -2,7 +2,7 @@
  (vars_TCC1 0
   (vars_TCC1-1 nil 3703602385 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[cstat])" creduction nil))
-   nil))
+   nil (vars termination "vars(s2)" "nil")))
  (vars_TCC2 0
   (vars_TCC2-1 nil 3703602385 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -25,7 +25,7 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (<< adt-def-decl "(strict_well_founded?[cstat])" creduction nil))
-   nil))
+   nil (vars termination "vars(thenc)" "nil")))
  (vars_TCC3 0
   (vars_TCC3-1 nil 3703602385 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -48,7 +48,7 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (<< adt-def-decl "(strict_well_founded?[cstat])" creduction nil))
-   nil))
+   nil (vars termination "vars(elsec)" "nil")))
  (vars_TCC4 0
   (vars_TCC4-1 nil 3703602385 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[cstat])" creduction nil)
@@ -75,7 +75,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil))
-   nil))
+   nil (vars termination "vars(stats`seq(j))" "nil")))
  (length_cdr 0
   (length_cdr-1 nil 3703618864 ("" (grind) nil nil)
    ((length def-decl "nat" list_props nil)
@@ -98,7 +98,7 @@
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (length def-decl "nat" list_props nil))
-   nil))
+   nil (nth_cdr subtype "i + 1" "below[length[T](l)]")))
  (nth_cdr 0
   (nth_cdr-1 nil 3703618930 ("" (grind) nil nil)
    ((nth def-decl "T" list_props nil)) shostak))
@@ -110,7 +110,7 @@
     (lvalue type-decl nil creduction nil)
     (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
     (<< adt-def-decl "(strict_well_founded?[cstat])" creduction nil))
-   nil))
+   nil (measure_stat termination "measure_stat(thenc)" "nil")))
  (measure_stat_TCC2 0
   (measure_stat_TCC2-1 nil 3703617429 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -119,7 +119,7 @@
     (lvalue type-decl nil creduction nil)
     (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
     (<< adt-def-decl "(strict_well_founded?[cstat])" creduction nil))
-   nil))
+   nil (measure_stat termination "measure_stat(elsec)" "nil")))
  (measure_stat_TCC3 0
   (measure_stat_TCC3-1 nil 3703617429
    ("" (skeep*)
@@ -150,7 +150,9 @@
      nil)
     (boolean nonempty-type-decl nil booleans nil)
     (number nonempty-type-decl nil numbers nil))
-   nil))
+   nil
+   (measure_stat subtype "(LAMBDA j: j < stats`length)"
+    "finite_set[nat]")))
  (measure_stat_TCC4 0
   (measure_stat_TCC4-1 nil 3703617429 ("" (termination-tcc) nil nil)
    ((real_lt_is_strict_total_order name-judgement
@@ -178,7 +180,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil))
-   nil))
+   nil (measure_stat termination "measure_stat(stats`seq(j))" "nil")))
  (measure_stat_car_TCC1 0
   (measure_stat_car_TCC1-1 nil 3703617691
    ("" (skeep* :preds? t)
@@ -190,7 +192,9 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (finseq2list_rec def-decl "list[T]" list2finseq nil))
-   nil))
+   nil
+   (measure_stat_car subtype "finseq2list[cstat](bstats(s1))"
+    "(cons?[cstat])")))
  (measure_stat_car 0
   (measure_stat_car-1 nil 3703617691
    ("" (skeep* :preds? t)
@@ -458,7 +462,7 @@
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (measure_stat def-decl "posnat" creduction nil))
-   nil))
+   nil (clength termination "clength(s2)" "nil")))
  (clength_TCC2 0
   (clength_TCC2-1 nil 3703602385 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -471,7 +475,7 @@
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (measure_stat def-decl "posnat" creduction nil))
-   nil))
+   nil (clength termination "clength(thenc)" "nil")))
  (clength_TCC3 0
   (clength_TCC3-1 nil 3703602385
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
@@ -480,13 +484,13 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (measure_stat def-decl "posnat" creduction nil))
-   nil))
+   nil (clength termination "clength(elsec)" "nil")))
  (clength_TCC4 0
   (clength_TCC4-1 nil 3703602385 ("" (termination-tcc) nil nil)
    ((finseq2list_rec def-decl "list[T]" list2finseq nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (finseq2list const-decl "list[T]" list2finseq nil))
-   nil))
+   nil (clength subtype "finseq2list[cstat](stats)" "(cons?[cstat])")))
  (clength_TCC5 0
   (clength_TCC5-1 nil 3703602385
    ("" (skeep*)
@@ -508,7 +512,9 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (cstat type-decl nil creduction nil))
-   nil))
+   nil
+   (clength termination "clength(car(finseq2list[cstat](stats)))"
+    "nil")))
  (clength_TCC6 0
   (clength_TCC6-1 nil 3703617429
    ("" (skeep*)
@@ -531,7 +537,10 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (cstat type-decl nil creduction nil))
-   nil))
+   nil
+   (clength termination
+    "clength(sblock(list2finseq[cstat](cdr(finseq2list[cstat](stats)))))"
+    "nil")))
  (stack_size_at_TCC1 0
   (stack_size_at_TCC1-1 nil 3703854481 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -560,7 +569,7 @@
      integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil (stack_size_at subtype "i - 1" "below(clength(s2))")))
  (stack_size_at_TCC2 0
   (stack_size_at_TCC2-1 nil 3703854481 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -595,9 +604,9 @@
      integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil (stack_size_at subtype "i - 1" "below(clength(thenc))")))
  (stack_size_at_TCC3 0
-  (stack_size_at_TCC3-1 nil 3703854481 ("" (subtype-tcc) nil nil)
+  (stack_size_at_TCC3-1 nil 3703854481 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
@@ -619,16 +628,20 @@
     (below type-eq-decl nil naturalnumbers nil)
     (lvalue type-decl nil creduction nil)
     (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
-    (odd_minus_odd_is_even application-judgement "even_int" integers
-     nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
-   nil))
+   nil
+   (stack_size_at subtype "i - 1 - clength(thenc)"
+    "below(clength(elsec))")))
  (stack_size_at_TCC4 0
   (stack_size_at_TCC4-1 nil 3703854481 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -656,7 +669,9 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (finseq2list const-decl "list[T]" list2finseq nil))
-   nil))
+   nil
+   (stack_size_at subtype "finseq2list[cstat](stats)"
+    "(cons?[cstat])")))
  (stack_size_at_TCC5 0
   (stack_size_at_TCC5-1 nil 3703854481
    ("" (skeep* :preds? t)
@@ -677,7 +692,9 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (cstat type-decl nil creduction nil))
-   nil))
+   nil
+   (stack_size_at termination
+    "stack_size_at(car(finseq2list[cstat](stats)))" "nil")))
  (stack_size_at_TCC6 0
   (stack_size_at_TCC6-1 nil 3703854481
    ("" (skeep* :preds? t)
@@ -700,7 +717,10 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (cstat type-decl nil creduction nil))
-   nil))
+   nil
+   (stack_size_at termination
+    "stack_size_at(sblock(list2finseq[cstat](cdr(finseq2list[cstat](stats)))))"
+    "nil")))
  (stack_size_at_TCC7 0
   (stack_size_at_TCC7-1 nil 3703854481
    ("" (skeep* :preds? t)
@@ -723,10 +743,12 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (clength def-decl "nat" creduction nil))
-   nil))
+   nil
+   (stack_size_at subtype "i - clength(car(finseq2list[cstat](stats)))"
+    "below(clength(sblock(list2finseq[cstat](cdr(finseq2list[cstat](stats))))))")))
  (stack_size_at_zero_TCC1 0
   (stack_size_at_zero_TCC1-1 nil 3703874317 ("" (subtype-tcc) nil nil)
-   nil nil))
+   nil nil (stack_size_at_zero subtype "0" "below(clength(s1))")))
  (stack_size_at_zero 0
   (stack_size_at_zero-1 nil 3703874318
    ("" (measure-induct+ "measure_stat(s1)" ("s1"))
@@ -852,7 +874,9 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (executable_stat? const-decl "bool" creduction nil))
-   nil))
+   nil
+   (extract_stat subtype "(s1, i)"
+    "{s2, j | j < clength(s2) AND executable_stat?(s2, j)}")))
  (extract_stat_TCC2 0
   (extract_stat_TCC2-1 nil 3703876546 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -881,7 +905,7 @@
      integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil (extract_stat subtype "i - 1" "below(clength(s2))")))
  (extract_stat_TCC3 0
   (extract_stat_TCC3-1 nil 3703876546
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
@@ -896,7 +920,9 @@
      "(strict_total_order?[real])" real_props nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil))
-   nil))
+   nil
+   (extract_stat subtype "(s1, i)"
+    "{s2, j | j < clength(s2) AND executable_stat?(s2, j)}")))
  (extract_stat_TCC4 0
   (extract_stat_TCC4-1 nil 3703876546 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -923,7 +949,9 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (executable_stat? const-decl "bool" creduction nil))
-   nil))
+   nil
+   (extract_stat subtype "(s1, i)"
+    "{s2, j | j < clength(s2) AND executable_stat?(s2, j)}")))
  (extract_stat_TCC5 0
   (extract_stat_TCC5-1 nil 3703876546 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -954,9 +982,9 @@
      integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil (extract_stat subtype "i - 1" "below(clength(thenc))")))
  (extract_stat_TCC6 0
-  (extract_stat_TCC6-1 nil 3703876546 ("" (subtype-tcc) nil nil)
+  (extract_stat_TCC6-1 nil 3703876546 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
@@ -978,61 +1006,29 @@
     (below type-eq-decl nil naturalnumbers nil)
     (lvalue type-decl nil creduction nil)
     (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
-    (odd_minus_odd_is_even application-judgement "even_int" integers
-     nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (int_minus_int_is_int application-judgement "int" integers nil))
-   nil))
- (extract_stat_TCC7 0
-  (extract_stat_TCC7-1 nil 3703876546
-   ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
-   ((int_minus_int_is_int application-judgement "int" integers nil)
-    (odd_minus_odd_is_even application-judgement "even_int" integers
-     nil)
     (nnint_plus_posint_is_posint application-judgement "posint"
      integers nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil)
-    (clength def-decl "nat" creduction nil)
-    (executable_stat? const-decl "bool" creduction nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil))
-   nil))
- (extract_stat_TCC8 0
-  (extract_stat_TCC8-1 nil 3703876546 ("" (subtype-tcc) nil nil)
-   ((boolean nonempty-type-decl nil booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (< const-decl "bool" reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (cstat type-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (executable_stat? const-decl "bool" creduction nil)
+     integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil))
+   nil
+   (extract_stat subtype "i - 1 - clength(thenc)"
+    "below(clength(elsec))")))
+ (extract_stat_TCC7 0
+  (extract_stat_TCC7-1 nil 3703876546
+   ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
+   ((executable_stat? const-decl "bool" creduction nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil))
-   nil))
- (is_fun_call_at_TCC1 0
-  (is_fun_call_at_TCC1-1 nil 3703956313 ("" (subtype-tcc) nil nil) nil
-   nil))
+   nil
+   (extract_stat subtype "(s1, i)"
+    "{s2, j | j < clength(s2) AND executable_stat?(s2, j)}")))
  (Definition_TCC1 0
   (Definition_TCC1-1 nil 3703956313 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -1055,13 +1051,12 @@
      "(strict_total_order?[real])" real_props nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil (Definition subtype "clength(s1) - 1" "below(clength(s1))")))
  (cstate_TCC1 0
-  (cstate_TCC1-1 nil 3703872785 ("" (subtype-tcc) nil nil) nil nil))
- (next_pc_TCC1 0
-  (next_pc_TCC1-1 nil 3703872785 ("" (subtype-tcc) nil nil) nil nil))
- (next_pc_TCC2 0
-  (next_pc_TCC2-1 nil 3703872785 ("" (subtype-tcc) nil nil)
+  (cstate_TCC1-1 nil 3703872785 ("" (subtype-tcc) nil nil) nil nil
+   (cstate subtype "i" "below[C`length]")))
+ (make_call_TCC1 0
+  (make_call_TCC1-1 nil 3704041017 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
@@ -1078,59 +1073,52 @@
     (int nonempty-type-eq-decl nil integers nil)
     (>= const-decl "bool" reals nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (cstat type-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil))
-   nil))
- (next_pc_TCC3 0
-  (next_pc_TCC3-1 nil 3703872785
-   ("" (skeep* :preds? t)
-    (("" (typepred "v(s2)(i-1)")
-      (("1" (grind) nil nil) ("2" (grind) nil nil)) nil))
-    nil)
-   ((below type-eq-decl nil naturalnumbers nil)
-    (clength def-decl "nat" creduction nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (measure_stat def-decl "posnat" creduction nil)
-    (posnat nonempty-type-eq-decl nil integers nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (vars def-decl "bool" creduction nil)
     (> const-decl "bool" reals nil)
-    (nonneg_int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (cstat type-decl nil creduction nil)
-    (< const-decl "bool" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
+    (clength def-decl "nat" creduction nil)
+    (is_return? const-decl "bool" creduction nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (executable_stat? const-decl "bool" creduction nil)
+    (extract_stat def-decl
+     "{s2, j | j < clength(s2) AND executable_stat?(s2, j)}" creduction
      nil)
-    (number nonempty-type-decl nil numbers nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (Definition type-eq-decl nil creduction nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (below type-eq-decl nil nat_types nil)
+    (cstack_frame type-eq-decl nil creduction nil)
+    (is_fun_call_at const-decl "bool" creduction nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (cvalue type-decl nil creduction nil)
+    (Stack type-eq-decl nil creduction nil)
+    (Store type-eq-decl nil creduction nil)
+    (cstate type-eq-decl nil creduction nil)
+    (seq type-eq-decl nil more_finseq nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil))
-   nil))
- (next_pc_TCC4 0
-  (next_pc_TCC4-1 nil 3703872785 ("" (subtype-tcc) nil nil)
+    (add const-decl "finseq[T]" more_finseq nil))
+   nil
+   (make_call subtype
+    "add((# ffct := f, fpc := 0, fdepth := cS`cdefs`seq(f)`arity #), cS`callstack)"
+    "finseq[cstack_frame(cS`cdefs)]")))
+ (make_call_TCC2 0
+  (make_call_TCC2-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (make_call subtype
+    "add((# ffct := f, fpc := 0, fdepth := cS`cdefs`seq(f)`arity #), cS`callstack)"
+    "{C: finseq[cstack_frame(cS`cdefs)] | FORALL (i: nat | i < C`length - 1): is_fun_call_at(cS`cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc)}")))
+ (next_pc_TCC1 0
+  (next_pc_TCC1-1 nil 3703872785 ("" (subtype-tcc) nil nil) nil nil
+   (next_pc subtype "1" "upto(clength(s1))")))
+ (next_pc_TCC2 0
+  (next_pc_TCC2-1 nil 3703872785 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
@@ -1147,20 +1135,20 @@
     (int nonempty-type-eq-decl nil integers nil)
     (>= const-decl "bool" reals nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (cstat type-decl nil creduction nil)
     (clength def-decl "nat" creduction nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil))
-   nil))
- (next_pc_TCC5 0
-  (next_pc_TCC5-1 nil 3703872785 ("" (subtype-tcc) nil nil) nil nil))
- (next_pc_TCC6 0
-  (next_pc_TCC6-1 nil 3703872785 ("" (subtype-tcc) nil nil)
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (next_pc subtype "1 + next_pc(s2)(i - 1)" "upto(clength(s1))")))
+ (next_pc_TCC3 0
+  (next_pc_TCC3-1 nil 3703872785 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
@@ -1177,232 +1165,139 @@
     (int nonempty-type-eq-decl nil integers nil)
     (>= const-decl "bool" reals nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (cstat type-decl nil creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (next_pc subtype "2 + clength(s2)" "upto(clength(s1))")))
+ (next_pc_TCC4 0
+  (next_pc_TCC4-1 nil 3703872785 ("" (subtype-tcc) nil nil) nil nil
+   (next_pc subtype "1" "upto(clength(s1))")))
+ (next_pc_TCC5 0
+  (next_pc_TCC5-1 nil 3703872785 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (< const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (cstat type-decl nil creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil))
+   nil
+   (next_pc subtype "1 + clength(thenc) + clength(elsec)"
+    "upto(clength(s1))")))
+ (next_pc_TCC6 0
+  (next_pc_TCC6-1 nil 3703872785 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (< const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (cstat type-decl nil creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (next_pc subtype "1 + next_pc(thenc)(i - 1)" "upto(clength(s1))")))
+ (next_pc_TCC7 0
+  (next_pc_TCC7-1 nil 3703872785 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (< const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
     (clength def-decl "nat" creduction nil)
     (lvalue type-decl nil creduction nil)
     (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil))
-   nil))
- (next_pc_TCC7 0
-  (next_pc_TCC7-1 nil 3703872785
-   ("" (skeep* :preds? t)
-    (("" (typepred "v(thenc)(i-1)")
-      (("1" (grind) nil nil) ("2" (grind) nil nil)) nil))
-    nil)
-   ((below type-eq-decl nil naturalnumbers nil)
-    (clength def-decl "nat" creduction nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (measure_stat def-decl "posnat" creduction nil)
-    (posnat nonempty-type-eq-decl nil integers nil)
-    (> const-decl "bool" reals nil)
-    (nonneg_int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (cstat type-decl nil creduction nil)
-    (< const-decl "bool" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number nonempty-type-decl nil numbers nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
     (nnint_plus_posint_is_posint application-judgement "posint"
      integers nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil))
-   nil))
+   nil
+   (next_pc subtype
+    "1 + clength(thenc) + next_pc(elsec)(i - 1 - clength(thenc))"
+    "upto(clength(s1))")))
  (next_pc_TCC8 0
   (next_pc_TCC8-1 nil 3703872785
-   ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
-   ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (clength def-decl "nat" creduction nil)
-    (even_minus_odd_is_odd application-judgement "odd_int" integers
-     nil))
-   nil))
- (next_pc_TCC9 0
-  (next_pc_TCC9-1 nil 3703872785 ("" (subtype-tcc) nil nil)
-   ((boolean nonempty-type-decl nil booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (< const-decl "bool" reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (cstat type-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (lvalue type-decl nil creduction nil)
-    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil))
-   nil))
- (next_pc_TCC10 0
-  (next_pc_TCC10-1 nil 3703872785
-   ("" (skeep* :preds? t)
-    (("" (typepred "v(elsec)(i - 1 - clength(thenc))")
-      (("1" (grind) nil nil) ("2" (grind) nil nil)) nil))
-    nil)
-   ((below type-eq-decl nil naturalnumbers nil)
-    (clength def-decl "nat" creduction nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (measure_stat def-decl "posnat" creduction nil)
-    (posnat nonempty-type-eq-decl nil integers nil)
-    (> const-decl "bool" reals nil)
-    (nonneg_int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (cstat type-decl nil creduction nil)
-    (< const-decl "bool" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number nonempty-type-decl nil numbers nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (even_minus_odd_is_odd application-judgement "odd_int" integers
-     nil)
-    (int_plus_int_is_int application-judgement "int" integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil))
-   nil))
- (next_pc_TCC11 0
-  (next_pc_TCC11-1 nil 3703872785 ("" (subtype-tcc) nil nil)
-   ((boolean nonempty-type-decl nil booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (< const-decl "bool" reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (cstat type-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (lvalue type-decl nil creduction nil)
-    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil))
-   nil))
- (next_pc_TCC12 0
-  (next_pc_TCC12-1 nil 3703872785
-   ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
-   ((int_minus_int_is_int application-judgement "int" integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (finseq2list const-decl "list[T]" list2finseq nil)
-    (clength def-decl "nat" creduction nil)
-    (finseq2list_rec def-decl "list[T]" list2finseq nil)
-    (list2finseq const-decl "finseq[T]" list2finseq nil))
-   nil))
- (next_pc_TCC13 0
-  (next_pc_TCC13-1 nil 3703872785
-   ("" (skeep* :preds? t)
-    (("" (lemma measure_stat_car)
-      (("" (inst -1 s1) (("" (grind) nil nil)) nil)) nil))
-    nil)
-   ((measure_stat_car formula-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (measure_stat def-decl "posnat" creduction nil)
-    (empty? const-decl "bool" sets nil)
-    (member const-decl "bool" sets nil)
-    (finseq2list const-decl "list[T]" list2finseq nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (Sigma def-decl "nat" finite_set_theorems nil)
-    (real_gt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (cstat type-decl nil creduction nil))
-   nil))
- (next_pc_TCC14 0
-  (next_pc_TCC14-1 nil 3703872785
    ("" (skeep* :preds? t)
     (("" (typepred "v(car[cstat](finseq2list[cstat](stats)))(i)")
       (("" (replace -4)
-        (("" (expand clength +)
+        (("" (expand clength 1)
           (("" (lift-if)
             (("" (split)
               (("1" (grind) nil nil)
-               ("2" (assert)
-                (("2" (flatten) (("2" (assert) nil nil)) nil)) nil))
+               ("2" (flatten) (("2" (assert) nil nil)) nil))
               nil))
             nil))
           nil))
@@ -1415,10 +1310,8 @@
     (car adt-accessor-decl "[(cons?) -> T]" list_adt nil)
     (cons? adt-recognizer-decl "[list -> boolean]" list_adt nil)
     (list type-decl nil list_adt nil)
-    (below type-eq-decl nil naturalnumbers nil)
+    (upto nonempty-type-eq-decl nil naturalnumbers nil)
     (clength def-decl "nat" creduction nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (measure_stat def-decl "posnat" creduction nil)
     (posnat nonempty-type-eq-decl nil integers nil)
@@ -1429,8 +1322,9 @@
     (integer_pred const-decl "[rational -> boolean]" integers nil)
     (rational nonempty-type-from-decl nil rationals nil)
     (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (cstat type-decl nil creduction nil)
     (< const-decl "bool" reals nil)
+    (cstat type-decl nil creduction nil)
+    (<= const-decl "bool" reals nil)
     (real nonempty-type-from-decl nil reals nil)
     (real_pred const-decl "[number_field -> boolean]" reals nil)
     (number_field nonempty-type-from-decl nil number_fields nil)
@@ -1441,112 +1335,38 @@
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
     (finseq2list_rec def-decl "list[T]" list2finseq nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil))
-   nil))
- (next_pc_TCC15 0
-  (next_pc_TCC15-1 nil 3703872785 ("" (subtype-tcc) nil nil)
-   ((boolean nonempty-type-decl nil booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (< const-decl "bool" reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (cstat type-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (finseq2list const-decl "list[T]" list2finseq nil))
-   nil))
- (next_pc_TCC16 0
-  (next_pc_TCC16-1 nil 3703872785
-   ("" (skeep* :preds? t)
-    (("" (split)
-      (("1" (grind) nil nil)
-       ("2" (replace -2)
-        (("2" (expand clength -1)
-          (("2" (lift-if -1)
-            (("2" (split -1)
-              (("1" (grind) nil nil)
-               ("2" (flatten) (("2" (assert) nil nil)) nil))
-              nil))
-            nil))
-          nil))
-        nil))
-      nil))
-    nil)
-   ((real_ge_is_total_order name-judgement "(total_order?[real])"
+    (real_le_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (finseq2list const-decl "list[T]" list2finseq nil)
-    (clength def-decl "nat" creduction nil)
-    (even_minus_odd_is_odd application-judgement "odd_int" integers
-     nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
-   nil))
- (next_pc_TCC17 0
-  (next_pc_TCC17-1 nil 3703872785
+   nil
+   (next_pc subtype "next_pc(car(finseq2list[cstat](stats)))(i)"
+    "upto(clength(s1))")))
+ (next_pc_TCC9 0
+  (next_pc_TCC9-1 nil 3703872785
    ("" (skeep* :preds? t)
-    (("" (lemma measure_stat_cdr)
-      (("" (inst -1 s1) (("" (grind) nil nil)) nil)) nil))
-    nil)
-   ((measure_stat_cdr formula-decl nil creduction nil)
-    (clength def-decl "nat" creduction nil)
-    (finseq2list const-decl "list[T]" list2finseq nil)
-    (list2finseq const-decl "finseq[T]" list2finseq nil)
-    (member const-decl "bool" sets nil)
-    (empty? const-decl "bool" sets nil)
-    (measure_stat def-decl "posnat" creduction nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (Sigma def-decl "nat" finite_set_theorems nil)
-    (real_gt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (cstat type-decl nil creduction nil))
-   nil))
- (next_pc_TCC18 0
-  (next_pc_TCC18-1 nil 3703872785
-   ("" (skeep* :preds? t)
-    (("" (replace -2)
-      (("" (expand clength 3 3)
-        ((""
-          (typepred
-           "v(sblock(list2finseq[cstat](cdr[cstat](finseq2list[cstat](stats)))))
-       (i - clength(car[cstat](finseq2list[cstat](stats))))")
+    ((""
+      (typepred
+       "v(sblock(list2finseq[cstat](cdr[cstat](finseq2list[cstat](stats)))))
+        (i - clength(car[cstat](finseq2list[cstat](stats))))")
+      (("1" (replace -3)
+        (("1" (expand clength 2 3)
           (("1" (lift-if)
             (("1" (split)
               (("1" (grind) nil nil)
                ("2" (flatten) (("2" (assert) nil nil)) nil))
               nil))
-            nil)
-           ("2" (grind) nil nil))
+            nil))
           nil))
-        nil))
+        nil)
+       ("2" (grind) nil nil))
       nil))
     nil)
    ((car adt-accessor-decl "[(cons?) -> T]" list_adt nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
     (finseq2list const-decl "list[T]" list2finseq nil)
     (cdr adt-accessor-decl "[(cons?) -> list]" list_adt nil)
     (cons? adt-recognizer-decl "[list -> boolean]" list_adt nil)
@@ -1557,9 +1377,8 @@
     (sblock? adt-recognizer-decl "[cstat -> boolean]" creduction nil)
     (finseq type-eq-decl nil finite_sequences nil)
     (below type-eq-decl nil nat_types nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (upto nonempty-type-eq-decl nil naturalnumbers nil)
+    (clength def-decl "nat" creduction nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (measure_stat def-decl "posnat" creduction nil)
     (posnat nonempty-type-eq-decl nil integers nil)
@@ -1570,8 +1389,9 @@
     (integer_pred const-decl "[rational -> boolean]" integers nil)
     (rational nonempty-type-from-decl nil rationals nil)
     (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (cstat type-decl nil creduction nil)
     (< const-decl "bool" reals nil)
+    (cstat type-decl nil creduction nil)
+    (<= const-decl "bool" reals nil)
     (real nonempty-type-from-decl nil reals nil)
     (real_pred const-decl "[number_field -> boolean]" reals nil)
     (number_field nonempty-type-from-decl nil number_fields nil)
@@ -1585,21 +1405,25 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (finseq2list_rec def-decl "list[T]" list2finseq nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (clength def-decl "nat" creduction nil))
-   nil))
- (next_pc_TCC19 0
-  (next_pc_TCC19-1 nil 3703872785
-   ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
-   ((nnint_plus_posint_is_posint application-judgement "posint"
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil))
-   nil))
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (next_pc subtype
+    "clength(car(finseq2list[cstat](stats))) + next_pc(sblock(list2finseq[cstat](cdr(finseq2list[cstat](stats)))))(i - clength(car(finseq2list[cstat](stats))))"
+    "upto(clength(s1))")))
+ (next_pc_TCC10 0
+  (next_pc_TCC10-1 nil 3703872785 ("" (grind) nil nil) nil nil
+   (next_pc subtype "i + 1" "upto(clength(s1))")))
+ (pop_TCC1 0
+  (pop_TCC1-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (pop subtype "S`length - 1" "nat")))
+ (pop_TCC2 0
+  (pop_TCC2-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (pop subtype "i" "below[S`length]")))
  (reduce_TCC1 0
   (reduce_TCC1-1 nil 3703956390 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
@@ -1645,7 +1469,9 @@
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[length(cS`callstack)]")))
  (reduce_TCC2 0
   (reduce_TCC2-1 nil 3703956390 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
@@ -1695,7 +1521,7 @@
      "(strict_total_order?[real])" real_props nil)
     (finseq_appl const-decl "[below[length(fs)] -> T]" finite_sequences
      nil))
-   nil))
+   nil (reduce subtype "lf`fpc" "below(clength(fbody))")))
  (reduce_TCC3 0
   (reduce_TCC3-1 nil 3703956390 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
@@ -1747,7 +1573,9 @@
      "(strict_total_order?[real])" real_props nil)
     (finseq_appl const-decl "[below[length(fs)] -> T]" finite_sequences
      nil))
-   nil))
+   nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
  (reduce_TCC4 0
   (reduce_TCC4-1 nil 3703956390 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
@@ -1801,7 +1629,9 @@
      "(strict_total_order?[real])" real_props nil)
     (finseq_appl const-decl "[below[length(fs)] -> T]" finite_sequences
      nil))
-   nil))
+   nil
+   (reduce subtype "next_pc(fbody)(lf`fpc)"
+     "below(clength(cS`cdefs`seq(lf`ffct)`body))")))
  (reduce_TCC5 0
   (reduce_TCC5-1 nil 3703956390 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
@@ -1855,7 +1685,9 @@
      "(strict_total_order?[real])" real_props nil)
     (finseq_appl const-decl "[below[length(fs)] -> T]" finite_sequences
      nil))
-   nil))
+   nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
  (reduce_TCC6 0
   (reduce_TCC6-1 nil 3703956390
    ("" (skeep* :preds? t)
@@ -1914,5 +1746,102 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
-   nil)))
+   nil (reduce subtype "lf`fdepth - 1" "nat")))
+ (reduce_TCC7 0
+  (reduce_TCC7-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "next_pc(fbody)(lf`fpc)"
+     "below(clength(cS`cdefs`seq(lf`ffct)`body))")))
+ (reduce_TCC8 0
+  (reduce_TCC8-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`stack" "{S: Stack | S`length > 0}")))
+ (reduce_TCC9 0
+  (reduce_TCC9-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`stack`length - 1 - cindex(v1)"
+     "below[cS`stack`length]")))
+ (reduce_TCC10 0
+  (reduce_TCC10-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
+ (reduce_TCC11 0
+  (reduce_TCC11-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "lf`fpc + clength(cthen) + 1"
+     "below(clength(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body))")))
+ (reduce_TCC12 0
+  (reduce_TCC12-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
+ (reduce_TCC13 0
+  (reduce_TCC13-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "lf`fpc + 1"
+     "below(clength(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body))")))
+ (reduce_TCC14 0
+  (reduce_TCC14-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
+ (reduce_TCC15 0
+  (reduce_TCC15-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "next_pc(fbody)(lf`fpc)"
+     "below(clength(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body))")))
+ (reduce_TCC16 0
+  (reduce_TCC16-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`stack`length - 1 - cindex(v1)"
+     "below[cS`stack`length]")))
+ (reduce_TCC17 0
+  (reduce_TCC17-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
+ (reduce_TCC18 0
+  (reduce_TCC18-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "next_pc(fbody)(lf`fpc)"
+     "below(clength(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body))")))
+ (reduce_TCC19 0
+  (reduce_TCC19-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "x" "(cref?)")))
+ (reduce_TCC20 0
+  (reduce_TCC20-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`store"
+     "Store(IF x = cnil THEN cS`domain ELSE remove(crefindex(x), cS`domain) ENDIF)")))
+ (reduce_TCC21 0
+  (reduce_TCC21-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
+ (reduce_TCC22 0
+  (reduce_TCC22-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "lf`fpc + 1"
+     "below(clength(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body))")))
+ (reduce_TCC23 0
+  (reduce_TCC23-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`stack`length - 1 - i - cindex(args`seq(i))"
+     "below[length(cS`stack)]")))
+ (reduce_TCC24 0
+  (reduce_TCC24-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "f" "below(cS`cdefs`length)")))
+ (reduce_TCC25 0
+  (reduce_TCC25-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`callstack`length - 1"
+     "below[cS`callstack`length]")))
+ (reduce_TCC26 0
+  (reduce_TCC26-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "lf`fpc + 1"
+     "below(clength(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body))")))
+ (reduce_TCC27 0
+  (reduce_TCC27-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cS`stack`length - 1 - i - cindex(cargs(e1)`seq(i))"
+     "below[length(cS`stack)]")))
+ (reduce_TCC28 0
+  (reduce_TCC28-1 nil 3704041017 ("" (subtype-tcc) nil nil) nil nil
+   (reduce subtype "cfun(e1)" "below(cS`cdefs`length)")))
+ (reduce_TCC29 0
+  (reduce_TCC29-1 nil 3704041017 ("" (cases-tcc) nil nil) nil nil
+   (reduce cases "s1"
+     "cstat: DATATYPE
+ BEGIN
+  sassign(aval: lvalue, aexpr: cexpr): sassign?
+  scall(sfun: nat, sargs: finseq[(cvar?)]): scall?
+  sdecl(dtype: ctype, dstat: cstat): sdecl?
+  sif(scond: (cvar?), iftrue: cstat, iffalse: cstat): sif?
+  sblock(bstats: finseq[cstat]): sblock?
+  smalloc(msize: nat): smalloc?
+  sfree(fvar: (cvar?)): sfree?
+ END cstat"))))
 

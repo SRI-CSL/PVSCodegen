@@ -123,7 +123,7 @@ creduction: THEORY
     clength(s1) : RECURSIVE nat =
       CASES s1 OF
         sdecl(tp1, s2): clength(s2) + 2,
-        sif(v1, thenc, elsec): clength(thenc) + clength(elsec) + 2,
+        sif(v1, thenc, elsec): clength(thenc) + clength(elsec) + 1,
         sblock(stats):
           IF stats`length = 0 THEN
             0
@@ -131,7 +131,7 @@ creduction: THEORY
             clength(car(stats)) + clength(sblock(cdr(stats)))
           ENDIF,
         scall(f, args): 1 + args`length,
-        sassign(lv1, e1): IF ecall?(e1) THEN 1 + cargs(e1)`length ELSE 1 ENDIF
+        sassign(lv1, e1): IF ecall?(e1) THEN 2 + cargs(e1)`length ELSE 2 ENDIF
         ELSE 1
       ENDCASES
     MEASURE measure_stat(s1)
@@ -151,10 +151,8 @@ creduction: THEORY
             0
           ELSIF i < clength(thenc) + 1 THEN
             stack_size_at(thenc)(i - 1)
-          ELSIF i < clength(thenc) + clength(elsec) + 1 THEN
-            stack_size_at(elsec)(i - 1 - clength(thenc))
           ELSE
-            0
+            stack_size_at(elsec)(i - 1 - clength(thenc))
           ENDIF,
         sblock(stats):
           IF i < clength(car(stats)) THEN
@@ -205,7 +203,7 @@ creduction: THEORY
     executable_stat?(s1, (i: below(clength(s1)))): bool =
       CASES s1 OF
         sdecl(tp1, s2): i = 0 OR i = 1 + clength(s2),
-        sif(v1, thenc, elsec): i = 0 OR i = 1 + clength(thenc) + clength(elsec),
+        sif(v1, thenc, elsec): i = 0,
         sblock(stats): FALSE
         ELSE TRUE
       ENDCASES
@@ -226,10 +224,8 @@ creduction: THEORY
             (s1, i)
           ELSIF i < 1 + clength(thenc) THEN
             extract_stat(thenc)(i - 1)
-          ELSIF i < 1 + clength(thenc) + clength(elsec) THEN
-            extract_stat(elsec)(i - 1 - clength(thenc))
           ELSE
-            (s1, i)
+            extract_stat(elsec)(i - 1 - clength(thenc))
           ENDIF,
         sblock(stats):
           IF i < clength(car(stats)) THEN
@@ -244,10 +240,10 @@ creduction: THEORY
     is_return?(s1) : bool =
       sassign?(s1) AND creturn?(aval(s1))
 
-    is_fun_call_at(s1)(i: below(clength(s1))) : bool =
+    is_fun_call_at(s1)(i: below(clength(s1)), fct: nat) : bool =
       LET (s2, j) = extract_stat(s1)(i) IN
-      (sassign?(s2) AND ecall?(aexpr(s2)) AND j = cargs(aexpr(s2))`length) OR
-        (scall?(s2) AND j = sargs(s2)`length)
+      (sassign?(s2) AND ecall?(aexpr(s2)) AND fct = cfun(aexpr(s2)) AND j = cargs(aexpr(s2))`length + 1) OR
+        (scall?(s2) AND fct = sfun(s2) AND j = sargs(s2)`length)
 
     %TODO definitions are well typed
     Definition: TYPE = [#
@@ -272,7 +268,7 @@ creduction: THEORY
       cdefs: finseq[Definition],
       callstack: {C : finseq[cstack_frame(cdefs)] |
         FORALL (i | i < C`length - 1):
-          is_fun_call_at(cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc)
+          is_fun_call_at(cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc, C`seq(i+1)`ffct)
       },
       stack: Stack,
       domain: finite_set[nat],
@@ -282,33 +278,37 @@ creduction: THEORY
 
     cS, cS1, cS2: VAR cstate
 
-    next_pc(s1)(i | i < clength(s1) - 1) : RECURSIVE below(clength(s1)) =
+    make_call(cS, (f: below(cS`cdefs`length))): cstate =
+      cS WITH [`callstack := add((# ffct := f,
+                                    fpc := 0,
+                                    fdepth := cS`cdefs`seq(f)`arity
+                                  #), cS`callstack)]
+
+    next_pc(s1)(i | i < clength(s1)) : RECURSIVE upto(clength(s1)) =
       CASES s1 OF
         sdecl(tp1, s2):
           IF i = 0 THEN
             1
-          ELSIF i < clength(s2) THEN
+          ELSIF i < 1 + clength(s2) THEN
             1 + next_pc(s2)(i - 1)
           ELSE
-            1 + clength(s2)
+            2 + clength(s2)
           ENDIF,
         sif(v1, thenc, elsec):
           IF i = 0 THEN % this should never matter however
             1
-          ELSIF i < clength(thenc) THEN
-            1 + next_pc(thenc)(i - 1)
-          ELSIF i = clength(thenc) THEN
-            1 + clength(thenc) + clength(elsec)
-          ELSIF i < clength(thenc) + clength(elsec) THEN
-            1 + clength(thenc) + next_pc(elsec)(i - 1 - clength(thenc))
+          ELSIF i < 1 + clength(thenc) THEN
+            IF next_pc(thenc)(i - 1) = clength(thenc) THEN
+              1 + clength(thenc) + clength(elsec)
+            ELSE
+              1 + next_pc(thenc)(i - 1)
+            ENDIF
           ELSE
-            1 + clength(thenc) + clength(elsec)
+            1 + clength(thenc) + next_pc(elsec)(i - 1 - clength(thenc))
           ENDIF,
         sblock(stats):
-          IF i < clength(car(stats)) - 1 THEN
+          IF i < clength(car(stats)) THEN
             next_pc(car(stats))(i)
-          ELSIF i = clength(car(stats)) - 1 THEN
-            clength(car(stats))
           ELSE
             clength(car(stats)) + next_pc(sblock(cdr(stats)))(i-clength(car(stats)))
           ENDIF
@@ -316,7 +316,7 @@ creduction: THEORY
       ENDCASES
     MEASURE measure_stat(s1)
 
-    pop(S: Stack | S`length > 0) : Stack =
+    pop[T: TYPE](S: finseq[T] | S`length > 0) : finseq[T] =
       (# length := S`length - 1,
          seq := LAMBDA (i: below(S`length - 1)): S`seq(i)
        #)
@@ -339,7 +339,7 @@ creduction: THEORY
                          ]
                       ]
 
-            ELSE
+            ELSE % Pop it
               cS WITH [`stack := pop(cS`stack),
                        `callstack`seq(cS`callstack`length - 1) :=
                          lf WITH [
@@ -368,16 +368,116 @@ creduction: THEORY
             IF cintv?(x) OR (cref?(x) AND NOT cS`domain(crefindex(x))) THEN
               cS WITH [`error := TRUE]
             ELSE
-              cS WITH [`domain := IF x = cnil THEN cS`domain ELSE remove(cS`domain, crefindex(x)),
+              cS WITH [`domain := IF x = cnil THEN cS`domain ELSE remove(crefindex(x), cS`domain) ENDIF,
                        `callstack`seq(cS`callstack`length - 1)`fpc :=
                          next_pc(fbody)(lf`fpc)]
             ENDIF,
           smalloc(n):
-            cS,
+            cS WITH [`domain := add(least_out(cS`domain), cS`domain),
+                     `store := cS`store WITH
+                       [(least_out(cS`domain)) |->
+                         (# length := n, seq := LAMBDA (i: below(n)): cnil #)],
+                     `callstack`seq(cS`callstack`length - 1)`fpc :=
+                         next_pc(fbody)(lf`fpc)],
           scall(f, args):
-            cS,
+            IF i < args`length THEN % Push arg
+              cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1,
+                       `stack := add(cS`stack(cS`stack`length - 1 - i - cindex(args`seq(i))), cS`stack)
+              ]
+            ELSE % Call
+              make_call(cS, f)
+            ENDIF,
           sassign(lv1, e1):
-            cS
+            IF ecall?(e1) AND i <= cargs(e1)`length THEN
+              IF i < cargs(e1)`length THEN % Push arg
+                cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1,
+                         `stack := add(cS`stack(cS`stack`length - 1 - i - cindex(cargs(e1)`seq(i))), cS`stack)
+                ]
+              ELSE % Call
+                make_call(cS, cfun(e1))
+              ENDIF
+            ELSIF i = 0 THEN % compute rhs and put in return value
+              CASES e1 OF
+                econstant(n):
+                  cS WITH [`return_value := cintv(n),
+                           `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                enil:
+                  cS WITH [`return_value := cnil,
+                           `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                ebuiltin(b, v1, v2):
+                  LET x1 = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+                  LET x2 = cS`stack`seq(cS`stack`length - 1 - cindex(v2)) IN
+                  IF cintv?(x1) AND cintv?(x2) THEN
+                    cS WITH [`return_value := cintv(cintvalue(x1) + cintvalue(x2)),
+                             `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                  ELSE
+                    cS WITH [`error := TRUE]
+                  ENDIF,
+                elv(lr1):
+                  CASES lr1 OF
+                    cvar(i):
+                      cS WITH [`return_value := cS`stack`seq(cS`stack`length - 1 - i),
+                               `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                    caccess(v1, v2):
+                      LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+                      LET i = cS`stack`seq(cS`stack`length - 1 - cindex(v2)) IN
+                      IF cref?(r) AND cS`domain(crefindex(r))
+                          AND cintv?(i) AND cintvalue(i) >= 0
+                          AND cintvalue(i) < cS`store(crefindex(r))`length THEN
+                        cS WITH [`return_value := cS`store(crefindex(r))`seq(cintvalue(i)),
+                                 `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                      ELSE
+                        cS WITH [`error := TRUE]
+                      ENDIF,
+                    cfield(v1, k):
+                      LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+                      IF cref?(r) AND cS`domain(crefindex(r)) AND k < cS`store(crefindex(r))`length THEN
+                        cS WITH [`return_value := cS`store(crefindex(r))`seq(k),
+                                 `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                      ELSE
+                        cS WITH [`error := TRUE]
+                     ENDIF
+                  ENDCASES
+              ENDCASES
+            ELSE
+              CASES lv1 OF
+                cvar(i):
+                  cS WITH [`stack`seq(cS`stack`length - 1 - i) := cS`return_value,
+                           `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                caccess(v1, v2):
+                  LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+                  LET i = cS`stack`seq(cS`stack`length - 1 - cindex(v2)) IN
+                  IF cref?(r) AND cS`domain(crefindex(r))
+                      AND cintv?(i) AND cintvalue(i) >= 0
+                      AND cintvalue(i) < cS`store(crefindex(r))`length THEN
+                    cS WITH [`store(crefindex(r))`seq(cintvalue(i)) := cS`return_value,
+                             `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                  ELSE
+                    cS WITH [`error := TRUE]
+                  ENDIF,
+                cfield(v1, k):
+                  LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+                  IF cref?(r) AND cS`domain(crefindex(r)) AND k < cS`store(crefindex(r))`length THEN
+                    cS WITH [`store(crefindex(r))`seq(k) := cS`return_value,
+                             `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                  ELSE
+                    cS WITH [`error := TRUE]
+                  ENDIF,
+                creturn:
+                  IF lf`fdepth > 0 THEN
+                    cS WITH [`callstack`seq(cS`callstack`length - 1)`fdepth := lf`fdepth - 1]
+                  ELSIF cS`callstack`length > 0 THEN
+                    LET nc = pop(cS`callstack) IN
+                    LET nlf = nc`seq(nc`length - 1) IN
+                    cS WITH [`callstack := nc WITH
+                      [`seq(nc`length - 1)`fpc :=
+                          next_pc(cS`cdefs`seq(nlf`ffct)`body)(nlf`fpc)]
+                    ]
+                  ELSE
+                    cS
+                  ENDIF
+              ENDCASES
+            ENDIF
         ENDCASES
       ENDIF
 

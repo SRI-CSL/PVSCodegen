@@ -36,13 +36,13 @@ typeinfo_adt: THEORY
   typeinfo_ord: [typeinfo -> upto(4)]
 
   typeinfo_ord_defaxiom: AXIOM
-         (forall (lettype: nat, lrhs: typeinfo, lbody: typeinfo):
+         (FORALL (lettype: nat, lrhs: typeinfo, lbody: typeinfo):
             typeinfo_ord(lett(lettype, lrhs, lbody)) = 0)
-     AND (forall (ptbody: typeinfo): typeinfo_ord(popt(ptbody)) = 1)
-     AND (forall (rlexpr: typeinfo): typeinfo_ord(releaset(rlexpr)) = 2)
-     AND (forall (tthen: typeinfo, telse: typeinfo):
+     AND (FORALL (ptbody: typeinfo): typeinfo_ord(popt(ptbody)) = 1)
+     AND (FORALL (rlexpr: typeinfo): typeinfo_ord(releaset(rlexpr)) = 2)
+     AND (FORALL (tthen: typeinfo, telse: typeinfo):
             typeinfo_ord(iftt(tthen, telse)) = 3)
-     AND forall (leaftype: nat): typeinfo_ord(leaft(leaftype)) = 4;
+     AND FORALL (leaftype: nat): typeinfo_ord(leaft(leaftype)) = 4;
 
   ord(x: typeinfo): upto(4) =
       CASES x
@@ -137,18 +137,18 @@ typeinfo_adt: THEORY
 
   typeinfo_induction: AXIOM
     FORALL (p: [typeinfo -> boolean]):
-      (     (forall (lett1_var: nat, lett2_var: typeinfo,
+      (     (FORALL (lett1_var: nat, lett2_var: typeinfo,
                      lett3_var: typeinfo):
                p(lett2_var) AND p(lett3_var) IMPLIES
                 p(lett(lett1_var, lett2_var, lett3_var)))
-        AND (forall (popt1_var: typeinfo):
+        AND (FORALL (popt1_var: typeinfo):
                p(popt1_var) IMPLIES p(popt(popt1_var)))
-        AND (forall (releaset1_var: typeinfo):
+        AND (FORALL (releaset1_var: typeinfo):
                p(releaset1_var) IMPLIES p(releaset(releaset1_var)))
-        AND (forall (iftt1_var: typeinfo, iftt2_var: typeinfo):
+        AND (FORALL (iftt1_var: typeinfo, iftt2_var: typeinfo):
                p(iftt1_var) AND p(iftt2_var) IMPLIES
                 p(iftt(iftt1_var, iftt2_var)))
-        AND forall (leaft1_var: nat): p(leaft(leaft1_var)))
+        AND FORALL (leaft1_var: nat): p(leaft(leaft1_var)))
        IMPLIES FORALL (typeinfo_var: typeinfo): p(typeinfo_var);
 
   subterm(x: typeinfo, y: typeinfo):  boolean =
@@ -168,13 +168,13 @@ typeinfo_adt: THEORY
         CASES y
           OF lett(lett1_var, lett2_var, lett3_var):
                (x = lett2_var OR x << lett2_var) OR
-                x = lett3_var OR x << lett3_var,
-             popt(popt1_var): x = popt1_var OR x << popt1_var,
+                (x = lett3_var OR x << lett3_var),
+             popt(popt1_var): (x = popt1_var OR x << popt1_var),
              releaset(releaset1_var):
-               x = releaset1_var OR x << releaset1_var,
+               (x = releaset1_var OR x << releaset1_var),
              iftt(iftt1_var, iftt2_var):
                (x = iftt1_var OR x << iftt1_var) OR
-                x = iftt2_var OR x << iftt2_var,
+                (x = iftt2_var OR x << iftt2_var),
              leaft(leaft1_var): FALSE
           ENDCASES;
 

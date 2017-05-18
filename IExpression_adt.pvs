@@ -77,26 +77,26 @@ IExpression_adt: THEORY
   IExpression_ord: [IExpression -> upto(12)]
 
   IExpression_ord_defaxiom: AXIOM
-         (forall (index: nat, marked: bool):
+         (FORALL (index: nat, marked: bool):
             IExpression_ord(variable(index, marked)) = 0)
-     AND (forall (value: int): IExpression_ord(constant(value)) = 1)
+     AND (FORALL (value: int): IExpression_ord(constant(value)) = 1)
      AND (IExpression_ord(nil) = 2)
-     AND (forall (fun: nat, args: list[(variable?)]):
+     AND (FORALL (fun: nat, args: list[(variable?)]):
             IExpression_ord(application(fun, args)) = 3)
-     AND (forall (letrhs: IExpression, body: IExpression):
+     AND (FORALL (letrhs: IExpression, body: IExpression):
             IExpression_ord(letexpr(letrhs, body)) = 4)
-     AND (forall (condition: (variable?), thenexpr: IExpression,
+     AND (FORALL (condition: (variable?), thenexpr: IExpression,
                   elseexpr: IExpression):
             IExpression_ord(ift(condition, thenexpr, elseexpr)) = 5)
-     AND (forall (target: (variable?), lhs: (variable?), rhs: (variable?)):
+     AND (FORALL (target: (variable?), lhs: (variable?), rhs: (variable?)):
             IExpression_ord(update(target, lhs, rhs)) = 6)
-     AND (forall (arrayvalue: (variable?), position: (variable?)):
+     AND (FORALL (arrayvalue: (variable?), position: (variable?)):
             IExpression_ord(lookup(arrayvalue, position)) = 7)
-     AND (forall (size: nat): IExpression_ord(newint(size)) = 8)
-     AND (forall (size: nat): IExpression_ord(newref(size)) = 9)
-     AND (forall (pbody: IExpression): IExpression_ord(pop(pbody)) = 10)
-     AND (forall (refindex: nat): IExpression_ord(ref(refindex)) = 11)
-     AND forall (rvar: (variable?), rexpr: IExpression):
+     AND (FORALL (size: nat): IExpression_ord(newint(size)) = 8)
+     AND (FORALL (size: nat): IExpression_ord(newref(size)) = 9)
+     AND (FORALL (pbody: IExpression): IExpression_ord(pop(pbody)) = 10)
+     AND (FORALL (refindex: nat): IExpression_ord(ref(refindex)) = 11)
+     AND FORALL (rvar: (variable?), rexpr: IExpression):
            IExpression_ord(release(rvar, rexpr)) = 12;
 
   ord(x: IExpression): upto(12) =
@@ -336,34 +336,34 @@ IExpression_adt: THEORY
 
   IExpression_induction: AXIOM
     FORALL (p: [IExpression -> boolean]):
-      (     (forall (variable1_var: nat, variable2_var: bool):
+      (     (FORALL (variable1_var: nat, variable2_var: bool):
                p(variable(variable1_var, variable2_var)))
-        AND (forall (constant1_var: int): p(constant(constant1_var)))
+        AND (FORALL (constant1_var: int): p(constant(constant1_var)))
         AND p(nil)
-        AND (forall (application1_var: nat,
+        AND (FORALL (application1_var: nat,
                      application2_var: list[(variable?)]):
                every(p)(application2_var) IMPLIES
                 p(application(application1_var, application2_var)))
-        AND (forall (letexpr1_var: IExpression, letexpr2_var: IExpression):
+        AND (FORALL (letexpr1_var: IExpression, letexpr2_var: IExpression):
                p(letexpr1_var) AND p(letexpr2_var) IMPLIES
                 p(letexpr(letexpr1_var, letexpr2_var)))
-        AND (forall (ift1_var: (variable?), ift2_var: IExpression,
+        AND (FORALL (ift1_var: (variable?), ift2_var: IExpression,
                      ift3_var: IExpression):
                p(ift1_var) AND p(ift2_var) AND p(ift3_var) IMPLIES
                 p(ift(ift1_var, ift2_var, ift3_var)))
-        AND (forall (update1_var: (variable?), update2_var: (variable?),
+        AND (FORALL (update1_var: (variable?), update2_var: (variable?),
                      update3_var: (variable?)):
                p(update1_var) AND p(update2_var) AND p(update3_var) IMPLIES
                 p(update(update1_var, update2_var, update3_var)))
-        AND (forall (lookup1_var: (variable?), lookup2_var: (variable?)):
+        AND (FORALL (lookup1_var: (variable?), lookup2_var: (variable?)):
                p(lookup1_var) AND p(lookup2_var) IMPLIES
                 p(lookup(lookup1_var, lookup2_var)))
-        AND (forall (newint1_var: nat): p(newint(newint1_var)))
-        AND (forall (newref1_var: nat): p(newref(newref1_var)))
-        AND (forall (pop1_var: IExpression):
+        AND (FORALL (newint1_var: nat): p(newint(newint1_var)))
+        AND (FORALL (newref1_var: nat): p(newref(newref1_var)))
+        AND (FORALL (pop1_var: IExpression):
                p(pop1_var) IMPLIES p(pop(pop1_var)))
-        AND (forall (ref1_var: nat): p(ref(ref1_var)))
-        AND forall (release1_var: (variable?), release2_var: IExpression):
+        AND (FORALL (ref1_var: nat): p(ref(ref1_var)))
+        AND FORALL (release1_var: (variable?), release2_var: IExpression):
               p(release1_var) AND p(release2_var) IMPLIES
                p(release(release1_var, release2_var)))
        IMPLIES FORALL (IExpression_var: IExpression): p(IExpression_var);
@@ -377,7 +377,7 @@ IExpression_adt: THEORY
             application(application1_var, application2_var):
               some[(variable?)]
                   ((restrict[IExpression, (variable?), boolean]
-                        ((lambda (z: IExpression): subterm(x, z)))))
+                        ((LAMBDA (z: IExpression): subterm(x, z)))))
                   (application2_var),
             letexpr(letexpr1_var, letexpr2_var):
               subterm(x, letexpr1_var) OR subterm(x, letexpr2_var),
@@ -406,28 +406,29 @@ IExpression_adt: THEORY
              application(application1_var, application2_var):
                some[(variable?)]
                    (restrict[IExpression, (variable?), boolean]
-                        (lambda (z: IExpression): x = z OR x << z))
+                        (LAMBDA (z: IExpression): (x = z OR x << z)))
                    (application2_var),
              letexpr(letexpr1_var, letexpr2_var):
                (x = letexpr1_var OR x << letexpr1_var) OR
-                x = letexpr2_var OR x << letexpr2_var,
+                (x = letexpr2_var OR x << letexpr2_var),
              ift(ift1_var, ift2_var, ift3_var):
-                    (x = ift1_var) OR (x << ift1_var) OR (x = ift2_var)
-                OR (x << ift2_var) OR (x = ift3_var) OR (x << ift3_var),
+               (x = ift1_var OR x << ift1_var) OR
+                (x = ift2_var OR x << ift2_var) OR
+                 (x = ift3_var OR x << ift3_var),
              update(update1_var, update2_var, update3_var):
-                    (x = update1_var) OR (x << update1_var)
-                OR (x = update2_var) OR (x << update2_var)
-                OR (x = update3_var) OR (x << update3_var),
+               (x = update1_var OR x << update1_var) OR
+                (x = update2_var OR x << update2_var) OR
+                 (x = update3_var OR x << update3_var),
              lookup(lookup1_var, lookup2_var):
                (x = lookup1_var OR x << lookup1_var) OR
-                x = lookup2_var OR x << lookup2_var,
+                (x = lookup2_var OR x << lookup2_var),
              newint(newint1_var): FALSE,
              newref(newref1_var): FALSE,
-             pop(pop1_var): x = pop1_var OR x << pop1_var,
+             pop(pop1_var): (x = pop1_var OR x << pop1_var),
              ref(ref1_var): FALSE,
              release(release1_var, release2_var):
                (x = release1_var OR x << release1_var) OR
-                x = release2_var OR x << release2_var
+                (x = release2_var OR x << release2_var)
           ENDCASES;
 
   IExpression_well_founded: AXIOM strict_well_founded?[IExpression](<<);
