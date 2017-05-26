@@ -59,6 +59,7 @@ creduction: THEORY
         cref(crefindex: nat): cref?
         cintv(cintvalue: int): cintv?
         cnil: cnil?
+        cundef: cundef?
       END cvalue
 
     dom: VAR finite_set[nat]
@@ -237,8 +238,21 @@ creduction: THEORY
       ENDCASES
     MEASURE measure_stat(s1)
 
-    is_return?(s1) : bool =
-      sassign?(s1) AND creturn?(aval(s1))
+    is_return_at_end?(s1) : RECURSIVE bool =
+      CASES s1 OF
+        sif(v1, thenc, elsec): is_return_at_end?(thenc) AND is_return_at_end?(elsec),
+        sblock(stats):
+          IF stats`length = 0 THEN FALSE
+          ELSIF stats`length = 1 THEN is_return_at_end?(car(stats))
+          ELSE is_return_at_end?(sblock(cdr(stats))) ENDIF,
+        sassign(lv1, e1): creturn?(lv1)
+        ELSE FALSE
+      ENDCASES
+    MEASURE measure_stat(s1)
+
+    is_return?(s1)(i: below(clength(s1))) : bool =
+      LET (s2, j) = extract_stat(s1)(i) IN
+      sassign?(s2) AND creturn?(aval(s2)) AND j = clength(s2) - 1
 
     is_fun_call_at(s1)(i: below(clength(s1)), fct: nat) : bool =
       LET (s2, j) = extract_stat(s1)(i) IN
@@ -251,7 +265,7 @@ creduction: THEORY
         body: {s1 |
             (FORALL i: vars(s1)(i) IMPLIES i < arity)
           AND clength(s1) > 0
-          AND is_return?(extract_stat(s1)(clength(s1) - 1)`1)
+          AND is_return_at_end?(s1)
         }
     #]
     D: VAR finseq[Definition]
@@ -260,7 +274,9 @@ creduction: THEORY
       ffct: below(D`length),
       fpc: below(clength(D`seq(ffct)`body)),
       %fstack: {S : Stack | S`length = stack_size_at(D`seq(ffct)`body)(fpc) + D`seq(ffct)`arity}
-      fdepth: nat %TODO constraints?
+      fdepth: {k : nat | k = stack_size_at(D`seq(ffct)`body)(fpc) + D`seq(ffct)`arity OR
+                     (k <= stack_size_at(D`seq(ffct)`body)(fpc) + D`seq(ffct)`arity AND
+                        is_return?(D`seq(ffct)`body)(fpc))}
     #]
 
     cstate: TYPE = [#
@@ -270,7 +286,7 @@ creduction: THEORY
         FORALL (i | i < C`length - 1):
           is_fun_call_at(cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc, C`seq(i+1)`ffct)
       },
-      stack: Stack,
+      stack: Stack,%TODO constraints on stack length
       domain: finite_set[nat],
       store: Store(domain),
       return_value: cvalue
@@ -278,7 +294,10 @@ creduction: THEORY
 
     cS, cS1, cS2: VAR cstate
 
-    make_call(cS, (f: below(cS`cdefs`length))): cstate =
+    make_call((cS | cS`callstack`length > 0), (f: below(cS`cdefs`length) |
+      is_fun_call_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)
+        (cS`callstack`seq(cS`callstack`length - 1)`fpc, f)
+    )): cstate =
       cS WITH [`callstack := add((# ffct := f,
                                     fpc := 0,
                                     fdepth := cS`cdefs`seq(f)`arity
@@ -316,6 +335,64 @@ creduction: THEORY
       ENDCASES
     MEASURE measure_stat(s1)
 
+    is_return_at_end_clength: LEMMA
+      is_return_at_end?(s1) IMPLIES clength(s1) > 0
+
+    next_pc_no_overflow: LEMMA
+      i < clength(s1) AND
+        NOT is_return?(s1)(i) AND
+        is_return_at_end?(s1) IMPLIES
+          next_pc(s1)(i) < clength(s1)
+
+    next_pc_overflow: LEMMA
+      clength(s1) > 0 IMPLIES next_pc(s1)(clength(s1) - 1) = clength(s1)
+
+    extract_stat_index: LEMMA
+      i < clength(s1) IMPLIES
+         i + clength(extract_stat(s1)(i)`1) - extract_stat(s1)(i)`2 <= clength(s1)
+
+    next_pc_if_upto: LEMMA
+      i < clength(s1) AND sif?(extract_stat(s1)(i)`1) IMPLIES
+        i + 1 + clength(iftrue(extract_stat(s1)(i)`1)) <= clength(s1)
+
+    next_pc_if_no_overflow: LEMMA
+      i < clength(s1) AND 
+        is_return_at_end?(s1) IMPLIES
+        (LET (s2, j) = extract_stat(s1)(i) IN
+         sif?(s2) IMPLIES
+           i + 1 + clength(iftrue(s2)) < clength(s1))
+
+    stack_size_at_overflow: LEMMA
+      i < clength(s1) AND
+        NOT sdecl?(extract_stat(s1)(i)`1) AND
+        next_pc(s1)(i) = clength(s1) IMPLIES
+          stack_size_at(s1)(i) = 0
+
+    stack_size_at_next_pc: LEMMA
+      i < clength(s1) AND next_pc(s1)(i) < clength(s1) AND
+        NOT sdecl?(extract_stat(s1)(i)`1) IMPLIES
+          stack_size_at(s1)(next_pc(s1)(i)) = stack_size_at(s1)(i)
+
+    stack_size_at2(s1)(i: upto(clength(s1))): nat =
+      IF i = clength(s1) THEN 0 ELSE stack_size_at(s1)(i) ENDIF
+
+    stack_size_at_next_pc_iftrue: LEMMA
+      i + 1 < clength(s1) AND
+       sif?(extract_stat(s1)(i)`1) IMPLIES
+          stack_size_at(s1)(i + 1) = stack_size_at(s1)(i)
+
+    stack_size_at_next_pc_iffalse: LEMMA
+      i < clength(s1) IMPLIES
+       (LET (s2, j) = extract_stat(s1)(i) IN
+        sif?(s2) AND i + 1 + clength(iftrue(s2)) <= clength(s1) IMPLIES
+           stack_size_at2(s1)(i + 1 + clength(iftrue(s2))) = stack_size_at(s1)(i))
+
+    cframe_next_pc(D)(cf: cstack_frame(D) |
+      NOT is_return?(D`seq(cf`ffct)`body)(cf`fpc) AND
+      NOT sdecl?(extract_stat(D`seq(cf`ffct)`body)(cf`fpc)`1)
+    ): cstack_frame(D) =
+      cf WITH [`fpc := next_pc(D`seq(cf`ffct)`body)(cf`fpc)]
+
     pop[T: TYPE](S: finseq[T] | S`length > 0) : finseq[T] =
       (# length := S`length - 1,
          seq := LAMBDA (i: below(S`length - 1)): S`seq(i)
@@ -330,8 +407,8 @@ creduction: THEORY
         LET (s1, i) = extract_stat(fbody)(lf`fpc) IN
         CASES s1 OF
           sdecl(tp, s2):
-            IF i = 0 THEN % Push new variable
-              cS WITH [`stack := add(IF tp = cint THEN cintv(0) ELSE cnil ENDIF, cS`stack),
+            IF i = 0 THEN % Push new variable TODO undefined
+              cS WITH [`stack := add(cundef, cS`stack),
                        `callstack`seq(cS`callstack`length - 1) :=
                          lf WITH [
                           `fdepth := lf`fdepth + 1,
@@ -349,16 +426,13 @@ creduction: THEORY
                       ]
             ENDIF,
           sif(v1, cthen, celse):
-            IF i = 0 THEN % Check condition
-              LET x = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
-              IF x = cintv(0) OR x = cnil THEN
-                cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + clength(cthen) + 1]
-              ELSE
-                cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1]
-              ENDIF
-            ELSE % Nop
-              cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc :=
-                         next_pc(fbody)(lf`fpc)]
+            LET x = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+            IF x = cundef THEN
+              cS WITH [`error := TRUE]
+            ELSIF x = cintv(0) OR x = cnil THEN
+              cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + clength(cthen) + 1]
+            ELSE
+              cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1]
             ENDIF,
           sfree(v1):
             LET x = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
@@ -369,19 +443,17 @@ creduction: THEORY
               cS WITH [`error := TRUE]
             ELSE
               cS WITH [`domain := IF x = cnil THEN cS`domain ELSE remove(crefindex(x), cS`domain) ENDIF,
-                       `callstack`seq(cS`callstack`length - 1)`fpc :=
-                         next_pc(fbody)(lf`fpc)]
+                       `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
             ENDIF,
           smalloc(n):
             cS WITH [`domain := add(least_out(cS`domain), cS`domain),
                      `store := cS`store WITH
                        [(least_out(cS`domain)) |->
-                         (# length := n, seq := LAMBDA (i: below(n)): cnil #)],
-                     `callstack`seq(cS`callstack`length - 1)`fpc :=
-                         next_pc(fbody)(lf`fpc)],
+                         (# length := n, seq := LAMBDA (i: below(n)): cundef #)],
+                     `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
           scall(f, args):
             IF i < args`length THEN % Push arg
-              cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1,
+              cS WITH [`callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf),
                        `stack := add(cS`stack(cS`stack`length - 1 - i - cindex(args`seq(i))), cS`stack)
               ]
             ELSE % Call
@@ -390,7 +462,7 @@ creduction: THEORY
           sassign(lv1, e1):
             IF ecall?(e1) AND i <= cargs(e1)`length THEN
               IF i < cargs(e1)`length THEN % Push arg
-                cS WITH [`callstack`seq(cS`callstack`length - 1)`fpc := lf`fpc + 1,
+                cS WITH [`callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf),
                          `stack := add(cS`stack(cS`stack`length - 1 - i - cindex(cargs(e1)`seq(i))), cS`stack)
                 ]
               ELSE % Call
@@ -400,16 +472,16 @@ creduction: THEORY
               CASES e1 OF
                 econstant(n):
                   cS WITH [`return_value := cintv(n),
-                           `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                           `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
                 enil:
                   cS WITH [`return_value := cnil,
-                           `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                           `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
                 ebuiltin(b, v1, v2):
                   LET x1 = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
                   LET x2 = cS`stack`seq(cS`stack`length - 1 - cindex(v2)) IN
                   IF cintv?(x1) AND cintv?(x2) THEN
                     cS WITH [`return_value := cintv(cintvalue(x1) + cintvalue(x2)),
-                             `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                             `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
                   ELSE
                     cS WITH [`error := TRUE]
                   ENDIF,
@@ -417,7 +489,7 @@ creduction: THEORY
                   CASES lr1 OF
                     cvar(i):
                       cS WITH [`return_value := cS`stack`seq(cS`stack`length - 1 - i),
-                               `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                               `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
                     caccess(v1, v2):
                       LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
                       LET i = cS`stack`seq(cS`stack`length - 1 - cindex(v2)) IN
@@ -425,7 +497,7 @@ creduction: THEORY
                           AND cintv?(i) AND cintvalue(i) >= 0
                           AND cintvalue(i) < cS`store(crefindex(r))`length THEN
                         cS WITH [`return_value := cS`store(crefindex(r))`seq(cintvalue(i)),
-                                 `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                                 `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
                       ELSE
                         cS WITH [`error := TRUE]
                       ENDIF,
@@ -433,7 +505,7 @@ creduction: THEORY
                       LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
                       IF cref?(r) AND cS`domain(crefindex(r)) AND k < cS`store(crefindex(r))`length THEN
                         cS WITH [`return_value := cS`store(crefindex(r))`seq(k),
-                                 `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                                 `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
                       ELSE
                         cS WITH [`error := TRUE]
                      ENDIF
@@ -443,7 +515,7 @@ creduction: THEORY
               CASES lv1 OF
                 cvar(i):
                   cS WITH [`stack`seq(cS`stack`length - 1 - i) := cS`return_value,
-                           `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)],
+                           `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
                 caccess(v1, v2):
                   LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
                   LET i = cS`stack`seq(cS`stack`length - 1 - cindex(v2)) IN
@@ -451,7 +523,7 @@ creduction: THEORY
                       AND cintv?(i) AND cintvalue(i) >= 0
                       AND cintvalue(i) < cS`store(crefindex(r))`length THEN
                     cS WITH [`store(crefindex(r))`seq(cintvalue(i)) := cS`return_value,
-                             `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                             `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
                   ELSE
                     cS WITH [`error := TRUE]
                   ENDIF,
@@ -459,7 +531,7 @@ creduction: THEORY
                   LET r = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
                   IF cref?(r) AND cS`domain(crefindex(r)) AND k < cS`store(crefindex(r))`length THEN
                     cS WITH [`store(crefindex(r))`seq(k) := cS`return_value,
-                             `callstack`seq(cS`callstack`length - 1)`fpc := next_pc(fbody)(lf`fpc)]
+                             `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
                   ELSE
                     cS WITH [`error := TRUE]
                   ENDIF,
@@ -470,11 +542,10 @@ creduction: THEORY
                     LET nc = pop(cS`callstack) IN
                     LET nlf = nc`seq(nc`length - 1) IN
                     cS WITH [`callstack := nc WITH
-                      [`seq(nc`length - 1)`fpc :=
-                          next_pc(cS`cdefs`seq(nlf`ffct)`body)(nlf`fpc)]
+                      [`seq(nc`length - 1) := cframe_next_pc(cS`cdefs)(nlf)]
                     ]
                   ELSE
-                    cS
+                    cS WITH [`callstack := pop(cS`callstack)]
                   ENDIF
               ENDCASES
             ENDIF
