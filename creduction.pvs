@@ -121,6 +121,15 @@ creduction: THEORY
       sblock?(s1) AND bstats(s1)`length > 0 IMPLIES
         measure_stat(sblock(cdr(bstats(s1)))) < measure_stat(s1)
 
+    stat_induction: LEMMA
+      FORALL (P: pred[cstat]):
+        (FORALL tp1, s1: P(s1) IMPLIES P(sdecl(tp1, s1))) AND
+        (FORALL (v1: (cvar?)), s1, s2: P(s1) AND P(s2) IMPLIES P(sif(v1, s1, s2))) AND
+        P(sblock(null)) AND
+        (FORALL s1, (l: finseq[cstat]): P(s1) AND P(sblock(l)) IMPLIES P(sblock(cons(s1, l)))) AND
+        (FORALL s1: NOT sdecl?(s1) AND NOT sif?(s1) AND NOT sblock?(s1) IMPLIES P(s1)) IMPLIES
+          FORALL s1: P(s1)
+
     clength(s1) : RECURSIVE nat =
       CASES s1 OF
         sdecl(tp1, s2): clength(s2) + 2,
@@ -256,7 +265,7 @@ creduction: THEORY
 
     is_fun_call_at(s1)(i: below(clength(s1)), fct: nat) : bool =
       LET (s2, j) = extract_stat(s1)(i) IN
-      (sassign?(s2) AND ecall?(aexpr(s2)) AND fct = cfun(aexpr(s2)) AND j = cargs(aexpr(s2))`length + 1) OR
+      (sassign?(s2) AND ecall?(aexpr(s2)) AND fct = cfun(aexpr(s2)) AND j = cargs(aexpr(s2))`length) OR
         (scall?(s2) AND fct = sfun(s2) AND j = sargs(s2)`length)
 
     %TODO definitions are well typed
@@ -286,7 +295,9 @@ creduction: THEORY
         FORALL (i | i < C`length - 1):
           is_fun_call_at(cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc, C`seq(i+1)`ffct)
       },
-      stack: Stack,%TODO constraints on stack length
+      stack : Stack,
+%      stack: {S: Stack | S`length = Sigma((LAMBDA i: i < callstack`length),
+%        LAMBDA i: IF i < callstack`length THEN callstack`seq(i)`fdepth ELSE 0 ENDIF)},
       domain: finite_set[nat],
       store: Store(domain),
       return_value: cvalue
@@ -294,14 +305,18 @@ creduction: THEORY
 
     cS, cS1, cS2: VAR cstate
 
-    make_call((cS | cS`callstack`length > 0), (f: below(cS`cdefs`length) |
+    make_call((cS | cS`callstack`length > 0), (f: nat |
       is_fun_call_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)
         (cS`callstack`seq(cS`callstack`length - 1)`fpc, f)
     )): cstate =
-      cS WITH [`callstack := add((# ffct := f,
-                                    fpc := 0,
-                                    fdepth := cS`cdefs`seq(f)`arity
-                                  #), cS`callstack)]
+      IF f < cS`cdefs`length THEN
+        cS WITH [`callstack := add((# ffct := f,
+                                      fpc := 0,
+                                      fdepth := cS`cdefs`seq(f)`arity
+                                    #), cS`callstack)]
+      ELSE
+        cS WITH [`error := TRUE]
+      ENDIF
 
     next_pc(s1)(i | i < clength(s1)) : RECURSIVE upto(clength(s1)) =
       CASES s1 OF
@@ -376,6 +391,38 @@ creduction: THEORY
     stack_size_at2(s1)(i: upto(clength(s1))): nat =
       IF i = clength(s1) THEN 0 ELSE stack_size_at(s1)(i) ENDIF
 
+
+    stack_size_at2_alt : LEMMA
+     FORALL (i: upto(clength(s1))):
+     stack_size_at2(s1)(i) =
+      CASES s1 OF
+        sdecl(tp1, s2):
+          IF i = 0 THEN
+            0
+          ELSIF i < clength(s1) THEN
+            1 + stack_size_at2(s2)(i - 1)
+          ELSE
+            0
+          ENDIF,
+        sif(v1, thenc, elsec):
+          IF i = 0 THEN
+            0
+          ELSIF i < clength(thenc) + 1 THEN
+            stack_size_at(thenc)(i - 1)
+          ELSE
+            stack_size_at2(elsec)(i - 1 - clength(thenc))
+          ENDIF,
+        sblock(stats):
+          IF stats`length = 0 THEN
+            0
+          ELSIF i < clength(car(stats)) THEN
+            stack_size_at(car(stats))(i)
+          ELSE
+            stack_size_at2(sblock(cdr(stats)))(i-clength(car(stats)))
+          ENDIF
+        ELSE 0
+      ENDCASES
+
     stack_size_at_next_pc_iftrue: LEMMA
       i + 1 < clength(s1) AND
        sif?(extract_stat(s1)(i)`1) IMPLIES
@@ -386,6 +433,42 @@ creduction: THEORY
        (LET (s2, j) = extract_stat(s1)(i) IN
         sif?(s2) AND i + 1 + clength(iftrue(s2)) <= clength(s1) IMPLIES
            stack_size_at2(s1)(i + 1 + clength(iftrue(s2))) = stack_size_at(s1)(i))
+
+    next_pc_decl_begin_no_overflow: LEMMA
+      i < clength(s1) AND sdecl?(extract_stat(s1)(i)`1) AND extract_stat(s1)(i)`2 = 0 IMPLIES
+        next_pc(s1)(i) < clength(s1)
+
+    stack_size_at_next_pc_decl_begin: LEMMA
+      i < clength(s1) AND next_pc(s1)(i) < clength(s1) AND
+        sdecl?(extract_stat(s1)(i)`1) AND extract_stat(s1)(i)`2 = 0 IMPLIES
+          stack_size_at(s1)(next_pc(s1)(i)) = stack_size_at(s1)(i) + 1
+
+    AUTO_REWRITE+ list2finseq_finseq2list
+    AUTO_REWRITE+ finseq2list_list2finseq
+
+    stack_size_at_next_pc_decl_end: LEMMA
+      i < clength(s1) AND next_pc(s1)(i) <= clength(s1) AND
+        sdecl?(extract_stat(s1)(i)`1) AND
+        extract_stat(s1)(i)`2 = clength(extract_stat(s1)(i)`1) - 1 IMPLIES
+          stack_size_at2(s1)(next_pc(s1)(i)) = stack_size_at(s1)(i) - 1
+
+    stack_size_at_vars: LEMMA
+      i < clength(s1) AND NOT sdecl?(extract_stat(s1)(i)`1) IMPLIES
+        vars(extract_stat(s1)(i)`1)(j + stack_size_at(s1)(i)) IMPLIES vars(s1)(j)
+
+    cframe_vars: LEMMA
+      FORALL (cf: cstack_frame(D)):
+        NOT sdecl?(extract_stat(D`seq(cf`ffct)`body)(cf`fpc)`1) AND
+        NOT is_return?(D`seq(cf`ffct)`body)(cf`fpc) IMPLIES
+          vars(extract_stat(D`seq(cf`ffct)`body)(cf`fpc)`1)(j) IMPLIES j < cf`fdepth
+
+    cstate_vars: LEMMA
+      cS`callstack`length > 0 IMPLIES
+      LET cf = cS`callstack`seq(cS`callstack`length - 1) IN
+        NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1) AND
+        NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND
+        vars(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)(j) IMPLIES
+          j < cS`stack`length
 
     cframe_next_pc(D)(cf: cstack_frame(D) |
       NOT is_return?(D`seq(cf`ffct)`body)(cf`fpc) AND
@@ -402,7 +485,7 @@ creduction: THEORY
       IF cS`callstack`length = 0 THEN
         cS
       ELSE
-        LET lf = cS`callstack(cS`callstack`length - 1) IN
+        LET lf = cS`callstack`seq(cS`callstack`length - 1) IN
         LET fbody = cS`cdefs`seq(lf`ffct)`body IN
         LET (s1, i) = extract_stat(fbody)(lf`fpc) IN
         CASES s1 OF
@@ -439,7 +522,7 @@ creduction: THEORY
             % Freeing an int or something outside the domain is liable to memory
             % corruption, so this is an error.
             % However, freeing null it legal and is a nop.
-            IF cintv?(x) OR (cref?(x) AND NOT cS`domain(crefindex(x))) THEN
+            IF cintv?(x) OR (cref?(x) AND NOT cS`domain(crefindex(x))) OR x = cundef THEN
               cS WITH [`error := TRUE]
             ELSE
               cS WITH [`domain := IF x = cnil THEN cS`domain ELSE remove(crefindex(x), cS`domain) ENDIF,
@@ -538,7 +621,7 @@ creduction: THEORY
                 creturn:
                   IF lf`fdepth > 0 THEN
                     cS WITH [`callstack`seq(cS`callstack`length - 1)`fdepth := lf`fdepth - 1]
-                  ELSIF cS`callstack`length > 0 THEN
+                  ELSIF cS`callstack`length > 1 THEN
                     LET nc = pop(cS`callstack) IN
                     LET nlf = nc`seq(nc`length - 1) IN
                     cS WITH [`callstack := nc WITH
