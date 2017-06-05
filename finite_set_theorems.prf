@@ -101,6 +101,37 @@
     (boolean nonempty-type-decl nil booleans nil)
     (number nonempty-type-decl nil numbers nil))
    shostak))
+ (below_finite 0
+  (below_finite-1 nil 3705329631
+   ("" (skeep)
+    (("" (expand is_finite)
+      (("" (inst?)
+        (("" (inst 1 "LAMBDA (i: below(n)): i") (("" (grind) nil nil))
+          nil))
+        nil))
+      nil))
+    nil)
+   ((is_finite const-decl "bool" finite_sets nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil nat_types nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (injective? const-decl "bool" functions nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil))
+   shostak))
  (nat_fullset_infinite 0
   (nat_fullset_infinite-1 nil 3649868880
    ("" (expand "is_finite")
@@ -176,7 +207,9 @@
     (nonempty? const-decl "bool" sets nil)
     (injective? const-decl "bool" functions nil)
     (nat_fullset_infinite formula-decl nil finite_set_theorems nil))
-   nil))
+   nil
+   (pick_new subtype "LAMBDA j: complement(NS)(j)"
+    "(nonempty?[nat])")))
  (pick_new_TCC2 0
   (pick_new_TCC2-1 nil 3649901266 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -200,7 +233,9 @@
     (injective? const-decl "bool" functions nil)
     (member const-decl "bool" sets nil)
     (complement const-decl "set" sets nil))
-   nil))
+   nil
+   (pick_new subtype "(choose! j: complement(NS)(j))"
+    "{j | NOT NS(j)}")))
  (least_out_rec_TCC1 0
   (least_out_rec_TCC1-1 nil 3649901266 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -231,7 +266,7 @@
     (member const-decl "bool" sets nil)
     (complement const-decl "set" sets nil)
     (pick_new const-decl "{j | NOT NS(j)}" finite_set_theorems nil))
-   nil))
+   nil (least_out_rec subtype "pick_new(NS) - i" "naturalnumber")))
  (least_out_rec_TCC2 0
   (least_out_rec_TCC2-1 nil 3649901266 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -261,14 +296,14 @@
     (member const-decl "bool" sets nil)
     (complement const-decl "set" sets nil)
     (pick_new const-decl "{j | NOT NS(j)}" finite_set_theorems nil))
-   nil))
+   nil (least_out_rec subtype "i + 1" "{i | i <= pick_new(NS)}")))
  (least_out_rec_TCC3 0
   (least_out_rec_TCC3-1 nil 3649901266 ("" (subtype-tcc) nil nil)
    ((member const-decl "bool" sets nil)
     (complement const-decl "set" sets nil)
     (pick_new const-decl "{j | NOT NS(j)}" finite_set_theorems nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
-   nil))
+   nil (least_out_rec termination "least_out_rec(NS, i + 1)" "nil")))
  (least_out_TCC1 0
   (least_out_TCC1-1 nil 3649966189 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -295,7 +330,7 @@
     (member const-decl "bool" sets nil)
     (complement const-decl "set" sets nil)
     (pick_new const-decl "{j | NOT NS(j)}" finite_set_theorems nil))
-   nil))
+   nil (least_out subtype "0" "{i | i <= pick_new(NS)}")))
  (Sigma_TCC1 0
   (Sigma_TCC1-1 nil 3698608718 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -319,7 +354,7 @@
     (member const-decl "bool" sets nil)
     (empty? const-decl "bool" sets nil)
     (nonempty? const-decl "bool" sets nil))
-   nil))
+   nil (Sigma subtype "X" "(nonempty?[nat])")))
  (Sigma_TCC2 0
   (Sigma_TCC2-1 nil 3698608718
    ("" (skeep)
@@ -347,7 +382,7 @@
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
     (card_remove formula-decl nil finite_sets nil))
-   nil))
+   nil (Sigma termination "Sigma(remove(choose(X), X), f)" "nil")))
  (list2finset_TCC1 0
   (list2finset_TCC1-1 nil 3652980080
    ("" (induct "LL")
@@ -367,7 +402,7 @@
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
     (list type-decl nil list_adt nil))
-   nil))
+   nil (list2finset subtype "list2set(LL)" "finite_set[T]")))
  (finite_set_induction 0
   (finite_set_induction-1 nil 3656130780
    ("" (skeep)
@@ -511,7 +546,7 @@
     (set type-eq-decl nil sets nil)
     (nonzero_elts const-decl "set[T]" convergence_set "sigma_set/")
     (finite_nonzero_elts formula-decl nil finite_set_theorems nil))
-   nil))
+   nil (sigma_sigma_set subtype "f" "(convergent?[nat](X))")))
  (sigma_sigma_set 0
   (sigma_sigma_set-1 nil 3698607396
    ("" (induct "X" :name "finite_set_induction")
@@ -834,8 +869,8 @@
      "sets_aux/"))
    shostak))
  (sigma_shift_TCC1 0
-  (sigma_shift_TCC1-1 nil 3703620208 ("" (subtype-tcc) nil nil) nil
-   nil))
+  (sigma_shift_TCC1-1 nil 3703620208 ("" (subtype-tcc) nil nil) nil nil
+   (sigma_shift subtype "(LAMBDA i: X(i + 1))" "finite_set[nat]")))
  (sigma_shift 0
   (sigma_shift-1 nil 3703620209
    ("" (induct X :name finite_set_induction)
@@ -964,8 +999,7 @@
     (/= const-decl "boolean" notequal nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (int_plus_int_is_int application-judgement "int" integers nil)
-    (X_1 skolem-const-decl "finite_set[nat]" finite_set_theorems nil)
+    (int_plus_int_is_int application-judgement "int" integers nil) nil
     (emptyset const-decl "set" sets nil)
     (member const-decl "bool" sets nil)
     (empty? const-decl "bool" sets nil)

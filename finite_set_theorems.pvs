@@ -10,6 +10,9 @@ finite_set_theorems : THEORY
     nat_infinite: LEMMA
       (FORALL (n: nat): NOT EXISTS (f: (injective?[nat, below(n)])): TRUE)
 
+    below_finite: LEMMA
+      FORALL (n: nat): is_finite[nat](LAMBDA (i: nat): i < n)
+
     nat_fullset_infinite: LEMMA
       NOT is_finite(fullset[nat])
 
