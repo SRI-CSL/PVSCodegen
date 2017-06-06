@@ -3,6 +3,12 @@ creduction: THEORY
 
     IMPORTING finite_set_theorems, list2finseq_extra, finseq_theorems
 
+    pop[T: TYPE](S: finseq[T] | S`length > 0) : finseq[T] =
+      (# length := S`length - 1,
+         seq := LAMBDA (i: below(S`length - 1)): S`seq(i)
+       #)
+
+
     % All types we are considering have a size of sizeof(int) or sizeof(int*)
     % We will assume these two are equal, and every size we will
     % use will mean that size times sizeof(int)
@@ -312,6 +318,11 @@ creduction: THEORY
         (FORALL (i: below(C1`length)): C1`seq(i)`fdepth = C2`seq(i)`fdepth) IMPLIES
           fdepth_sum(D)(C1) = fdepth_sum(D)(C2)
 
+    fdepth_sum_pop: LEMMA
+      FORALL (C: finseq[cstack_frame(D)]):
+        C`length > 0 IMPLIES
+          fdepth_sum(D)(C) = C`seq(C`length - 1)`fdepth + fdepth_sum(D)(pop(C))
+
     expected_stack_size(D)(C: finseq[cstack_frame(D)]): nat =
        fdepth_sum(D)(C) +
         IF C`length > 0 THEN
@@ -520,15 +531,24 @@ creduction: THEORY
     extra_size_at_zero: LEMMA
       clength(s1) > 0 IMPLIES extra_size_at(s1)(0) = 0
 
+    next_pc_extract: LEMMA
+      i < clength(s1) AND
+        NOT sdecl?(extract_stat(s1)(i)`1) AND NOT sif?(extract_stat(s1)(i)`1) AND
+        extract_stat(s1)(i)`2 < clength(extract_stat(s1)(i)`1) - 1 IMPLIES
+      next_pc(s1)(i) < clength(s1) AND
+        extract_stat(s1)(next_pc(s1)(i))`1 = extract_stat(s1)(i)`1 AND
+        extract_stat(s1)(next_pc(s1)(i))`2 = extract_stat(s1)(i)`2 + 1
 
     make_call((cS | cS`callstack`length > 0), (f: nat |
       is_fun_call_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)
-        (cS`callstack`seq(cS`callstack`length - 1)`fpc, f) AND
-      (f < cS`cdefs`length IMPLIES
-        extra_size_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)
-          (cS`callstack`seq(cS`callstack`length - 1)`fpc) = cS`cdefs`seq(f)`arity)
+        (cS`callstack`seq(cS`callstack`length - 1)`fpc, f) %AND
+%      (f < cS`cdefs`length IMPLIES
+%        extra_size_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)
+%          (cS`callstack`seq(cS`callstack`length - 1)`fpc) = cS`cdefs`seq(f)`arity)
     )): cstate =
-      IF f < cS`cdefs`length THEN
+      IF f < cS`cdefs`length AND
+           extra_size_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)
+             (cS`callstack`seq(cS`callstack`length - 1)`fpc) = cS`cdefs`seq(f)`arity THEN
         cS WITH [`callstack := add((# ffct := f,
                                       fpc := 0,
                                       fdepth := cS`cdefs`seq(f)`arity
@@ -556,6 +576,20 @@ creduction: THEORY
           IMPLIES
              extra_size_at(s1)(next_pc(s1)(i)) = 0
 
+    extra_size_at_next_pc_iftrue: LEMMA
+      i + 1 < clength(s1) AND
+        sif?(extract_stat(s1)(i)`1)
+        IMPLIES
+          extra_size_at(s1)(i + 1) = extra_size_at(s1)(i)
+
+    extra_size_at_next_pc_iffalse: LEMMA
+      i < clength(s1) AND
+        sif?(extract_stat(s1)(i)`1) AND
+        i + 1 + clength(iftrue(extract_stat(s1)(i)`1)) < clength(s1)
+        IMPLIES
+          extra_size_at(s1)(i + 1 + clength(iftrue(extract_stat(s1)(i)`1))) =
+            extra_size_at(s1)(i)
+
     cframe_vars: LEMMA
       FORALL (cf: cstack_frame(D)):
         NOT sdecl?(extract_stat(D`seq(cf`ffct)`body)(cf`fpc)`1) AND
@@ -575,11 +609,6 @@ creduction: THEORY
       NOT sdecl?(extract_stat(D`seq(cf`ffct)`body)(cf`fpc)`1)
     ): cstack_frame(D) =
       cf WITH [`fpc := next_pc(D`seq(cf`ffct)`body)(cf`fpc)]
-
-    pop[T: TYPE](S: finseq[T] | S`length > 0) : finseq[T] =
-      (# length := S`length - 1,
-         seq := LAMBDA (i: below(S`length - 1)): S`seq(i)
-       #)
 
     reduce(cS | NOT cS`error): cstate =
       IF cS`callstack`length = 0 THEN
