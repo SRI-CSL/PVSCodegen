@@ -471,28 +471,28 @@ rreduction      : THEORY
                 ])
 
      popReduce(D)(grS | popRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
-      (LET stack = grS`stack,
+       LET stack = grS`stack,
            store = grS`store,
            expr = grS`redex,
            body = pbody(expr)
        IN
-       IF value?(body) THEN
+       % IF value?(body) THEN
          grS WITH [`redex := body,
                    `stack := pop(stack)]
-       ELSE
-         LET value : (domainValue?(grS`domain)) = get(stack)(body) IN
-         IF marked(body) AND ref?(value) THEN
-           grS WITH [`redex := value,
-                     `stack := pop(grS`stack WITH [`seq(stack`length - index(body) - 1) := nil])]
-         ELSIF ref?(value) THEN
-           grS WITH [`redex := value,
-                     `stack := pop(grS`stack),
-                     `count(refindex(value)) := grS`count(refindex(value)) + IF index(body) = 0 THEN 0 ELSE 1 ENDIF]
-         ELSE
-           grS WITH [`redex := value,
-                     `stack := pop(grS`stack)]
-         ENDIF
-       ENDIF)
+       % ELSE
+       %   LET value : (domainValue?(grS`domain)) = get(stack)(body) IN
+       %   IF marked(body) AND ref?(value) THEN
+       %     grS WITH [`redex := value,
+       %               `stack := pop(grS`stack WITH [`seq(stack`length - index(body) - 1) := nil])]
+       %   ELSIF ref?(value) THEN
+       %     grS WITH [`redex := value,
+       %               `stack := pop(grS`stack),
+       %               `count(refindex(value)) := grS`count(refindex(value)) + IF index(body) = 0 THEN 0 ELSE 1 ENDIF]
+       %   ELSE
+       %     grS WITH [`redex := value,
+       %               `stack := pop(grS`stack)]
+       %   ENDIF
+       % ENDIF
 
      release_reduce_redex_correct: LEMMA
        pureReleaseRedex?(grS`redex) IMPLIES
@@ -528,33 +528,52 @@ rreduction      : THEORY
          grS WITH [`redex := rexpr(grS`redex)]
        ENDIF
 
+    variableReduce(D)(grS | variable?(grS`redex)): rstate =
+      LET stack = grS`stack,
+          store = grS`store,
+          expr = grS`redex
+      IN
+      LET value : (domainValue?(grS`domain)) = get(stack)(expr) IN
+      IF ref?(value) THEN
+        IF marked(grS`redex) THEN
+          grS WITH [`redex := value,
+                    `stack`seq(stack`length - 1 - index(expr)) := nil]
+        ELSE
+          grS WITH [`redex := value,
+                    `count(refindex(value)) := grS`count(refindex(value)) + 1]
+        ENDIF
+      ELSE
+        grS WITH [`redex := value]
+      ENDIF
+      
+
     letReduce(D)(grS | pureLetRedex?(grS`redex)): rstate =
      (LET stack = grS`stack,
           store = grS`store,
           expr = grS`redex
       IN
-      IF variable?(letrhs(expr)) THEN
-        LET value : (domainValue?(grS`domain)) = get(stack)(letrhs(expr)) IN
-        LET nredex =
-          IF marked(letrhs(expr)) THEN
-            pop(release(variable(index(letrhs(expr)) + 1, TRUE), body(expr)))
-          ELSE
-            pop(body(expr))
-          ENDIF
-        IN        
-        grS WITH [`redex := nredex,
-                  `stack := push(value, stack),
-                  `count := IF ref?(value) THEN
-                              grS`count WITH [(refindex(value)) |-> grS`count(refindex(value)) + 1]
-                            ELSE
-                              grS`count
-                            ENDIF
-                 ]
-      ELSE
+      % IF variable?(letrhs(expr)) THEN
+      %   LET value : (domainValue?(grS`domain)) = get(stack)(letrhs(expr)) IN
+      %   LET nredex =
+      %     IF marked(letrhs(expr)) THEN
+      %       pop(release(variable(index(letrhs(expr)) + 1, TRUE), body(expr)))
+      %     ELSE
+      %       pop(body(expr))
+      %     ENDIF
+      %   IN        
+      %   grS WITH [`redex := nredex,
+      %             `stack := push(value, stack),
+      %             `count := IF ref?(value) THEN
+      %                         grS`count WITH [(refindex(value)) |-> grS`count(refindex(value)) + 1]
+      %                       ELSE
+      %                         grS`count
+      %                       ENDIF
+      %            ]
+      % ELSE
         grS WITH [`redex := pop(body(expr)),
                   `stack := push(letrhs(expr), stack)
                  ]
-      ENDIF
+      % ENDIF
      )
 
     count_copy(dom, (cnt : [(dom) -> nat]), (V: finseq[(domainValue?(dom))]), (i: upto(V`length))): RECURSIVE [(dom) -> nat] =
@@ -693,6 +712,9 @@ rreduction      : THEORY
          grS WITH [error := TRUE]
        ENDIF)
 
+    variableReduce_ndr: JUDGEMENT
+      variableReduce(D)(grS | noDanglingRefs?(grS) AND variable?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
     letReduce_ndr: JUDGEMENT
       letReduce(D)(grS | noDanglingRefs?(grS) AND pureLetRedex?(grS`redex))
         HAS_TYPE (noDanglingRefs?)
@@ -736,7 +758,9 @@ rreduction      : THEORY
         t
       ELSE
         LET nS : (noDanglingRefs?) = make_redex(t) IN
-        IF pureLetRedex?(nS`redex) THEN
+        IF variable?(nS`redex) THEN
+          variableReduce(D)(nS)
+        ELSIF pureLetRedex?(nS`redex) THEN
           letReduce(D)(nS)
         ELSIF applyRedex?(nS`redex) THEN
           applyReduce(D)(nS)

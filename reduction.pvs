@@ -51,6 +51,9 @@ reduction : THEORY
 
     stackvar?(S)(x): bool = (index(x) < S`length)
 
+    variableReduce(D)(gS | variable?(gS`redex)): estate =
+      gS WITH [`redex := get(gS`stack)(gS`redex)]
+
     letReduce(D)(gS | pureLetRedex?(gS`redex)): estate =
       (LET stack = gS`stack,
            store = gS`store,
@@ -58,9 +61,10 @@ reduction : THEORY
        IN
        gS WITH [`error := FALSE,
                 `redex := pop(body(expr)),
-                `stack := (IF variable?(letrhs(expr))
-                           THEN push(get(stack)(letrhs(expr)), stack)
-                           ELSE push(letrhs(expr), stack) ENDIF)])
+                `stack := push(letrhs(expr), stack)])
+       %         `stack := (IF variable?(letrhs(expr))
+       %                    THEN push(get(stack)(letrhs(expr)), stack)
+       %                    ELSE push(letrhs(expr), stack) ENDIF)])
 
     set_redex_correct: LEMMA
       domainValue?(gS`domain)(u) IMPLIES
@@ -219,7 +223,7 @@ reduction : THEORY
           store = gS`store,
           expr = gS`redex,
           body = pbody(expr),
-          value = (IF value?(body) THEN body ELSE get(stack)(body) ENDIF)
+          value = body
        IN gS WITH [`redex := value,
                    `stack := pop(stack)])
 
@@ -238,7 +242,9 @@ reduction : THEORY
         t
       ELSE
         LET nS = make_redex_e(t) IN
-        IF pureLetRedex?(nS`redex) THEN
+        IF variable?(nS`redex) THEN
+          variableReduce(D)(nS)
+        ELSIF pureLetRedex?(nS`redex) THEN
           letReduce(D)(nS)
         ELSIF applyRedex?(nS`redex) THEN
           applyReduce(D)(nS)

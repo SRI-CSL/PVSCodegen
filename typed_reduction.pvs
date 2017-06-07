@@ -252,14 +252,14 @@ typed_reduction: THEORY
     buildRedexType(A, tA): RECURSIVE {(tK, tB) | typeinfo_fill(tK, tB) = tA} = 
       CASES A OF
         letexpr(B, C):
-          IF atom?(B) OR NOT lett?(tA) THEN
+          IF value?(B) OR NOT lett?(tA) THEN
             (holet, tA)
           ELSE
             LET (tK, tB) = buildRedexType(B, lrhs(tA)) IN
             (letct(lettype(tA), tK, lbody(tA)), tB)
           ENDIF,
         pop(B):
-          IF atom?(B) OR NOT popt?(tA) THEN
+          IF value?(B) OR NOT popt?(tA) THEN
             (holet, tA)
           ELSE
             LET (tK, tB) = buildRedexType(B, ptbody(tA)) IN
@@ -313,7 +313,9 @@ typed_reduction: THEORY
         t
       ELSE
         LET nS = make_redex_typed(t) IN
-        IF pureLetRedex?(nS`state`redex) THEN
+        IF variable?(nS`state`redex) THEN
+          nS WITH [`state := variableReduce(D)(nS`state)]
+        ELSIF pureLetRedex?(nS`state`redex) THEN
           nS WITH [`state := letReduce(D)(nS`state),
                    `stack_types := add(lettype(nS`redex_type), nS`stack_types),
                    `redex_type := popt(lbody(nS`redex_type))]

@@ -1,76 +1,67 @@
 (IL
  (fill_TCC1 0
   (fill_TCC1-1 nil 3646033320 ("" (termination-tcc) nil nil)
-   ((<< adt-def-decl "(strict_well_founded?[IContext])" IL nil)) nil))
+   ((<< adt-def-decl "(strict_well_founded?[IContext])" IL nil)) nil
+   (fill termination "fill(K1, A)" "nil")))
  (fill_TCC2 0
   (fill_TCC2-1 nil 3646033320 ("" (termination-tcc) nil nil)
-   ((<< adt-def-decl "(strict_well_founded?[IContext])" IL nil)) nil))
+   ((<< adt-def-decl "(strict_well_founded?[IContext])" IL nil)) nil
+   (fill termination "fill(K1, A)" "nil")))
  (context_lemma 0
   (context_lemma-1 nil 3646034052
-   ("" (induct "A")
-    (("1" (grind) nil nil) ("2" (grind) nil nil) ("3" (grind) nil nil)
-     ("4" (skeep)
-      (("4"
-        (inst + "hole"
-         "application(application1_var, application2_var)")
-        (("4" (grind) nil nil)) nil))
+   ("" (induct A)
+    (("1" (skeep* :preds? t)
+      (("1" (inst 2 "hole" _)
+        (("1" (inst?) (("1" (grind) nil nil)) nil)) nil))
       nil)
-     ("5" (skeep)
-      (("5" (ground)
-        (("1" (inst + "hole" "letexpr(letexpr1_var, letexpr2_var)")
-          (("1" (grind) nil nil)) nil)
+     ("2" (grind) nil nil) ("3" (grind) nil nil)
+     ("4" (grind) (("4" (inst 1 hole) (("4" (grind) nil nil)) nil))
+      nil)
+     ("5" (skeep*)
+      (("5" (split)
+        (("1" (inst 2 "hole" _)
+          (("1" (inst 2 "letexpr(letexpr1_var, letexpr2_var)")
+            (("1" (grind) nil nil)) nil))
+          nil)
          ("2" (skeep)
-          (("2" (inst + "hole" "letexpr(letexpr1_var, letexpr2_var)")
+          (("2" (inst 2 "letc(K,letexpr2_var)" B)
             (("2" (grind) nil nil)) nil))
-          nil)
-         ("3" (skeep)
-          (("3" (inst + "letc(K, letexpr2_var)" "B")
-            (("3" (grind) nil nil)) nil))
-          nil)
-         ("4" (skeep)
-          (("4" (skeep)
-            (("4" (inst + "letc(K!1, letexpr2_var)" "B!1")
-              (("4" (grind) nil nil)) nil))
-            nil))
           nil))
         nil))
       nil)
-     ("6" (skeep)
-      (("6" (inst + "hole" "ift(ift1_var, ift2_var, ift3_var)")
+     ("6" (skeep*)
+      (("6" (inst 2 "hole" "ift(ift1_var,ift2_var,ift3_var)")
         (("6" (grind) nil nil)) nil))
       nil)
-     ("7" (skeep)
+     ("7" (skeep*)
       (("7"
-        (inst + "hole" "update(update1_var, update2_var, update3_var)")
+        (inst 2 "hole" "update(update1_var, update2_var, update3_var)")
         (("7" (grind) nil nil)) nil))
       nil)
-     ("8" (skeep)
-      (("8" (inst + "hole" "lookup(lookup1_var, lookup2_var)")
+     ("8" (skeep*)
+      (("8" (inst 2 "hole" "lookup(lookup1_var, lookup2_var)")
         (("8" (grind) nil nil)) nil))
       nil)
-     ("9" (skeep)
-      (("9" (inst + "hole" "newint(newint1_var)")
+     ("9" (skeep*)
+      (("9" (inst 2 "hole" "newint(newint1_var)")
         (("9" (grind) nil nil)) nil))
       nil)
-     ("10" (skeep)
-      (("10" (inst + "hole" "newref(newref1_var)")
+     ("10" (skeep*)
+      (("10" (inst 2 "hole" "newref(newref1_var)")
         (("10" (grind) nil nil)) nil))
       nil)
-     ("11" (skeep)
-      (("11" (ground)
-        (("1" (inst + "hole" "pop(pop1_var)") (("1" (grind) nil nil))
+     ("11" (skeep*)
+      (("11" (split)
+        (("1" (inst 2 "hole" "pop(pop1_var)") (("1" (grind) nil nil))
           nil)
-         ("2" (skeep)
-          (("2" (inst + "popc(K)" "B") (("2" (grind) nil nil)) nil))
+         ("2" (skeep*)
+          (("2" (inst 2 "popc(K)" B) (("2" (grind) nil nil)) nil))
           nil))
         nil))
       nil)
-     ("12" (skeep)
-      (("12" (inst + "hole" "ref(ref1_var)") (("12" (grind) nil nil))
-        nil))
-      nil)
-     ("13" (skeep)
-      (("13" (inst + "hole" "release(release1_var, release2_var)")
+     ("12" (grind) nil nil)
+     ("13" (skeep*)
+      (("13" (inst 2 "hole" "release(release1_var,release2_var)")
         (("13" (grind) nil nil)) nil))
       nil))
     nil)
@@ -78,9 +69,6 @@
      IExpression_adt nil)
     (release adt-constructor-decl
      "[[(variable?), IExpression] -> (release?)]" IExpression_adt nil)
-    (ref adt-constructor-decl "[nat -> (ref?)]" IExpression_adt nil)
-    (ref? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
     (popc? adt-recognizer-decl "[IContext -> boolean]" IL nil)
     (popc adt-constructor-decl "[IContext -> (popc?)]" IL nil)
     (pop adt-constructor-decl "[IExpression -> (pop?)]" IExpression_adt
@@ -117,45 +105,50 @@
      "[[IExpression, IExpression] -> (letexpr?)]" IExpression_adt nil)
     (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (PRED type-eq-decl nil defined_types nil)
+    (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
+    (application? adt-recognizer-decl "[IExpression -> boolean]"
+                  IExpression_adt nil)
     (application adt-constructor-decl
      "[[nat, list[(variable?)]] -> (application?)]" IExpression_adt
      nil)
-    (application? adt-recognizer-decl "[IExpression -> boolean]"
-                  IExpression_adt nil)
-    (variable? adt-recognizer-decl "[IExpression -> boolean]"
-               IExpression_adt nil)
-    nil (PRED type-eq-decl nil defined_types nil)
-    (list type-decl nil list_adt nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (>= const-decl "bool" reals nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number nonempty-type-decl nil numbers nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
-    (number nonempty-type-decl nil numbers nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (variable adt-constructor-decl "[[nat, bool] -> (variable?)]"
+     IExpression_adt nil)
+    (letRedex? const-decl "bool" IL nil)
+    (applyRedex? const-decl "bool" IL nil)
+    (iftRedex? const-decl "bool" IL nil)
+    (updateRedex? const-decl "bool" IL nil)
+    (lookupRedex? const-decl "bool" IL nil)
+    (newintRedex? const-decl "bool" IL nil)
+    (newrefRedex? const-decl "bool" IL nil)
+    (popRedex? const-decl "bool" IL nil)
+    (releaseRedex? const-decl "bool" IL nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
     (hole adt-constructor-decl "(hole?)" IL nil)
     (hole? adt-recognizer-decl "[IContext -> boolean]" IL nil)
-    (releaseRedex? const-decl "bool" IL nil)
-    (popRedex? const-decl "bool" IL nil)
-    (newrefRedex? const-decl "bool" IL nil)
-    (newintRedex? const-decl "bool" IL nil)
-    (lookupRedex? const-decl "bool" IL nil)
-    (updateRedex? const-decl "bool" IL nil)
-    (iftRedex? const-decl "bool" IL nil)
-    (applyRedex? const-decl "bool" IL nil)
-    (letRedex? const-decl "bool" IL nil)
-    (value? const-decl "bool" IL nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (fill def-decl "IExpression" IL nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (redex? const-decl "bool" IL nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (IContext type-decl nil IL nil) (atom? const-decl "bool" IL nil)
+    (IContext type-decl nil IL nil) (value? const-decl "bool" IL nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
@@ -178,12 +171,14 @@
     (strict_well_founded? const-decl "bool" orders nil)
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil
+   (buildContext subtype "(letc(K, C), B1)"
+    "{K, B | fill(K, B) = A}")))
  (buildContext_TCC2 0
   (buildContext_TCC2-1 nil 3646033320 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (buildContext termination "buildContext(B)" "nil")))
  (buildContext_TCC3 0
   (buildContext_TCC3-1 nil 3646033320
    ("" (skosimp*)
@@ -201,15 +196,17 @@
     (strict_well_founded? const-decl "bool" orders nil)
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil
+   (buildContext subtype "(popc(K), B1)" "{K, B | fill(K, B) = A}")))
  (buildContext_TCC4 0
   (buildContext_TCC4-1 nil 3646033320 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (buildContext termination "buildContext(B)" "nil")))
  (buildContext_TCC5 0
   (buildContext_TCC5-1 nil 3646033320 ("" (grind) nil nil)
-   ((fill def-decl "IExpression" IL nil)) nil))
+   ((fill def-decl "IExpression" IL nil)) nil
+   (buildContext subtype "(hole, A)" "{K, B | fill(K, B) = A}")))
  (context_composition 0
   (context_composition-1 nil 3646034275
    ("" (induct-and-simplify "K1") nil nil)
@@ -225,7 +222,7 @@
   (pure?_TCC1-1 nil 3646033320 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (pure? termination "pure?(C)" "nil")))
  (pure?_TCC2 0
   (pure?_TCC2-1 nil 3646033320 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -236,7 +233,7 @@
                IExpression_adt nil)
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (pure? termination "pure?(B)" "nil")))
  (pure?_TCC3 0
   (pure?_TCC3-1 nil 3646033320 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -247,13 +244,13 @@
                IExpression_adt nil)
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (pure? termination "pure?(C)" "nil")))
  (pure?_TCC4 0
   (pure?_TCC4-1 nil 3693185170
    ("" (skeep) (("" (replace -1) (("" (grind) nil nil)) nil)) nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (pure? termination "pure?(B)" "nil")))
  (pure_contextPure 0
   (pure_contextPure-1 nil 3646034299
    ("" (induct-and-simplify "A") nil nil)
@@ -273,7 +270,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
-   nil))
+   nil (buildcontextPure_ subtype "B" "(contextPure?)")))
  (buildcontextPure_TCC2 0
   (buildcontextPure_TCC2-1 nil 3646033320
    ("" (skeep* :preds? t)
@@ -285,7 +282,9 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil))
-   nil))
+   nil
+   (buildcontextPure_ subtype "(letc(K, C), B1)"
+    "{K, B | cpure?(K) AND contextPure?(B)}")))
  (buildcontextPure_TCC3 0
   (buildcontextPure_TCC3-1 nil 3646033320
    ("" (recursive-judgement-tcc) nil nil)
@@ -294,7 +293,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
-   nil))
+   nil (buildcontextPure_ subtype "B" "(contextPure?)")))
  (buildcontextPure_TCC4 0
   (buildcontextPure_TCC4-1 nil 3693185170
    ("" (skeep* :preds? t)
@@ -306,10 +305,14 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil))
-   nil))
+   nil
+   (buildcontextPure_ subtype "(popc(K), B1)"
+    "{K, B | cpure?(K) AND contextPure?(B)}")))
  (buildcontextPure_TCC5 0
   (buildcontextPure_TCC5-1 nil 3693185170 ("" (grind) nil nil)
-   ((cpure? def-decl "bool" IL nil)) nil))
+   ((cpure? def-decl "bool" IL nil)) nil
+   (buildcontextPure_ subtype "(hole, A)"
+    "{K, B | cpure?(K) AND contextPure?(B)}")))
  (contextPurefill 0
   (contextPurefill-1 nil 3646034319
    ("" (induct-and-simplify "K") nil nil)
@@ -337,15 +340,17 @@
    shostak))
  (pureLetRedex?_TCC1 0
   (pureLetRedex?_TCC1-1 nil 3646033320 ("" (subtype-tcc) nil nil)
-   ((value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil)
+   ((value? const-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil))
-   nil))
+   nil (pureLetRedex? subtype "A" "(IExpression_adt.letexpr?)")))
  (pureIftRedex?_TCC1 0
   (pureIftRedex?_TCC1-1 nil 3646033320 ("" (subtype-tcc) nil nil)
-   ((iftRedex? const-decl "bool" IL nil)) nil))
+   ((iftRedex? const-decl "bool" IL nil)) nil
+   (pureIftRedex? subtype "A" "(IExpression_adt.ift?)")))
  (pureReleaseRedex?_TCC1 0
   (pureReleaseRedex?_TCC1-1 nil 3693185170 ("" (grind) nil nil)
-   ((releaseRedex? const-decl "bool" IL nil)) nil))
+   ((releaseRedex? const-decl "bool" IL nil)) nil
+   (pureReleaseRedex? subtype "A" "(IExpression_adt.release?)")))
  (pureRedexContextPure 0
   (pureRedexContextPure-1 nil 3646130634
    ("" (induct "A")
@@ -394,7 +399,7 @@
     (applyRedex? const-decl "bool" IL nil)
     (pureLetRedex? const-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
-    (atom? const-decl "bool" IL nil) (value? const-decl "bool" IL nil)
+    (value? const-decl "bool" IL nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil)
     (pureRedex? const-decl "bool" IL nil)
@@ -430,7 +435,7 @@
     (iftRedex? const-decl "bool" IL nil)
     (applyRedex? const-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
-    (atom? const-decl "bool" IL nil) (value? const-decl "bool" IL nil)
+    (value? const-decl "bool" IL nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (pureRedex? const-decl "bool" IL nil)
     (contextPure? def-decl "bool" IL nil)
@@ -443,14 +448,14 @@
    shostak))
  (buildRedex_TCC1 0
   (buildRedex_TCC1-1 nil 3699114546 ("" (grind) nil nil)
-   ((value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil)
+   ((value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil))
-   nil))
+   nil (buildRedex subtype "(hole, A)" "{K, B | fill(K, B) = A}")))
  (buildRedex_TCC2 0
   (buildRedex_TCC2-1 nil 3699114546 ("" (grind) nil nil)
-   ((value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil)
+   ((value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil))
-   nil))
+   nil (buildRedex subtype "(hole, A)" "{K, B | fill(K, B) = A}")))
  (buildRedexPure_TCC1 0
   (buildRedexPure_TCC1-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
@@ -459,7 +464,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
-    (value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil)
+    (value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil)
     (cpure? def-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
@@ -474,8 +479,11 @@
     (popRedex? const-decl "bool" IL nil)
     (releaseRedex? const-decl "bool" IL nil)
     (pureReleaseRedex? const-decl "bool" IL nil)
-    (pureRedex? const-decl "bool" IL nil))
-   nil))
+    (pureRedex? const-decl "bool" IL nil)
+    (atom? const-decl "bool" IL nil))
+   nil
+   (buildRedexPure_ subtype "(hole, A)"
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
  (buildRedexPure_TCC2 0
   (buildRedexPure_TCC2-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
@@ -484,8 +492,8 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil)
-    (value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil))
-   nil))
+    (value? const-decl "bool" IL nil))
+   nil (buildRedexPure_ subtype "B" "(contextPure?)")))
  (buildRedexPure_TCC3 0
   (buildRedexPure_TCC3-1 nil 3699114546
    ("" (skeep*)
@@ -520,7 +528,9 @@
     (hole? adt-recognizer-decl "[IContext -> boolean]" IL nil)
     (hole adt-constructor-decl "(hole?)" IL nil)
     (atom? const-decl "bool" IL nil))
-   nil))
+   nil
+   (buildRedexPure_ subtype "(letc(K, C), B1)"
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
  (buildRedexPure_TCC4 0
   (buildRedexPure_TCC4-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
@@ -529,7 +539,7 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
-    (value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil)
+    (value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil)
     (cpure? def-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
@@ -544,8 +554,11 @@
     (popRedex? const-decl "bool" IL nil)
     (releaseRedex? const-decl "bool" IL nil)
     (pureReleaseRedex? const-decl "bool" IL nil)
-    (pureRedex? const-decl "bool" IL nil))
-   nil))
+    (pureRedex? const-decl "bool" IL nil)
+    (atom? const-decl "bool" IL nil))
+   nil
+   (buildRedexPure_ subtype "(hole, A)"
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
  (buildRedexPure_TCC5 0
   (buildRedexPure_TCC5-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
@@ -554,8 +567,8 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil)
-    (value? const-decl "bool" IL nil) (atom? const-decl "bool" IL nil))
-   nil))
+    (value? const-decl "bool" IL nil))
+   nil (buildRedexPure_ subtype "B" "(contextPure?)")))
  (buildRedexPure_TCC6 0
   (buildRedexPure_TCC6-1 nil 3699114546
    ("" (skeep*)
@@ -590,7 +603,9 @@
     (hole? adt-recognizer-decl "[IContext -> boolean]" IL nil)
     (hole adt-constructor-decl "(hole?)" IL nil)
     (atom? const-decl "bool" IL nil))
-   nil))
+   nil
+   (buildRedexPure_ subtype "(popc(K), B1)"
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
  (buildRedexPure_TCC7 0
   (buildRedexPure_TCC7-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
@@ -601,7 +616,6 @@
     (boolean nonempty-type-decl nil booleans nil)
     (fill def-decl "IExpression" IL nil)
     (cpure? def-decl "bool" IL nil) (value? const-decl "bool" IL nil)
-    (atom? const-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
     (pureLetRedex? const-decl "bool" IL nil)
     (applyRedex? const-decl "bool" IL nil)
@@ -614,8 +628,11 @@
     (popRedex? const-decl "bool" IL nil)
     (releaseRedex? const-decl "bool" IL nil)
     (pureReleaseRedex? const-decl "bool" IL nil)
-    (pureRedex? const-decl "bool" IL nil))
-   nil))
+    (pureRedex? const-decl "bool" IL nil)
+    (atom? const-decl "bool" IL nil))
+   nil
+   (buildRedexPure_ subtype "(hole, A)"
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
  (refs_TCC1 0
   (refs_TCC1-1 nil 3646033320
    ("" (typepred "IExpression_adt.<<")
@@ -673,7 +690,7 @@
     (strict_well_founded? const-decl "bool" orders nil)
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (refs termination "refs(C)" "nil")))
  (pure_refs 0
   (pure_refs-1 nil 3646034342
    ("" (induct-and-simplify "A")
@@ -747,7 +764,7 @@
                IExpression_adt nil)
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (refcount termination "refcount(C)" "nil")))
  (refcount_pure 0
   (refcount_pure-1 nil 3676382439
    ("" (induct-and-simplify "A") nil nil)
@@ -775,9 +792,11 @@
      integers nil))
    shostak))
  (pop_TCC1 0
-  (pop_TCC1-1 nil 3646033415 ("" (subtype-tcc) nil nil) nil nil))
+  (pop_TCC1-1 nil 3646033415 ("" (subtype-tcc) nil nil) nil nil
+   (pop subtype "nS`length - 1" "nat")))
  (pop_TCC2 0
-  (pop_TCC2-1 nil 3646033415 ("" (subtype-tcc) nil nil) nil nil))
+  (pop_TCC2-1 nil 3646033415 ("" (subtype-tcc) nil nil) nil nil
+   (pop subtype "i" "below[nS`length]")))
  (get_TCC1 0
   (get_TCC1-1 nil 3646033415 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -806,7 +825,9 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
-   nil))
+   nil
+   (get subtype "S`length - IExpression_adt.index(x) - 1"
+        "below[S`length]")))
  (popdepth_fill 0
   (popdepth_fill-1 nil 3646034392
    ("" (induct-and-simplify "K") nil nil)
@@ -826,11 +847,13 @@
     (int nonempty-type-eq-decl nil integers nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil) nil
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (popDepth def-decl "nat" IL nil)
     (fill def-decl "IExpression" IL nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    nil (IContext_induction formula-decl nil IL nil)
+    (popDepth def-decl "nat" IL nil)
+    (IContext_induction formula-decl nil IL nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
@@ -855,7 +878,8 @@
     (integer_pred const-decl "[rational -> boolean]" integers nil)
     (int nonempty-type-eq-decl nil integers nil)
     (>= const-decl "bool" reals nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil) nil
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (popDepth def-decl "nat" IL nil)
     (IExpression_induction formula-decl nil IExpression_adt nil))
    shostak))
  (in_varlist_TCC1 0
@@ -884,10 +908,12 @@
       nil))
     nil)
    ((int_minus_int_is_int application-judgement "int" integers nil)
-    (member def-decl "bool" list_props nil) nil
+    (member def-decl "bool" list_props nil)
+    (L!1 skolem-const-decl "list[(variable?)]" IL nil)
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
            nil)
-    (= const-decl "[T, T -> boolean]" equalities nil) nil
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (some adt-def-decl "boolean" list_adt nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (>= const-decl "bool" reals nil)
     (int nonempty-type-eq-decl nil integers nil)
@@ -912,19 +938,27 @@
      finseq_theorems nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (some_nth formula-decl nil finseq_theorems nil) nil nil
+    (some_nth formula-decl nil finseq_theorems nil)
+    (i_1 skolem-const-decl "below(length(L!1))" IL nil)
+    (i skolem-const-decl
+       "{i | some[(variable?)](LAMBDA (v: (variable?)): index(v) = i)(L!1)}"
+       IL nil)
     (member_nth formula-decl nil finseq_theorems nil)
     (boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
-    (list type-decl nil list_adt nil) nil
+    (list type-decl nil list_adt nil)
+    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (is_finite const-decl "bool" finite_sets nil)
     (injective? const-decl "bool" functions nil))
-   nil))
+   nil
+   (in_varlist subtype
+    "{i | list_adt[(IExpression_adt.variable?)].some(LAMBDA (v: (IExpression_adt.variable?)): IExpression_adt.index(v) = i)(L)}"
+    "finite_set[nat]")))
  (bumpn_TCC1 0
   (bumpn_TCC1-1 nil 3656517434 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -945,7 +979,7 @@
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil))
+   nil (bumpn subtype "i - j" "nat")))
  (bumpn_TCC2 0
   (bumpn_TCC2-1 nil 3656517434
    ("" (skeep*)
@@ -972,7 +1006,8 @@
       nil))
     nil)
    ((int_minus_int_is_int application-judgement "int" integers nil)
-    (is_finite const-decl "bool" finite_sets nil) nil
+    (is_finite const-decl "bool" finite_sets nil)
+    (X skolem-const-decl "finite_set[nat]" IL nil)
     (injective? const-decl "bool" functions nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -980,7 +1015,8 @@
     (< const-decl "bool" reals nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil) nil
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (j skolem-const-decl "nat" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -999,7 +1035,7 @@
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (set type-eq-decl nil sets nil)
     (finite_set type-eq-decl nil finite_sets nil))
-   nil))
+   nil (bumpn subtype "{i | i >= j AND X(i - j)}" "finite_set[nat]")))
  (bumpn_zero 0
   (bumpn_zero-1 nil 3656521531 ("" (grind-with-ext) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -1062,7 +1098,7 @@
      integers nil)
     (is_finite const-decl "bool" finite_sets nil)
     (injective? const-decl "bool" functions nil))
-   nil))
+   nil (drop subtype "{i | X(i + 1)}" "finite_set[nat]")))
  (drop_bump 0
   (drop_bump-1 nil 3656520613 ("" (grind-with-ext) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -1160,7 +1196,7 @@
   (vars_TCC1-1 nil 3646033415 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
-   nil))
+   nil (vars termination "vars(C)" "nil")))
  (vars_decompose 0
   (vars_decompose-1 nil 3646034443
    ("" (induct K)
@@ -1177,11 +1213,14 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (emptyset const-decl "set" sets nil)
-    (IContext_induction formula-decl nil IL nil) nil
+    (IContext_induction formula-decl nil IL nil)
+    (popDepth def-decl "nat" IL nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil) nil
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (fill def-decl "IExpression" IL nil) nil
+    (fill def-decl "IExpression" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
@@ -1392,7 +1431,8 @@
         nil))
       nil))
     nil)
-   ((IExpression_induction formula-decl nil IExpression_adt nil) nil
+   ((IExpression_induction formula-decl nil IExpression_adt nil)
+    (vars def-decl "finite_set[nat]" IL nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
@@ -1659,12 +1699,5 @@
      integers nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
     (restrict const-decl "R" restrict nil))
-   shostak))
- (vars_context_finite 0
-  (vars_context_finite-1 nil 3699126124
-   ("" (induct "K")
-    (("1" (postpone) nil nil) ("2" (postpone) nil nil)
-     ("3" (postpone) nil nil))
-    nil)
-   nil shostak)))
+   shostak)))
 

@@ -24,7 +24,7 @@ IL  		: THEORY
 
 %A let redex is one where the binding is atomic
   letRedex?(A): bool =
-   (letexpr?(A) AND atom?(letrhs(A)))
+   (letexpr?(A) AND value?(letrhs(A)))
 %An apply redex is an application expression
   applyRedex?(A): bool =
    application?(A)
@@ -43,13 +43,14 @@ IL  		: THEORY
   newrefRedex?(A): bool = newref?(A)
 %A pop redex is a pop of an atom
   popRedex?(A): bool =
-    (pop?(A) AND atom?(pbody(A)))
+    (pop?(A) AND value?(pbody(A)))
 %A release redex is a release expression
   releaseRedex?(A): bool = release?(A)
 
 %A redex is one of the above redexes
   redex?(A): bool =
-    (letRedex?(A) OR applyRedex?(A) OR iftRedex?(A) OR updateRedex?(A) OR
+    (variable?(A) OR
+      letRedex?(A) OR applyRedex?(A) OR iftRedex?(A) OR updateRedex?(A) OR
       lookupRedex?(A) OR newintRedex?(A) OR newrefRedex?(A) OR  popRedex?(A) OR
       releaseRedex?(A)) %OR markRedex?(A)
 
@@ -69,7 +70,7 @@ IL  		: THEORY
     MEASURE K BY <<
 %An expression is either an atom or can be decomposed into a context filled with a redex
    context_lemma: LEMMA
-     atom?(A) or (EXISTS K, B: redex?(B) AND A = fill(K, B))
+     value?(A) or (EXISTS K, B: redex?(B) AND A = fill(K, B))
 %Extracts the context from an expression
    buildContext(A): RECURSIVE {(K, B) | fill(K, B) = A} = 
     CASES A OF
@@ -141,7 +142,7 @@ IL  		: THEORY
    pureReleaseRedex?(A): bool = (releaseRedex?(A) AND contextPure?(rexpr(A)))
 
    pureRedex?(A): bool =
-    (pureLetRedex?(A) OR applyRedex?(A) OR pureIftRedex?(A) OR updateRedex?(A) OR
+    (variable?(A) OR pureLetRedex?(A) OR applyRedex?(A) OR pureIftRedex?(A) OR updateRedex?(A) OR
       lookupRedex?(A) OR newintRedex?(A) OR newrefRedex?(A) OR  popRedex?(A) OR pureReleaseRedex?(A))
 
    pureRedexContextPure: LEMMA
@@ -153,10 +154,10 @@ IL  		: THEORY
    buildRedex(A): RECURSIVE {(K, B) | fill(K, B) = A} = 
     CASES A OF
       letexpr(B, C):
-        IF atom?(B) THEN (hole, A)
+        IF value?(B) THEN (hole, A)
         ELSE LET (K, B1) = buildRedex(B) IN (letc(K, C), B1) ENDIF,
       pop(B):
-        IF atom?(B) THEN (hole, A)
+        IF value?(B) THEN (hole, A)
         ELSE LET (K, B1) = buildRedex(B) IN (popc(K), B1) ENDIF
       ELSE (hole, A)
       ENDCASES
