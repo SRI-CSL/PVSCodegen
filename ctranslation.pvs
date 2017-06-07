@@ -7,13 +7,14 @@ ctranslation: THEORY
     
     % A should have type
     % add some shift number for nested lets
+    % rv: var or return
     translate_statement(A: (pure?), rv: lvalue): cstat =
       CASES A OF
         variable(j, b): sassign(rv, elv(cvar(j))), % TODO maybe release
         constant(n): sassign(rv, econstant(n)),
         nil: sassign(rv, enil),
         application(f, args): sassign(rv, ecall(f, empty_seq)), % TODO; beware marked args -> all functions should use their args, so that there is no need to release; functions are responsible for freeing their args before returning
-        letexpr(B, C): ,% TODO need the type
+        letexpr(B, C): ,% TODO need the type; beware: rv needs offset
         ift(x, B, C): sif(cvar(index(x)),
                         translate_statement(B, rv),
                         translate_statement(C, rv)),
@@ -45,7 +46,12 @@ ctranslation: THEORY
           ELSE
             reconstruct_redex(C, rv, i - 1 - clength(translate_statement(B, rv)))
           ENDIF,
-        release(x, B): %TODO
+        release(x, B):
+          IF i < clength([decr(x)]) THEN
+            (A, hole)
+          ELSE
+            reconstruct_redex(B, rv, i - clength([decr(x)]))
+          ENDIF
         ELSE (A, hole)
       ENDCASES
 

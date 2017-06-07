@@ -7347,8 +7347,8 @@
     (int_times_even_is_even application-judgement "even_int" integers
      nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
-    (i skolem-const-decl "nat" creduction nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (i skolem-const-decl "nat" creduction nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (mult_divides2 application-judgement "(divides(m))" divides nil)
@@ -7685,17 +7685,17 @@
     (- const-decl "[numfield -> numfield]" number_fields nil)
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
+    (extra_size_at_zero formula-decl nil creduction nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
     (sif adt-constructor-decl "[[(cvar?), cstat, cstat] -> (sif?)]"
      creduction nil)
-    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
-    (lvalue type-decl nil creduction nil)
-    (extra_size_at_zero formula-decl nil creduction nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (extra_size_at_expand formula-decl nil creduction nil)
-    (ctype type-decl nil creduction nil)
-    (sdecl? adt-recognizer-decl "[cstat -> boolean]" creduction nil)
     (sdecl adt-constructor-decl "[[ctype, cstat] -> (sdecl?)]"
      creduction nil)
+    (sdecl? adt-recognizer-decl "[cstat -> boolean]" creduction nil)
+    (ctype type-decl nil creduction nil)
+    (extra_size_at_expand formula-decl nil creduction nil)
     (int_plus_int_is_int application-judgement "int" integers nil)
     (even_minus_odd_is_odd application-judgement "odd_int" integers
      nil)
@@ -9179,85 +9179,85 @@
         nil))
       nil))
     nil)
-   ((fdepth_sum_pop formula-decl nil creduction nil)
-    (stack_size_at2 const-decl "nat" creduction nil)
-    (stack_size_at_next_pc_iffalse formula-decl nil creduction nil)
-    (extra_size_at_next_pc_iffalse formula-decl nil creduction nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil)
-    (odd_minus_odd_is_even application-judgement "even_int" integers
-     nil)
-    (next_pc_if_no_overflow formula-decl nil creduction nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (rat_div_nzrat_is_rat application-judgement "rat" rationals nil)
-    (even_minus_odd_is_odd application-judgement "odd_int" integers
-     nil)
-    (fdepth_sum const-decl "nat" creduction nil)
-    (empty? const-decl "bool" sets nil)
-    (member const-decl "bool" sets nil)
-    (even? const-decl "bool" integers nil)
-    (mult_divides1 application-judgement "(divides(n))" divides nil)
-    (nnint_times_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (even_times_int_is_even application-judgement "even_int" integers
-     nil)
-    (mult_divides2 application-judgement "(divides(m))" divides nil)
-    (extra_size_at const-decl "nat" creduction nil)
-    (pop const-decl "finseq[T]" creduction nil)
-    (real_le_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (real_gt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (cstat type-decl nil creduction nil)
-    (AND const-decl "[bool, bool -> bool]" booleans nil)
+   ((cstate type-eq-decl nil creduction nil)
+    (Store type-eq-decl nil creduction nil)
+    (expected_stack_size const-decl "nat" creduction nil)
+    (Stack type-eq-decl nil creduction nil)
+    (cvalue type-decl nil creduction nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_fun_call_at const-decl "bool" creduction nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (cstack_frame type-eq-decl nil creduction nil)
+    (is_return? const-decl "bool" creduction nil)
+    (<= const-decl "bool" reals nil)
+    (stack_size_at def-decl "nat" creduction nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Definition type-eq-decl nil creduction nil)
+    (is_return_at_end? def-decl "bool" creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (> const-decl "bool" reals nil) (< const-decl "bool" reals nil)
+    (vars def-decl "bool" creduction nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
     (number_field_pred const-decl "[number -> boolean]" number_fields
      nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (vars def-decl "bool" creduction nil)
-    (< const-decl "bool" reals nil) (> const-decl "bool" reals nil)
-    (clength def-decl "nat" creduction nil)
-    (is_return_at_end? def-decl "bool" creduction nil)
-    (Definition type-eq-decl nil creduction nil)
-    (finseq type-eq-decl nil finite_sequences nil)
-    (below type-eq-decl nil nat_types nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (stack_size_at def-decl "nat" creduction nil)
-    (<= const-decl "bool" reals nil)
-    (is_return? const-decl "bool" creduction nil)
-    (cstack_frame type-eq-decl nil creduction nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (is_fun_call_at const-decl "bool" creduction nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (cvalue type-decl nil creduction nil)
-    (Stack type-eq-decl nil creduction nil)
-    (expected_stack_size const-decl "nat" creduction nil)
-    (Store type-eq-decl nil creduction nil)
-    (cstate type-eq-decl nil creduction nil))
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (cstat type-decl nil creduction nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (pop const-decl "finseq[T]" creduction nil)
+    (extra_size_at const-decl "nat" creduction nil)
+    (mult_divides2 application-judgement "(divides(m))" divides nil)
+    (even_times_int_is_even application-judgement "even_int" integers
+     nil)
+    (nnint_times_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (mult_divides1 application-judgement "(divides(n))" divides nil)
+    (even? const-decl "bool" integers nil)
+    (member const-decl "bool" sets nil)
+    (empty? const-decl "bool" sets nil)
+    (fdepth_sum const-decl "nat" creduction nil)
+    (even_minus_odd_is_odd application-judgement "odd_int" integers
+     nil)
+    (rat_div_nzrat_is_rat application-judgement "rat" rationals nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (next_pc_if_no_overflow formula-decl nil creduction nil)
+    (odd_minus_odd_is_even application-judgement "even_int" integers
+     nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (extra_size_at_next_pc_iffalse formula-decl nil creduction nil)
+    (stack_size_at_next_pc_iffalse formula-decl nil creduction nil)
+    (stack_size_at2 const-decl "nat" creduction nil)
+    (fdepth_sum_pop formula-decl nil creduction nil))
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1)`fpc := 1 + lf`fpc + clength(cthen)])}")))
@@ -9448,83 +9448,83 @@
         nil))
       nil))
     nil)
-   ((real_ge_is_total_order name-judgement "(total_order?[real])"
+   ((expected_stack_size const-decl "nat" creduction nil)
+    (int_plus_int_is_int application-judgement "int" integers nil)
+    (even_minus_odd_is_odd application-judgement "odd_int" integers
+     nil)
+    (stack_size_at_next_pc_iftrue formula-decl nil creduction nil)
+    (extra_size_at_next_pc_iftrue formula-decl nil creduction nil)
+    (next_pc_if_no_overflow formula-decl nil creduction nil)
+    (rat_div_nzrat_is_rat application-judgement "rat" rationals nil)
+    (fdepth_sum const-decl "nat" creduction nil)
+    (empty? const-decl "bool" sets nil)
+    (member const-decl "bool" sets nil)
+    (extra_size_at const-decl "nat" creduction nil)
+    (even? const-decl "bool" integers nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (mult_divides1 application-judgement "(divides(n))" divides nil)
+    (nnint_times_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (even_times_int_is_even application-judgement "even_int" integers
+     nil)
+    (mult_divides2 application-judgement "(divides(m))" divides nil)
+    (pop const-decl "finseq[T]" creduction nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (cstate type-eq-decl nil creduction nil)
+    (Store type-eq-decl nil creduction nil)
+    (Stack type-eq-decl nil creduction nil)
+    (cvalue type-decl nil creduction nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_fun_call_at const-decl "bool" creduction nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (cstack_frame type-eq-decl nil creduction nil)
+    (is_return? const-decl "bool" creduction nil)
+    (<= const-decl "bool" reals nil)
+    (stack_size_at def-decl "nat" creduction nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Definition type-eq-decl nil creduction nil)
+    (is_return_at_end? def-decl "bool" creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (> const-decl "bool" reals nil) (< const-decl "bool" reals nil)
+    (vars def-decl "bool" creduction nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (cstat type-decl nil creduction nil)
+    (below type-eq-decl nil nat_types nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (fdepth_sum_pop formula-decl nil creduction nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (real_le_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (fdepth_sum_pop formula-decl nil creduction nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (below type-eq-decl nil nat_types nil)
-    (cstat type-decl nil creduction nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (>= const-decl "bool" reals nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (vars def-decl "bool" creduction nil)
-    (< const-decl "bool" reals nil) (> const-decl "bool" reals nil)
-    (clength def-decl "nat" creduction nil)
-    (is_return_at_end? def-decl "bool" creduction nil)
-    (Definition type-eq-decl nil creduction nil)
-    (finseq type-eq-decl nil finite_sequences nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (stack_size_at def-decl "nat" creduction nil)
-    (<= const-decl "bool" reals nil)
-    (is_return? const-decl "bool" creduction nil)
-    (cstack_frame type-eq-decl nil creduction nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (is_fun_call_at const-decl "bool" creduction nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (cvalue type-decl nil creduction nil)
-    (Stack type-eq-decl nil creduction nil)
-    (Store type-eq-decl nil creduction nil)
-    (cstate type-eq-decl nil creduction nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (real_gt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (pop const-decl "finseq[T]" creduction nil)
-    (mult_divides2 application-judgement "(divides(m))" divides nil)
-    (even_times_int_is_even application-judgement "even_int" integers
-     nil)
-    (nnint_times_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (mult_divides1 application-judgement "(divides(n))" divides nil)
-    (nnint_plus_posint_is_posint application-judgement "posint"
-     integers nil)
-    (even? const-decl "bool" integers nil)
-    (extra_size_at const-decl "nat" creduction nil)
-    (member const-decl "bool" sets nil)
-    (empty? const-decl "bool" sets nil)
-    (fdepth_sum const-decl "nat" creduction nil)
-    (rat_div_nzrat_is_rat application-judgement "rat" rationals nil)
-    (next_pc_if_no_overflow formula-decl nil creduction nil)
-    (extra_size_at_next_pc_iftrue formula-decl nil creduction nil)
-    (stack_size_at_next_pc_iftrue formula-decl nil creduction nil)
-    (even_minus_odd_is_odd application-judgement "odd_int" integers
-     nil)
-    (int_plus_int_is_int application-judgement "int" integers nil)
-    (expected_stack_size const-decl "nat" creduction nil))
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1)`fpc := 1 + lf`fpc])}")))
@@ -9715,6 +9715,73 @@
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
  (reduce_TCC20 0
+  (reduce_TCC20-1 nil 3705762979
+   ("" (skeep* :preds? t)
+    (("" (typepred "cS`new_index") (("" (grind) nil nil)) nil)) nil)
+   ((cstate type-eq-decl nil creduction nil)
+    (Store type-eq-decl nil creduction nil)
+    (expected_stack_size const-decl "nat" creduction nil)
+    (Stack type-eq-decl nil creduction nil)
+    (cvalue type-decl nil creduction nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_fun_call_at const-decl "bool" creduction nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (cstack_frame type-eq-decl nil creduction nil)
+    (is_return? const-decl "bool" creduction nil)
+    (<= const-decl "bool" reals nil)
+    (stack_size_at def-decl "nat" creduction nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Definition type-eq-decl nil creduction nil)
+    (is_return_at_end? def-decl "bool" creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (> const-decl "bool" reals nil) (< const-decl "bool" reals nil)
+    (vars def-decl "bool" creduction nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (cstat type-decl nil creduction nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (finite_remove application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (injective? const-decl "bool" functions nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (/= const-decl "boolean" notequal nil)
+    (member const-decl "bool" sets nil)
+    (remove const-decl "set" sets nil)
+    (x!1 skolem-const-decl "(ndomain)" creduction nil)
+    (ndomain skolem-const-decl "finite_set[nat]" creduction nil)
+    (cS skolem-const-decl "{cS | NOT cS`error}" creduction nil)
+    (set type-eq-decl nil sets nil))
+   nil
+   (reduce subtype "cS`new_index"
+     "{n: nat | FORALL (x: (ndomain)): x < n}")))
+ (reduce_TCC21 0
   (reduce_TCC20-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -9820,7 +9887,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC21 0
+ (reduce_TCC22 0
   (reduce_TCC16-1 nil 3705261921 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -9880,7 +9947,7 @@
     (/= const-decl "boolean" notequal nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil (reduce subtype "x" "(cS`domain)")))
- (reduce_TCC22 0
+ (reduce_TCC23 0
   (reduce_TCC23-1 nil 3704134859 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -9932,7 +9999,73 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC23 0
+ (reduce_TCC24 0
+  (reduce_TCC24-1 nil 3705762979
+   ("" (skeep* :preds? t)
+    (("" (typepred "cS`new_index") (("" (grind) nil nil)) nil)) nil)
+   ((cstate type-eq-decl nil creduction nil)
+    (Store type-eq-decl nil creduction nil)
+    (expected_stack_size const-decl "nat" creduction nil)
+    (Stack type-eq-decl nil creduction nil)
+    (cvalue type-decl nil creduction nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_fun_call_at const-decl "bool" creduction nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (cstack_frame type-eq-decl nil creduction nil)
+    (is_return? const-decl "bool" creduction nil)
+    (<= const-decl "bool" reals nil)
+    (stack_size_at def-decl "nat" creduction nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Definition type-eq-decl nil creduction nil)
+    (is_return_at_end? def-decl "bool" creduction nil)
+    (clength def-decl "nat" creduction nil)
+    (> const-decl "bool" reals nil) (< const-decl "bool" reals nil)
+    (vars def-decl "bool" creduction nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (cstat type-decl nil creduction nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (nonempty? const-decl "bool" sets nil)
+    (set type-eq-decl nil sets nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (add const-decl "(nonempty?)" sets nil)
+    (member const-decl "bool" sets nil)
+    (nonempty_add_finite application-judgement
+     "non_empty_finite_set[nat]" countability "sets_aux/")
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil))
+   nil
+   (reduce subtype "cS`new_index + 1"
+     "{n: nat | FORALL (x: (sets[nat].add(cS`new_index, cS`domain))): x < n}")))
+ (reduce_TCC25 0
   (reduce_TCC23-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -10032,14 +10165,12 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC24 0
-  (reduce_TCC24-1 nil 3705684103 ("" (subtype-tcc) nil nil)
-   ((least_out const-decl "{n | NOT NS(n)}" finite_set_theorems nil)
-    (add const-decl "(nonempty?)" sets nil))
-   nil
-   (reduce subtype "finite_set_theorems.least_out(cS`domain)"
-     "(sets[nat].add(finite_set_theorems.least_out(cS`domain), cS`domain))")))
- (reduce_TCC25 0
+ (reduce_TCC26 0
+  (reduce_TCC26-1 nil 3705762979 ("" (subtype-tcc) nil nil)
+   ((add const-decl "(nonempty?)" sets nil)) nil
+   (reduce subtype "cS`new_index"
+     "(sets[nat].add(cS`new_index, cS`domain))")))
+ (reduce_TCC27 0
   (reduce_TCC26-1 nil 3704134859 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -10100,7 +10231,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC26 0
+ (reduce_TCC28 0
   (reduce_TCC20-1 nil 3705261921 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -10162,7 +10293,7 @@
     (nnrat_div_posrat_is_nnrat application-judgement "nonneg_rat"
      rationals nil))
    nil (reduce subtype "i / 2" "below[args`length]")))
- (reduce_TCC27 0
+ (reduce_TCC29 0
   (reduce_TCC21-1 nil 3705261921
    ("" (skeep* :preds? t)
     (("" (name-replace a "(i/2)::nat")
@@ -10272,7 +10403,7 @@
    (reduce subtype
            "cS`stack`length - 1 - (i / 2) - cindex(args`seq(i / 2))"
      "below[length(cS`stack)]")))
- (reduce_TCC28 0
+ (reduce_TCC30 0
   (reduce_TCC28-1 nil 3705684103
    ("" (skeep* :preds? t)
     (("" (expand add)
@@ -10432,7 +10563,7 @@
    (reduce subtype
            "more_finseq[cvalue].add(finite_sequences[cvalue].finseq_appl(cS`stack)(cS`stack`length - 1 - (i / 2) - cindex(args`seq(i / 2))), cS`stack)"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC29 0
+ (reduce_TCC31 0
   (reduce_TCC31-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((real_ge_is_total_order name-judgement "(total_order?[real])"
@@ -10457,7 +10588,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC30 0
+ (reduce_TCC32 0
   (reduce_TCC30-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -10637,7 +10768,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC31 0
+ (reduce_TCC33 0
   (reduce_TCC27-1 nil 3704127090 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -10695,7 +10826,7 @@
      nil)
     (mult_divides2 application-judgement "(divides(m))" divides nil))
    nil (reduce subtype "cS" "{cS | cS`callstack`length > 0}")))
- (reduce_TCC32 0
+ (reduce_TCC34 0
   (reduce_TCC32-1 nil 3705694392
    ("" (skeep* :preds? t)
     (("" (typepred "extract_stat(fbody)(lf`fpc)")
@@ -10767,7 +10898,7 @@
    nil
    (reduce subtype "f"
      "{f: nat | is_fun_call_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)(cS`callstack`seq(cS`callstack`length - 1)`fpc, f)}")))
- (reduce_TCC33 0
+ (reduce_TCC35 0
   (reduce_TCC36-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((is_return? const-decl "bool" creduction nil)
@@ -10791,7 +10922,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC34 0
+ (reduce_TCC36 0
   (reduce_TCC26-1 nil 3705263400 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -10855,7 +10986,7 @@
     (nnrat_div_posrat_is_nnrat application-judgement "nonneg_rat"
      rationals nil))
    nil (reduce subtype "i / 2" "below[cargs(e1)`length]")))
- (reduce_TCC35 0
+ (reduce_TCC37 0
   (reduce_TCC27-1 nil 3705263400
    ("" (skeep* :preds? t)
     (("" (name-replace a "(i/2)::nat")
@@ -10988,7 +11119,7 @@
    (reduce subtype
            "cS`stack`length - 1 - (i / 2) - cindex(cargs(e1)`seq(i / 2))"
      "below[length(cS`stack)]")))
- (reduce_TCC36 0
+ (reduce_TCC38 0
   (reduce_TCC36-1 nil 3705684103
    ("" (skeep* :preds? t)
     (("" (expand add)
@@ -11168,7 +11299,7 @@
    (reduce subtype
            "more_finseq[cvalue].add(finite_sequences[cvalue].finseq_appl(cS`stack)(cS`stack`length - 1 - (i / 2) - cindex(cargs(e1)`seq(i / 2))), cS`stack)"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC37 0
+ (reduce_TCC39 0
   (reduce_TCC38-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((is_return? const-decl "bool" creduction nil)
@@ -11192,7 +11323,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC38 0
+ (reduce_TCC40 0
   (reduce_TCC38-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -11372,7 +11503,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC39 0
+ (reduce_TCC41 0
   (reduce_TCC32-1 nil 3704127090 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -11432,7 +11563,7 @@
     (real_le_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
    nil (reduce subtype "cS" "{cS | cS`callstack`length > 0}")))
- (reduce_TCC40 0
+ (reduce_TCC42 0
   (reduce_TCC40-1 nil 3705694392 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -11494,7 +11625,7 @@
    nil
    (reduce subtype "cfun(e1)"
      "{f: nat | is_fun_call_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)(cS`callstack`seq(cS`callstack`length - 1)`fpc, f)}")))
- (reduce_TCC41 0
+ (reduce_TCC43 0
   (reduce_TCC42-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((real_ge_is_total_order name-judgement "(total_order?[real])"
@@ -11515,7 +11646,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC42 0
+ (reduce_TCC44 0
   (reduce_TCC42-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -11625,7 +11756,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC43 0
+ (reduce_TCC45 0
   (reduce_TCC44-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((mult_divides2 application-judgement "(divides(m))" divides nil)
@@ -11644,7 +11775,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC44 0
+ (reduce_TCC46 0
   (reduce_TCC44-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -11754,7 +11885,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC45 0
+ (reduce_TCC47 0
   (reduce_TCC38-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v1) < cS`stack`length")
@@ -11838,7 +11969,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v1)"
      "below[cS`stack`length]")))
- (reduce_TCC46 0
+ (reduce_TCC48 0
   (reduce_TCC39-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v2) < cS`stack`length")
@@ -11922,7 +12053,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v2)"
      "below[cS`stack`length]")))
- (reduce_TCC47 0
+ (reduce_TCC49 0
   (reduce_TCC49-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((real_lt_is_strict_total_order name-judgement
@@ -11946,7 +12077,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC48 0
+ (reduce_TCC50 0
   (reduce_TCC48-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -12061,7 +12192,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC49 0
+ (reduce_TCC51 0
   (reduce_TCC52-1 nil 3704134859
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((real_ge_is_total_order name-judgement "(total_order?[real])"
@@ -12083,7 +12214,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC50 0
+ (reduce_TCC52 0
   (reduce_TCC44-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "i1 < cS`stack`length")
@@ -12164,7 +12295,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - i"
      "below[cS`stack`length]")))
- (reduce_TCC51 0
+ (reduce_TCC53 0
   (reduce_TCC51-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -12275,7 +12406,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC52 0
+ (reduce_TCC54 0
   (reduce_TCC45-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v1) < cS`stack`length")
@@ -12359,7 +12490,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v1)"
      "below[cS`stack`length]")))
- (reduce_TCC53 0
+ (reduce_TCC55 0
   (reduce_TCC46-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v2) < cS`stack`length")
@@ -12443,7 +12574,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v2)"
      "below[cS`stack`length]")))
- (reduce_TCC54 0
+ (reduce_TCC56 0
   (reduce_TCC56-1 nil 3704134859 ("" (grind) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -12500,7 +12631,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC55 0
+ (reduce_TCC57 0
   (reduce_TCC55-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (expand expected_stack_size)
@@ -12616,7 +12747,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC56 0
+ (reduce_TCC58 0
   (reduce_TCC49-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v1) < cS`stack`length")
@@ -12702,7 +12833,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v1)"
      "below[cS`stack`length]")))
- (reduce_TCC57 0
+ (reduce_TCC59 0
   (reduce_TCC61-1 nil 3704134859
    ("" (skeep* :preds? t)
     (("" (split 4) (("1" (grind) nil nil) ("2" (grind) nil nil)) nil))
@@ -12728,7 +12859,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC58 0
+ (reduce_TCC60 0
   (reduce_TCC58-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (typepred "cS`stack")
@@ -12863,7 +12994,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC59 0
+ (reduce_TCC61 0
   (reduce_TCC52-1 nil 3704127090 ("" (cases-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -12923,7 +13054,7 @@
   cfield(cval: (cvar?), cfindex: nat): cfield?
   creturn: creturn?
  END lvalue")))
- (reduce_TCC60 0
+ (reduce_TCC62 0
   (reduce_TCC53-1 nil 3704127090 ("" (cases-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -12990,7 +13121,7 @@
   ecall(cfun: nat, cargs: finseq[(cvar?)]): ecall?
   ebuiltin(cbuiltin: below(builtin_num), cbv1: (cvar?), cbv2: (cvar?)): ebuiltin?
  END cexpr")))
- (reduce_TCC61 0
+ (reduce_TCC63 0
   (reduce_TCC64-1 nil 3704134859 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -13042,7 +13173,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC62 0
+ (reduce_TCC64 0
   (reduce_TCC56-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "i1 < cS`stack`length")
@@ -13124,7 +13255,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - i"
      "below[cS`stack`length]")))
- (reduce_TCC63 0
+ (reduce_TCC65 0
   (reduce_TCC57-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v1) < cS`stack`length")
@@ -13209,7 +13340,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v1)"
      "below[cS`stack`length]")))
- (reduce_TCC64 0
+ (reduce_TCC66 0
   (reduce_TCC58-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v2) < cS`stack`length")
@@ -13294,7 +13425,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v2)"
      "below[cS`stack`length]")))
- (reduce_TCC65 0
+ (reduce_TCC67 0
   (reduce_TCC49-1 nil 3705261921 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -13350,7 +13481,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC66 0
+ (reduce_TCC68 0
   (reduce_TCC66-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (typepred "cS`stack")
@@ -13503,7 +13634,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC67 0
+ (reduce_TCC69 0
   (reduce_TCC61-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (case "cindex(v1) < cS`stack`length")
@@ -13588,7 +13719,7 @@
    nil
    (reduce subtype "cS`stack`length - 1 - cindex(v1)"
      "below[cS`stack`length]")))
- (reduce_TCC68 0
+ (reduce_TCC70 0
   (reduce_TCC51-1 nil 3705263400 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -13644,7 +13775,7 @@
    nil
    (reduce subtype "lf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC69 0
+ (reduce_TCC71 0
   (reduce_TCC69-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (typepred "cS`stack")
@@ -13823,7 +13954,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)])}")))
- (reduce_TCC70 0
+ (reduce_TCC72 0
   (reduce_TCC82-1 nil 3704129060
    ("" (skeep* :preds? t)
     (("" (assert)
@@ -13959,7 +14090,7 @@
    nil
    (reduce subtype "lf`fdepth - 1"
      "{k: nat | k = cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`arity + stack_size_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)(cS`callstack`seq(cS`callstack`length - 1)`fpc) OR (k <= cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`arity + stack_size_at(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)(cS`callstack`seq(cS`callstack`length - 1)`fpc) AND is_return?(cS`cdefs`seq(cS`callstack`seq(cS`callstack`length - 1)`ffct)`body)(cS`callstack`seq(cS`callstack`length - 1)`fpc))}")))
- (reduce_TCC71 0
+ (reduce_TCC73 0
   (reduce_TCC71-1 nil 3705674907
    ("" (skeep* :preds? t)
     (("" (typepred "cS`stack")
@@ -14063,7 +14194,7 @@
     (fdepth_sum const-decl "nat" creduction nil))
    nil
    (reduce subtype "cS`stack" "{S: finseq[cvalue] | S`length > 0}")))
- (reduce_TCC72 0
+ (reduce_TCC74 0
   (reduce_TCC72-1 nil 3705674907
    ("" (skeep* :preds? t)
     (("" (expand pop)
@@ -14297,7 +14428,7 @@
    nil
    (reduce subtype "pop(cS`stack)"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(cS`callstack WITH [`seq(cS`callstack`length - 1)`fdepth := lf`fdepth - 1])}")))
- (reduce_TCC73 0
+ (reduce_TCC75 0
   (reduce_TCC69-1 nil 3704127090 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -14349,7 +14480,7 @@
    nil
    (reduce subtype "cS`callstack"
      "{S: finseq[cstack_frame(cS`cdefs)] | S`length > 0}")))
- (reduce_TCC74 0
+ (reduce_TCC76 0
   (reduce_TCC66-1 nil 3704127090 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -14400,7 +14531,7 @@
      real_props nil)
     (pop const-decl "finseq[T]" creduction nil))
    nil (reduce subtype "nc`length - 1" "below[nc`length]")))
- (reduce_TCC75 0
+ (reduce_TCC77 0
   (reduce_TCC68-1 nil 3704134859
    ("" (skeep* :preds? t)
     (("" (typepred "cS`callstack")
@@ -14482,7 +14613,7 @@
    nil
    (reduce subtype "nlf"
      "{cf: cstack_frame(cS`cdefs) | NOT is_return?(cS`cdefs`seq(cf`ffct)`body)(cf`fpc) AND NOT sdecl?(extract_stat(cS`cdefs`seq(cf`ffct)`body)(cf`fpc)`1)}")))
- (reduce_TCC76 0
+ (reduce_TCC78 0
   (reduce_TCC69-1 nil 3704134859
    ("" (skeep* :preds? t)
     (("" (case "i!1 < nc`length - 1")
@@ -14578,7 +14709,7 @@
    (reduce subtype
            "nc WITH [`seq(nc`length - 1) := cframe_next_pc(cS`cdefs)(nlf)]"
      "{C: finseq[cstack_frame(cS`cdefs)] | FORALL (i: nat | i < C`length - 1): is_fun_call_at(cS`cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc, C`seq(1 + i)`ffct)}")))
- (reduce_TCC77 0
+ (reduce_TCC79 0
   (reduce_TCC76-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (typepred "cS`stack")
@@ -14873,7 +15004,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(nc WITH [`seq(nc`length - 1) := cframe_next_pc(cS`cdefs)(nlf)])}")))
- (reduce_TCC78 0
+ (reduce_TCC80 0
   (reduce_TCC71-1 nil 3705169570 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -14925,7 +15056,7 @@
    nil
    (reduce subtype "cS`callstack"
      "{S: finseq[cstack_frame(cS`cdefs)] | S`length > 0}")))
- (reduce_TCC79 0
+ (reduce_TCC81 0
   (reduce_TCC72-1 nil 3705169570 ("" (subtype-tcc) nil nil)
    ((nat nonempty-type-eq-decl nil naturalnumbers nil)
     (cstat type-decl nil creduction nil)
@@ -14980,7 +15111,7 @@
    nil
    (reduce subtype "pop(cS`callstack)"
      "{C: finseq[cstack_frame(cS`cdefs)] | FORALL (i: nat | i < C`length - 1): is_fun_call_at(cS`cdefs`seq(C`seq(i)`ffct)`body)(C`seq(i)`fpc, C`seq(1 + i)`ffct)}")))
- (reduce_TCC80 0
+ (reduce_TCC82 0
   (reduce_TCC79-1 nil 3705328350
    ("" (skeep* :preds? t)
     (("" (typepred "cS`stack")
@@ -15146,7 +15277,7 @@
    nil
    (reduce subtype "cS`stack"
      "{S: Stack | S`length = expected_stack_size(cS`cdefs)(pop(cS`callstack))}")))
- (reduce_TCC81 0
+ (reduce_TCC83 0
   (reduce_TCC70-1 nil 3704127090
    ("" (skeep* :preds? t)
     (("" (typepred "extract_stat(fbody)(lf`fpc)")

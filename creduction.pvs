@@ -351,6 +351,7 @@ creduction: THEORY
 %        ENDIF
       },
       domain: finite_set[nat],
+      new_index: {n: nat | FORALL (x: (domain)): x < n},
       store: Store(domain),
       return_value: cvalue
     #]
@@ -660,9 +661,10 @@ creduction: THEORY
                        `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
             ENDIF,
           smalloc(n):
-            cS WITH [`domain := add(least_out(cS`domain), cS`domain),
+            cS WITH [`domain := add(cS`new_index, cS`domain),
+                     `new_index := cS`new_index + 1,
                      `store := cS`store WITH
-                       [(least_out(cS`domain)) |->
+                       [(cS`new_index) |->
                          (# length := n, seq := LAMBDA (i: below(n)): cundef #)],
                      `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
           scall(f, args):
