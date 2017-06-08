@@ -309,7 +309,7 @@ typed_reduction: THEORY
 
     typed_reduce(D)(tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)) : typed_state =
       LET t = typed_to_topstate(tS) IN
-      IF atom?(t`state`redex) THEN
+      IF value?(t`state`redex) THEN
         t
       ELSE
         LET nS = make_redex_typed(t) IN
@@ -320,7 +320,8 @@ typed_reduction: THEORY
                    `stack_types := add(lettype(nS`redex_type), nS`stack_types),
                    `redex_type := popt(lbody(nS`redex_type))]
         ELSIF applyRedex?(nS`state`redex) THEN
-          nS WITH [`state := applyReduce(D)(nS`state)]
+          nS WITH [`state := applyReduce(D)(nS`state),
+                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, tS`def_types`seq(fun(nS`state`redex))`body_type)]
         ELSIF pureIftRedex?(nS`state`redex) THEN
           nS WITH [`state := ifReduce(D)(nS`state),
                    `redex_type :=

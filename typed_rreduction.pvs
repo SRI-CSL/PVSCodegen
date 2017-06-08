@@ -216,11 +216,13 @@ typed_rreduction: THEORY
 
     typed_reduce(D)(tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)) : typed_rstate =
       LET t = typed_to_topstate(tS) IN
-      IF atom?(t`state`redex) THEN
+      IF value?(t`state`redex) THEN
         t
       ELSE
         LET nS = make_redex_typed(t) IN
-        IF pureLetRedex?(nS`state`redex) THEN
+        IF variable?(nS`state`redex) THEN
+          nS WITH [`state := variableReduce(D)(nS`state)]
+        ELSIF pureLetRedex?(nS`state`redex) THEN
           nS WITH [`state := letReduce(D)(nS`state),
                    `stack_types := add(lettype(nS`redex_type), nS`stack_types),
                    `redex_type := popt(lbody(nS`redex_type))]
