@@ -196,6 +196,13 @@ rreduction      : THEORY
           AND noDanglingRefs?(rS1)
      } = decref1(rS, r, i)
 
+     decref1_chk(rS, (x: (domainValue?(rS`domain)))) : {rS1 | rS1`domain = rS`domain AND (FORALL (s : (rS`domain)): rS1`store(s)`length = rS`store(s)`length
+          AND rS1`count(s) <= rS`count(s)
+          AND (rS1`count(s) = 0 or rS1`store(s) = rS`store(s)))
+     } = IF ref?(x) THEN decref1(rS, refindex(x), rS`store(refindex(x))`length) ELSE rS ENDIF
+
+     decref1_chk_ndr: JUDGEMENT
+       decref1_chk(rS: (noDanglingRefs?), x: (domainValue?(rS`domain))) HAS_TYPE (noDanglingRefs?)
 
     % rstate2estate(rS): estate =
     %   (# error := rS`error,
@@ -606,34 +613,45 @@ rreduction      : THEORY
        updateRedex?(grS`redex) IMPLIES index(rhs(grS`redex)) < grS`stack`length
 
 
+    maybe_clear_stack_at(dom, (str: Store(dom)),
+                              (S : Stack | every(domainValue?(dom))(S)),
+                              A,
+                              (cnt: [i:(dom) -> {j | j = refcount(dom, str, S, A)(i)}]),
+                              (x: (variable?) | index(x) < S`length)):
+      {((newStack : Stack | every(domainValue?(dom))(newStack) AND newStack`length = S`length),
+        (newcnt: [i: (dom) -> {j | j = refcount(dom,str,newStack,A)(i)}])) |
+          FORALL (i: below(S`length)):
+            ref?(newStack`seq(newStack`length - 1 - i)) IMPLIES
+               ref?(S`seq(S`length - 1 - i)) AND NOT (i = index(x) AND marked(x))} =
+         LET v = get(S)(x) IN
+         IF marked(x) AND ref?(v) THEN
+           (S WITH [`seq(S`length - index(x) - 1) := nil], cnt WITH [(refindex(v)) := cnt(refindex(v)) - 1])
+         ELSE
+           (S, cnt)
+         ENDIF
+
+    update_store(dom, (str: Store(dom)), S, A, (cnt: [i:(dom) -> {j|j=refcount(dom,str,S,A)(i)}]), (r: (dom)), (i: below(str(r)`length)), (nv: (domainValue?(dom)))):
+      {((newstr: Store(dom)), (newcnt: [i:(dom) -> {j|j=refcount(dom,newstr,S,A)(i)}])) |
+        newstr = str WITH [(r)`seq(i) := nv]
+      }=
+        (str WITH [(r)`seq(i) := nv],
+         LET ov = str(r)`seq(i) IN
+         LET cnt1 : [(dom) -> nat] = IF ref?(ov) THEN cnt WITH [(refindex(ov)) |-> cnt(refindex(ov))-1] ELSE cnt ENDIF IN
+         IF ref?(nv) THEN cnt1 WITH [(refindex(nv)) |-> cnt1(refindex(nv))+1] ELSE cnt1 ENDIF)
+
     updateReduce(D)(grS | updateRedex?(grS`redex) AND noDanglingRefs?(grS)): (noDanglingRefs?) =
       (LET stack = grS`stack,
-           domain = grS`domain,
-           store = grS`store,
-           expr : { A | index(target(A)) < stack`length
-                       AND index(lhs(A)) < stack`length
-                       AND index(rhs(A)) < stack`length
+           expr : { A : (update?) | index(target(A)) < stack`length
+                                AND index(lhs(A)) < stack`length
+                                AND index(rhs(A)) < stack`length
                   } = grS`redex,
-           aval : (domainValue?(domain)) = get(stack)(target(expr)),
-           lval : (domainValue?(domain)) = get(stack)(lhs(expr)),
-           rval : (domainValue?(domain)) = get(stack)(rhs(expr)) 
+           aval : (domainValue?(grS`domain)) = get(stack)(target(expr)),
+           lval : (domainValue?(grS`domain)) = get(stack)(lhs(expr)),
+           rval : (domainValue?(grS`domain)) = get(stack)(rhs(expr)) 
        IN
        IF (ref?(aval) AND constant?(lval) AND value(lval) >= 0
-                      AND value(lval) < store(refindex(aval))`length) THEN
-         LET nstack : { S : Stack | every(domainValue?(domain))(S) AND S`length = stack`length } =
-           IF ref?(rval) AND marked(rhs(expr)) THEN
-             stack WITH [`seq(stack`length - index(rhs(expr)) - 1) := nil]
-           ELSE
-             stack
-           ENDIF
-         IN
-         LET ncount : [i:(domain) -> {j | j = refcount(domain, store, nstack, expr)(i)}] =
-           IF ref?(rval) AND marked(rhs(expr)) THEN
-             grS`count WITH [(refindex(rval)) := grS`count(refindex(rval)) - 1]
-           ELSE
-             grS`count
-           ENDIF
-         IN
+                      AND value(lval) < grS`store(refindex(aval))`length) THEN
+         LET (nstack, ncount) = maybe_clear_stack_at(grS`domain, grS`store, stack, expr, grS`count, rhs(expr)) IN
          % If rval = aval, we have to copy and update because this is needed to match
          % the semantics defined in reduction.pvs. Of course, in a properly-typed
          % program, this can't happen (PVS doesn't allow circular references, which
@@ -642,71 +660,34 @@ rreduction      : THEORY
          IF ncount(refindex(aval)) > 1 OR NOT marked(target(expr)) OR rval = aval THEN
            % Copy and update
            LET oldref = refindex(aval),
-               newref = least_out(domain),
-               newdomain = add(newref, domain),
-               nnstack : { S : Stack | every(domainValue?(newdomain))(S) AND S`length = stack`length } =
-                 IF marked(target(expr)) THEN
-                   nstack WITH [`seq(stack`length - index(target(expr)) - 1) := nil]
-                 ELSE
-                   nstack
-                 ENDIF,
-               nncount = ncount WITH
-                 [(newref) |-> 1,
-                  (oldref) |-> ncount(oldref) - IF marked(target(expr)) THEN 1 ELSE 0 ENDIF],
-               copied : finseq[(domainValue?(newdomain))] = store(oldref),
-               nstore = store WITH [(newref) |-> copied],
-               nnncount : [i:(newdomain) -> {j | j = refcount(newdomain, nstore, nnstack, ref(newref))(i)}] = count_copy(newdomain, nncount, copied, copied`length),
-               nnstore = nstore WITH [(newref)`seq(value(lval)) := rval],
-               oldvalue = copied`seq(value(lval)),
-               nnnncount : [(newdomain) -> nat] =
-                 IF ref?(oldvalue) THEN
-                   nnncount WITH [(refindex(oldvalue)) := nnncount(refindex(oldvalue)) - 1]
-                 ELSE
-                   nnncount
-                 ENDIF,
-               nnnnncount : [i:(newdomain) -> {j | j = refcount(newdomain, nnstore, nnstack, ref(newref))(i)}] =
-                 IF ref?(rval) THEN
-                   nnnncount WITH [(refindex(rval)) := nnnncount(refindex(rval)) + 1]
-                 ELSE
-                   nnnncount
-                 ENDIF
+               newref = least_out(grS`domain),
+               newdomain = add(newref, grS`domain),
+               (nnstack, nncount) = maybe_clear_stack_at(grS`domain, grS`store, nstack, expr, ncount, target(expr)),
+               copied : finseq[(domainValue?(newdomain))] = grS`store(oldref),
+               nstore = grS`store WITH [(newref) |-> copied],
+               nnncount : [i:(newdomain) -> {j | j = refcount(newdomain, nstore, nnstack, ref(newref))(i)}] = count_copy(newdomain, nncount WITH [(newref) |-> 1], copied, copied`length),
+               (nnstore, nnnncount) = update_store(newdomain, nstore, nnstack, ref(newref), nnncount, newref, value(lval), rval)
            IN
            grS WITH [`redex := ref(newref),
                      `domain := newdomain,
                      `store := nnstore,
-                     `count := nnnnncount,
+                     `count := nnnncount,
                      `stack := nnstack
                     ]
          ELSE
            % Update in-place
            LET oldref = refindex(aval),
-               newstore = store WITH [(oldref)`seq(value(lval)) := rval],
-               oldvalue = store(oldref)`seq(value(lval)),
-               nnstack : { S : Stack | every(domainValue?(domain))(S) AND S`length = stack`length } =
+               oldvalue = grS`store(oldref)`seq(value(lval)),
+               nnstack : { S : Stack | every(domainValue?(grS`domain))(S) AND S`length = stack`length } =
                  nstack WITH [`seq(stack`length - 1 - index(target(expr))) := nil],
-               nncount : [(domain) -> nat] =
-                 IF ref?(rval) THEN
-                   ncount WITH [(refindex(rval)) := ncount(refindex(rval)) + 1]
-                 ELSE
-                   ncount
-                 ENDIF
+               (newstore, nncount) = update_store(grS`domain, grS`store, nnstack, aval, ncount, oldref, value(lval), rval)
            IN
-           IF ref?(oldvalue) THEN
-             LET orf = refindex(oldvalue) IN
-             decref(grS WITH [
-               `redex := aval,
-               `store := newstore,
-               `stack := nnstack,
-               `count := nncount WITH [(orf) := nncount(orf) - 1]
-             ], orf, newstore(orf)`length)
-           ELSE
-             grS WITH [
+           decref1_chk(grS WITH [
                `redex := aval,
                `store := newstore,
                `stack := nnstack,
                `count := nncount
-             ]
-           ENDIF
+             ], oldvalue)
          ENDIF
        ELSE
          grS WITH [error := TRUE]
