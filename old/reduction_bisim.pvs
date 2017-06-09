@@ -1,0 +1,87 @@
+reduction_bisim: THEORY
+  BEGIN
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, preprocess, reduction, rreduction
+
+    A, B, C: VAR IExpression
+    K, K1, K2: VAR IContext
+  
+    a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k: VAR nat
+    F: VAR finite_set[nat]
+
+    S, S1, S2: VAR Stack
+    nS: VAR neStack
+
+    dom, dom1: VAR finite_set[nat]
+
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND FORALL i: vars(A)(i) IMPLIES i < arity} #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+    rS, rS2: VAR rstate
+    goodrstate: TYPE = {rS | NOT rS`error}
+    grS: VAR goodrstate
+    grdS: VAR {grS | noDanglingRefs?(grS)}
+
+    decref_preserves: RECURSIVE JUDGEMENT
+      decref(rS: (noDanglingRefs?), (r: (rS`domain)), (i: upto(rS`store(r)`length))) HAS_TYPE
+        {rS2 | rS2`redex = rS`redex AND rS2`stack = rS`stack AND rS2`context = rS`context AND rS2`error = rS`error}
+
+    translate_refs((dom, dom1), translation: [(dom) -> (dom1)])(A | contextPure?(A) AND FORALL i: refs(A)(i) IMPLIES dom(i)): RECURSIVE IExpression =
+      CASES A OF
+        ref(r): ref(translation(r)),
+        letexpr(B, C): letexpr(translate_refs(dom, dom1, translation)(B),
+                               translate_refs(dom, dom1, translation)(C)),
+        ift(x, B, C): ift(x, translate_refs(dom, dom1, translation)(B),
+                             translate_refs(dom, dom1, translation)(C)),
+        pop(B): pop(translate_refs(dom, dom1, translation)(B))
+        ELSE A
+      ENDCASES
+    MEASURE A BY <<
+
+    %translate_stack(dom, dom1, translation)(S | every(domainValue?(dom))(S)):
+    %    {S1 | every(domainValue?(dom1))(S)} =
+    %  map(translate_refs(dom, dom1, translation))(S)
+
+    stack_matches((dom, dom1), translation: [(dom) -> (dom1)])((S | every(domainValue?(dom))(S)), (S1 | every(domainValue?(dom1))(S1)), X: finite_set[nat]): boolean =
+      S`length = S1`length AND
+        FORALL (i: (X)):
+          (i < S`length AND
+          translate_refs(dom, dom1, translation)(S`seq(S`length - i - 1)) =
+            S1`seq(S`length - i - 1))
+
+    store_matches((dom, dom1), translation: [(dom) -> (dom1)])(store: Store(dom), store1: Store(dom1)): boolean =
+      FORALL (r: (dom)): store1(translation(r))`length = store(r)`length AND
+        FORALL (j: below(store(r)`length)):
+          translate_refs(dom, dom1, translation)(store(r)`seq(j)) = store1(translation(r))`seq(j)
+
+    state_matches(eS: estate, rS: rstate)(translate: [{r: (rS`domain) | rS`count(r) > 0} -> (eS`domain)]): boolean =
+      LET dom = {r: (rS`domain) | rS`count(r) > 0} IN
+          eS`error = rS`error
+        AND translate_refs(dom, eS`domain, translate)(unmark(rS`redex)) = eS`redex
+        AND unmark(rS`context) = eS`context
+        AND stack_matches(dom, eS`domain, translate)(rS`stack, eS`stack, union(cvars(rS`redex), bumpn(cvars(rS`context), popDepth(rS`redex))))
+        AND store_matches(dom, eS`domain, translate)((LAMBDA (r: (dom)): rS`store(r)), eS`store)
+
+    state_matches?(eS: estate, rS: rstate): boolean =
+      EXISTS (translate: [{r: (rS`domain) | rS`count(r) > 0} -> (eS`domain)]): state_matches(eS, rS)(translate)
+
+    top_releases_ct(A): RECURSIVE nat =
+      CASES A OF
+        letexpr(B, C): top_releases_ct(B),
+        pop(B): top_releases_ct(B),
+        release(x, B): 1 + top_releases_ct(B)
+        ELSE 0
+      ENDCASES
+    MEASURE A BY <<
+
+    top_releases_ct_fill: LEMMA
+      top_releases_ct(fill(K, A)) = top_releases_ct(A)
+
+    top_releases_rs(rS): nat = top_releases_ct(rS`redex)
+    
+END reduction_bisim
