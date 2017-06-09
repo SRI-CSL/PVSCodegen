@@ -9,7 +9,6 @@ typed_rreduction: THEORY
     tK, tK1, tK2: VAR typeinfo_ctx
 
     
-    a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
     i, j, k, hole_type: VAR nat
@@ -75,7 +74,7 @@ typed_rreduction: THEORY
                `redex_type := typeinfo_fill(tS`context_type, tS`redex_type),
                `context_type := holet]
 
-    make_redex_typed(tS | tS`state`context = hole AND NOT atom?(tS`state`redex)): typed_rstate =
+    make_redex_typed(tS | tS`state`context = hole AND NOT value?(tS`state`redex)): typed_rstate =
       LET (tK, tA) = buildRedexType(tS`state`redex, tS`redex_type) IN
       tS WITH [`state := make_redex(tS`state),
                `redex_type := tA,

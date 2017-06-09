@@ -5,7 +5,7 @@ reduction_props: THEORY
     A, B, C: VAR IExpression
     K, K1, K2: VAR IContext
   
-    a, b, c: VAR (atom?)
+%    a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
     i, j, k, r: VAR nat
@@ -533,6 +533,10 @@ reduction_props: THEORY
       FORALL i, (args: list[(variable?)] | length(args) = i), A: 
        allReleaseMarked?(A) IMPLIES allReleaseMarked?(rreduction.letApply(i, args, A))
 
+    variableReduce_arm: LEMMA
+      variable?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+        IMPLIES allReleaseMarked?(variableReduce(D)(grS)`redex) AND armc?(variableReduce(D)(grS)`context)
+
     releaseReduce_arm: LEMMA
       pureReleaseRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
         IMPLIES allReleaseMarked?(releaseReduce(D)(grS)`redex) AND armc?(releaseReduce(D)(grS)`context)
@@ -585,7 +589,7 @@ reduction_props: THEORY
 
     make_redex_match: LEMMA
       FORALL (eS: topstate, rS: rtopstate):
-        NOT atom?(rS`redex) AND NOT atom?(eS`redex) AND
+        NOT value?(rS`redex) AND NOT value?(eS`redex) AND
         NOT releaseRedex?(make_redex(rS)`redex) AND state_matches?(eS, rS) IMPLIES
           state_matches?(make_redex_e(eS), make_redex(rS))
 

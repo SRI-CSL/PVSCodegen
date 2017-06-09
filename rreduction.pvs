@@ -7,7 +7,7 @@ rreduction      : THEORY
     A, B, C: VAR IExpression
     K, K1, K2: VAR IContext
   
-    a, b, c: VAR (atom?)
+    %a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
     i, j, k: VAR nat
@@ -740,21 +740,21 @@ rreduction      : THEORY
       releaseReduce(D)(grS | noDanglingRefs?(grS) AND pureReleaseRedex?(grS`redex))
         HAS_TYPE (noDanglingRefs?)
 
-    make_redex(t: rtopstate | NOT atom?(t`redex)): {rS | pureRedex?(rS`redex)} =
+    make_redex(t: rtopstate | NOT value?(t`redex)): {rS | pureRedex?(rS`redex)} =
       LET (ctx, redex) = buildRedex(t`redex) IN
       (t :: rstate) WITH [`context := ctx, `redex := redex]
 
     make_redex_idem: LEMMA
       FORALL (t: rtopstate):
-        NOT atom?(t`redex) IMPLIES
+        NOT value?(t`redex) IMPLIES
           make_redex(to_topstate(make_redex(t))) = make_redex(t)
 
     make_redex_ndr: JUDGEMENT
-      make_redex(t: rtopstate | noDanglingRefs?(t) AND NOT atom?(t`redex)) HAS_TYPE (noDanglingRefs?)
+      make_redex(t: rtopstate | noDanglingRefs?(t) AND NOT value?(t`redex)) HAS_TYPE (noDanglingRefs?)
 
     reduce(D)(grS | noDanglingRefs?(grS)): rstate =
       LET t = to_topstate(grS) IN
-      IF atom?(t`redex) THEN
+      IF value?(t`redex) THEN
         t
       ELSE
         LET nS : (noDanglingRefs?) = make_redex(t) IN

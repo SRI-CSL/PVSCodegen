@@ -23,7 +23,7 @@ typed_reduction: THEORY
       ENDCASES
     MEASURE tK BY <<
 
-    a, b, c: VAR (atom?)
+    %a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
     i, j, k, hole_type: VAR nat
@@ -290,7 +290,7 @@ typed_reduction: THEORY
           is_well_typed(B, tB, stypes, dom_types, def_types) AND
           is_well_typed_ctx(K, tK, popn(stypes, popDepth(B)), dom_types, def_types, expr_type(tB))
 
-    make_redex_typed(tS | tS`state`context = hole AND NOT atom?(tS`state`redex)): typed_state =
+    make_redex_typed(tS | tS`state`context = hole AND NOT value?(tS`state`redex)): typed_state =
       LET (tK, tA) = buildRedexType(tS`state`redex, tS`redex_type) IN
       tS WITH [`state := make_redex_e(tS`state),
                `redex_type := tA,

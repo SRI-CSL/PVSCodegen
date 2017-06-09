@@ -6,7 +6,7 @@ reduction : THEORY
     A, B, C: VAR IExpression
     K, K1, K2: VAR IContext
   
-    a, b, c: VAR (atom?)
+    %a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
     i, j, k: VAR nat
@@ -227,18 +227,18 @@ reduction : THEORY
        IN gS WITH [`redex := value,
                    `stack := pop(stack)])
 
-    make_redex_e(t: topstate | NOT atom?(t`redex)): {eS | pureRedex?(eS`redex)} =
+    make_redex_e(t: topstate | NOT value?(t`redex)): {eS | pureRedex?(eS`redex)} =
       LET (ctx, redex) = buildRedex(t`redex) IN
       (t :: estate) WITH [`context := ctx, `redex := redex]
 
     make_redex_e_idem: LEMMA
       FORALL (t: topstate):
-        NOT atom?(t`redex) IMPLIES
+        NOT value?(t`redex) IMPLIES
           make_redex_e(to_topstate(make_redex_e(t))) = make_redex_e(t)
 
     reduce(D)(gS): estate =
       LET t = to_topstate(gS) IN
-      IF atom?(t`redex) THEN
+      IF value?(t`redex) THEN
         t
       ELSE
         LET nS = make_redex_e(t) IN
