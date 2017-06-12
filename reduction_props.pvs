@@ -293,6 +293,33 @@ reduction_props: THEORY
         IMPLIES
           stack_matches(translate2)(S2, S1, X)
 
+    maybe_clear_stack_at_match: LEMMA
+      FORALL (dom, (str: Store(dom)), (S: Stack | every(domainValue?(dom))(S)), A,
+              (cnt: [i:(dom) -> {j | j = refcount(dom, str, S, A)(i)}]),
+              (x: (variable?) | index(x) < S`length)):
+         stack_matches(translate)(S, S1, X) AND
+         (marked(x) IMPLIES NOT X(index(x)))
+           IMPLIES
+             stack_matches(translate)(maybe_clear_stack_at(dom,str,S,A,cnt,x)`1,S1,X)
+
+    maybe_clear_stack_at_count: LEMMA
+      FORALL (dom, (str: Store(dom)), (S: Stack | every(domainValue?(dom))(S)), A,
+              (cnt: [i:(dom) -> {j | j = refcount(dom, str, S, A)(i)}]),
+              (x: (variable?) | index(x) < S`length),r:(dom)):
+         maybe_clear_stack_at(dom,str,S,A,cnt,x)`2(r) > 0 IMPLIES cnt(r) > 0
+
+    update_store_count: LEMMA
+      FORALL (dom, (str: Store(dom)), S, A,
+              (cnt: [i:(dom) -> {j | j = refcount(dom, str, S, A)(i)}]), (r: (dom)),
+              (i: below(str(r)`length)), (nv: (domainValue?(dom))), (t: (dom))):
+        update_store(dom,str,S,A,cnt,r,i,nv)`2(t) > 0 IMPLIES
+          nv = ref(t) OR cnt(t) > 0
+
+    count_copy_count: LEMMA
+      FORALL (dom, (cnt: [(dom)->nat]), (V: finseq[(domainValue?(dom))]), r:(dom)):
+        count_copy(dom,cnt,V,V`length)(r) > 0 IMPLIES
+          cnt(r) > 0 OR refcountArray(V)(r) > 0
+
     store_stillmatch: LEMMA
       FORALL (store1: Store(dom1)):
         rS`domain = rS2`domain AND
@@ -363,9 +390,17 @@ reduction_props: THEORY
     %   decref(rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)) HAS_TYPE
     %     {rS2 | FORALL (eS, translate): state_matches(eS, rS)(translate) IMPLIES state_matches(eS, rS2)(translate)}
 
+    decref1_stillmatch: LEMMA
+      FORALL (rS, (r: (rS`domain)), i: upto(rS`store(r)`length)):
+        state_matches(eS, rS)(translate) IMPLIES state_matches(eS, decref1(rS, r, i))(translate)
+
     decref_stillmatch: LEMMA
       FORALL (rS: (noDanglingRefs?), r: (rS`domain), i: upto(rS`store(r)`length)):
         state_matches(eS, rS)(translate) IMPLIES state_matches(eS, decref(rS, r, i))(translate)
+
+    decref1_chk_stillmatch: LEMMA
+      FORALL (rS, (u: (domainValue?(rS`domain)))):
+        state_matches(eS, rS)(translate) IMPLIES state_matches(eS, decref1_chk(rS, u))(translate)
 
     releaseReduce_match: LEMMA
       pureReleaseRedex?(grS`redex) AND noDanglingRefs?(grS) AND allReleaseMarked?(grS`redex) AND
