@@ -429,6 +429,14 @@ reduction_props: THEORY
       applyRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
         state_matches?(applyReduce(D)(gS), applyReduce(D)(grS))
 
+    variable_match: LEMMA
+      variable?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        variable?(gS`redex)
+
+    variableReduce_match: LEMMA
+      variable?(grS`redex) AND state_matches?(gS, grS) IMPLIES
+        state_matches?(variableReduce(D)(gS), variableReduce(D)(grS))
+
     ift_match: LEMMA
       pureIftRedex?(grS`redex) AND state_matches?(gS, grS) IMPLIES
         pureIftRedex?(gS`redex)

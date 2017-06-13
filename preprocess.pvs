@@ -218,6 +218,9 @@ preprocess  % [ parameters ]
     unmark_atom: JUDGEMENT
       unmark(A | atom?(A)) HAS_TYPE (atom?)
 
+    unmark_value: JUDGEMENT
+      unmark(A | value?(A)) HAS_TYPE (value?)
+
     unmark(K): RECURSIVE IContext =
       CASES K OF
         letc(K1, B): letc(unmark(K1), unmark(B)),
