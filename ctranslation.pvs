@@ -3,56 +3,187 @@ ctranslation: THEORY
 
     IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, typed_reduction, typed_rreduction, typed_reduction_props, creduction
 
+    A, B, C: VAR IExpression
+    i, j, k: VAR nat
+    x, y, z: VAR (variable?)
+    stypes: VAR finseq[nat]
+    dom_types: VAR [nat -> nat]
+    tA: VAR typeinfo
+    translate_vars: VAR [nat -> nat]
 
-    
-    % A should have type
-    % add some shift number for nested lets
-    % rv: var or return
-    translate_statement(A: (pure?), rv: lvalue): cstat =
+    Definition: TYPE = [# arity: nat,
+                          body: {A |  pure?(A) AND
+                                      (FORALL i: vars(A)(i) = (i < arity)) AND
+                                      unmark(A) = A}
+                       #]
+
+    tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+    tD: VAR finseq[tdef]
+
+    num_type_funs: nat = 10
+    get_type_inccnt_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs
+
+    get_type_memset_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 1
+
+    get_type_new_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 2
+
+    get_type_decref_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 3
+
+    get_type_decrcnt_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 4
+
+    get_type_decrcntchk_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 5
+
+    get_type_lookup_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 6
+
+    get_type_update_copy_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 7
+
+    get_type_update_chk_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 8
+
+    get_type_memcpy_fid(tid: nat, tD): nat =
+      tD`length + tid * num_type_funs + 9
+
+    seq1[T: TYPE](x: T) : finseq[T] = add(x, empty_seq)
+    seq2[T: TYPE](x, y: T) : finseq[T] = add(y, add(x, empty_seq))
+    seq3[T: TYPE](x, y, z: T) : finseq[T] = add(z, add(y, add(x, empty_seq)))
+    seq4[T: TYPE](w, x, y, z: T) : finseq[T] = add(z, add(y, add(x, add(w, empty_seq))))
+
+    shift(translate_vars)(i) : nat = translate_vars(i) + 1
+    newvar(translate_vars)(i) : nat = IF i = 0 THEN 0 ELSE translate_vars(i - 1) + 1 ENDIF
+
+    type_to_ctype(n: nat): RECURSIVE ctype =
+      IF n = 0 THEN
+        cint
+      ELSE
+        cstruct(seq3(cint, cint, carray(type_to_ctype(n - 1))))
+      ENDIF
+    MEASURE n
+    struct_count: nat = 0
+    struct_array_length: nat = 1
+    struct_array: nat = 2
+
+    % rv: var or return -> no, actually: rv is var. return at end
+    translate_statement(A: (pure?), rv: (cvar?),
+      (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+      dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+      (translate_vars: [nat -> nat])
+    ): RECURSIVE cstat =
       CASES A OF
-        variable(j, b): sassign(rv, elv(cvar(j))), % TODO maybe release
+        variable(j, b):
+          LET nv = cvar(translate_vars(j)) IN
+          IF b THEN
+            sassign(rv, elv(nv))
+          ELSE
+            sblock(seq2(scall(get_type_inccnt_fid(leaftype(tA), tD), seq1(nv)),
+                        sassign(rv, elv(nv))))
+          ENDIF,
         constant(n): sassign(rv, econstant(n)),
         nil: sassign(rv, enil),
-        application(f, args): sassign(rv, ecall(f, empty_seq)), % TODO; beware marked args -> all functions should use their args, so that there is no need to release; functions are responsible for freeing their args before returning
-        letexpr(B, C): ,% TODO need the type; beware: rv needs offset
-        ift(x, B, C): sif(cvar(index(x)),
-                        translate_statement(B, rv),
-                        translate_statement(C, rv)),
-        update(target, lhs, rhs): ,%TODO
-        lookup(arr, pos): sassign(rv, elv(caccess(cvar(arr), cvar(pos)))), % TODO release
-        newint(n): ,%TODO
-        newref(n): ,%TODO
-        release(x, B):%TODO
-      ENDCASES
-
-    % A should have type?
-    reconstruct_redex(A: (pure?), rv: lvalue, i: nat, cS: cstate): [IExpression, IContext] =
-      CASES A OF
+        application(f, args):
+          LET cntseq : finseq[cstat] = map(
+            LAMBDA (x | in_varlist(args)(index(x))):
+              IF marked(x) THEN
+                sblock(null)
+              ELSE
+                scall(get_type_inccnt_fid(stypes`seq(stypes`length - 1 - index(x)), tD),
+                      seq1(cvar(translate_vars(index(x)))))
+              ENDIF
+            )(args)
+          IN
+          LET nargs = map(LAMBDA x: cvar(translate_vars(index(x))))(args) IN
+          sblock(add(sassign(rv, ecall(f, nargs)), cntseq)),
         letexpr(B, C):
-          IF i = 0 THEN
-
-          ELSIF i < ... THEN
-
-          ELSIF i < ... THEN
-
-          ELSE
-
-          ENDIF,
+          sdecl(type_to_ctype(lettype(tA)), sblock(seq3(
+            translate_statement(B, cvar(0), stypes, dom_types, tD, lrhs(tA), shift(translate_vars)),
+            sassign(cvar(0), elv(cvar(0))),
+            translate_statement(C, cvar(cindex(rv) + 1), add(lettype(tA), stypes),
+                                dom_types, tD, lbody(tA), newvar(translate_vars)))))
+        ,
         ift(x, B, C):
-          IF i = 0 THEN
-            (A, hole)
-          ELSIF i < 1 + clength(translate_statement(B, rv)) THEN
-            reconstruct_redex(B, rv, i - 1)
+          sif(cvar(translate_vars(index(x))),
+            translate_statement(B, rv, stypes, dom_types, tD, tthen(tA), translate_vars),
+            translate_statement(C, rv, stypes, dom_types, tD, telse(tA), translate_vars)),
+        update(target, lhs, rhs):
+          LET cf =
+            IF marked(target) THEN
+              get_type_update_chk_fid(leaftype(tA) - 1, tD)
+            ELSE
+              get_type_update_copy_fid(leaftype(tA) - 1, tD)
+            ENDIF
+          IN
+          LET cl = sassign(rv, ecall(cf,
+            seq3(cvar(translate_vars(index(target))),
+                 cvar(translate_vars(index(lhs))),
+                 cvar(translate_vars(index(rhs))))))
+          IN
+          IF marked(rhs) THEN
+            sblock(seq2(scall(get_type_decrcnt_fid(leaftype(tA) - 1, tD),
+                       seq1(cvar(translate_vars(index(rhs))))),
+                   cl))
           ELSE
-            reconstruct_redex(C, rv, i - 1 - clength(translate_statement(B, rv)))
+            cl
           ENDIF,
+        lookup(arr, pos):
+          LET cl = sassign(rv, ecall(get_type_lookup_fid(leaftype(tA), tD),
+            seq2(cvar(translate_vars(index(arr))), cvar(translate_vars(index(pos))))))
+          IN
+          LET icnt = scall(get_type_inccnt_fid(leaftype(tA), tD), seq1(rv)) IN
+          IF marked(arr) THEN
+            sblock(seq3(cl, icnt,
+              scall(get_type_decrcntchk_fid(leaftype(tA) + 1, tD),
+                    seq1(cvar(translate_vars(index(arr)))))))
+         ELSE
+            sblock(seq2(cl, icnt))
+         ENDIF,
+        newint(n): sblock(null),%TODO
+        newref(n): sblock(null),%TODO
         release(x, B):
-          IF i < clength([decr(x)]) THEN
-            (A, hole)
-          ELSE
-            reconstruct_redex(B, rv, i - clength([decr(x)]))
-          ENDIF
-        ELSE (A, hole)
+          LET tp = stypes`seq(stypes`length - 1 - index(x)) IN
+          sblock(seq2(
+            scall(get_type_decrcntchk_fid(tp, tD), seq1(cvar(translate_vars(index(x))))),
+            translate_statement(B, rv, stypes, dom_types, tD, tA, translate_vars)))
       ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    % % A should have type?
+    % reconstruct_redex(A: (pure?), rv: lvalue, i: nat, cS: cstate): [IExpression, IContext] =
+    %   CASES A OF
+    %     letexpr(B, C):
+    %       IF i = 0 THEN
+
+    %       ELSIF i < ... THEN
+
+    %       ELSIF i < ... THEN
+
+    %       ELSE
+
+    %       ENDIF,
+    %     ift(x, B, C):
+    %       IF i = 0 THEN
+    %         (A, hole)
+    %       ELSIF i < 1 + clength(translate_statement(B, rv)) THEN
+    %         reconstruct_redex(B, rv, i - 1)
+    %       ELSE
+    %         reconstruct_redex(C, rv, i - 1 - clength(translate_statement(B, rv)))
+    %       ENDIF,
+    %     release(x, B):
+    %       IF i < clength([decr(x)]) THEN
+    %         (A, hole)
+    %       ELSE
+    %         reconstruct_redex(B, rv, i - clength([decr(x)]))
+    %       ENDIF
+    %     ELSE (A, hole)
+    %   ENDCASES
 
   END ctranslation

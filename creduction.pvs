@@ -43,6 +43,7 @@ creduction: THEORY
         enil: enil?
         ecall(cfun: nat, cargs: finseq[(cvar?)]): ecall?
         ebuiltin(cbuiltin: below(builtin_num), cbv1: (cvar?), cbv2: (cvar?)): ebuiltin?
+        emalloc(msize: nat): emalloc?
       END cexpr
 
     e1, e2, e3: VAR cexpr
@@ -54,7 +55,6 @@ creduction: THEORY
         sdecl(dtype: ctype, dstat: cstat): sdecl?
         sif(scond: (cvar?), iftrue: cstat, iffalse: cstat): sif?
         sblock(bstats: finseq[cstat]): sblock?
-        smalloc(msize: nat): smalloc?
         sfree(fvar: (cvar?)): sfree?
       END cstat
 
@@ -87,7 +87,8 @@ creduction: THEORY
         econstant(c) : FALSE,
         enil: FALSE,
         ecall(f, args) : EXISTS (j: below(args`length)): cindex(args`seq(j)) = i,
-        ebuiltin(f, v1, v2) : i = cindex(v1) OR i = cindex(v2)
+        ebuiltin(f, v1, v2) : i = cindex(v1) OR i = cindex(v2),
+        emalloc(n): FALSE
       ENDCASES
 
     vars(s1)(i) : RECURSIVE bool =
@@ -97,7 +98,6 @@ creduction: THEORY
         sdecl(tp1, s2): vars(s2)(i + 1),
         sif(v1, thenc, elsec): cindex(v1) = i OR vars(thenc)(i) OR vars(elsec)(i),
         sblock(stats): EXISTS (j: below(stats`length)): vars(stats`seq(j))(i),
-        smalloc(size): FALSE,
         sfree(v1): cindex(v1) = i
       ENDCASES
     MEASURE s1 BY <<
@@ -660,13 +660,6 @@ creduction: THEORY
                        `store := LAMBDA (x: (ndomain)): cS`store(x),
                        `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
             ENDIF,
-          smalloc(n):
-            cS WITH [`domain := add(cS`new_index, cS`domain),
-                     `new_index := cS`new_index + 1,
-                     `store := cS`store WITH
-                       [(cS`new_index) |->
-                         (# length := n, seq := LAMBDA (i: below(n)): cundef #)],
-                     `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
           scall(f, args):
 %            IF i < args`length THEN % Push arg
 %              cS WITH [`callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf),
@@ -717,6 +710,14 @@ creduction: THEORY
                   ELSE
                     cS WITH [`error := TRUE]
                   ENDIF,
+                emalloc(n):
+                  cS WITH [`return_value := cref(cS`new_index),
+                           `domain := add(cS`new_index, cS`domain),
+                           `new_index := cS`new_index + 1,
+                           `store := cS`store WITH
+                              [(cS`new_index) |->
+                                (# length := n, seq := LAMBDA (i: below(n)): cundef #)],
+                           `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
                 elv(lr1):
                   CASES lr1 OF
                     cvar(i):
