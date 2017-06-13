@@ -73,6 +73,12 @@ ctranslation: THEORY
     struct_array_length: nat = 1
     struct_array: nat = 2
 
+    do_allocate(n: nat, tp: nat, rv: (cvar?), tD): cstat =
+      sblock(seq3(
+        sassign(rv, emalloc(3)),
+        sassign(cfield(rv, struct_array), emalloc(n)),
+        scall(get_type_new_fid(tp, tD), seq1(rv))))
+
     % rv: var or return -> no, actually: rv is var. return at end
     translate_statement(A: (pure?), rv: (cvar?),
       (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
@@ -146,8 +152,8 @@ ctranslation: THEORY
          ELSE
             sblock(seq2(cl, icnt))
          ENDIF,
-        newint(n): sblock(null),%TODO
-        newref(n): sblock(null),%TODO
+        newint(n): do_allocate(n, leaftype(tA)-1, rv, tD),
+        newref(n): do_allocate(n, leaftype(tA)-1, rv, tD),
         release(x, B):
           LET tp = stypes`seq(stypes`length - 1 - index(x)) IN
           sblock(seq2(

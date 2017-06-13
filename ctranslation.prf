@@ -131,8 +131,7 @@
           IExpression_adt nil)
     (application? adt-recognizer-decl "[IExpression -> boolean]"
                   IExpression_adt nil)
-    (i skolem-const-decl "below(length[IExpression](args))"
-       ctranslation nil)
+    (i skolem-const-decl "below(length(args))" ctranslation nil)
     (args skolem-const-decl "list[(variable?)]" ctranslation nil))
    nil
    (translate_statement subtype "args"
@@ -423,9 +422,9 @@
      nil)
     (boolean nonempty-type-decl nil booleans nil)
     (number nonempty-type-decl nil numbers nil)
-    (cvars_pure formula-decl nil preprocess nil)
-    (IExpression type-decl nil IExpression_adt nil)
     (pure? def-decl "bool" IL nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (cvars_pure formula-decl nil preprocess nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
     (popn const-decl "finseq[nat]" typed_reduction nil)
@@ -1618,6 +1617,178 @@
     "seq2(creduction.cvar(translate_vars(IExpression_adt.index(arr))), creduction.cvar(translate_vars(IExpression_adt.index(pos))))"
     "finseq[(creduction.cvar?)]")))
  (translate_statement_TCC40 0
+  (translate_statement_TCC40-1 nil 3706382085 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (pure? def-decl "bool" IL nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (contextPure? def-decl "bool" IL nil)
+    (typeinfo type-decl nil typeinfo_adt nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (tdef type-eq-decl nil typed_reduction nil)
+    (is_well_typed def-decl "bool" typed_reduction nil)
+    (tdef type-eq-decl nil ctranslation nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (translate_statement subtype "tA" "(typeinfo_adt.leaft?)")))
+ (translate_statement_TCC41 0
+  (translate_statement_TCC41-1 nil 3706382085 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (pure? def-decl "bool" IL nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (contextPure? def-decl "bool" IL nil)
+    (typeinfo type-decl nil typeinfo_adt nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (tdef type-eq-decl nil typed_reduction nil)
+    (is_well_typed def-decl "bool" typed_reduction nil)
+    (tdef type-eq-decl nil ctranslation nil)
+    (emptyset const-decl "set" sets nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil))
+   nil
+   (translate_statement subtype "typeinfo_adt.leaftype(tA) - 1"
+    "nat")))
+ (translate_statement_TCC42 0
+  (translate_statement_TCC42-1 nil 3706382085 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (pure? def-decl "bool" IL nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (contextPure? def-decl "bool" IL nil)
+    (typeinfo type-decl nil typeinfo_adt nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (tdef type-eq-decl nil typed_reduction nil)
+    (is_well_typed def-decl "bool" typed_reduction nil)
+    (tdef type-eq-decl nil ctranslation nil)
+    (emptyset const-decl "set" sets nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (translate_statement subtype "tA" "(typeinfo_adt.leaft?)")))
+ (translate_statement_TCC43 0
+  (translate_statement_TCC43-1 nil 3706382085 ("" (grind) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (pure? def-decl "bool" IL nil)
+    (lvalue type-decl nil creduction nil)
+    (cvar? adt-recognizer-decl "[lvalue -> boolean]" creduction nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (< const-decl "bool" reals nil)
+    (below type-eq-decl nil nat_types nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (contextPure? def-decl "bool" IL nil)
+    (typeinfo type-decl nil typeinfo_adt nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (tdef type-eq-decl nil typed_reduction nil)
+    (is_well_typed def-decl "bool" typed_reduction nil)
+    (tdef type-eq-decl nil ctranslation nil)
+    (emptyset const-decl "set" sets nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil))
+   nil
+   (translate_statement subtype "typeinfo_adt.leaftype(tA) - 1"
+    "nat")))
+ (translate_statement_TCC44 0
   (translate_statement_TCC40-1 nil 3706378600
    ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -1671,7 +1842,7 @@
    (translate_statement subtype
     "seq1(creduction.cvar(translate_vars(IExpression_adt.index(x))))"
     "finseq[(creduction.cvar?)]")))
- (translate_statement_TCC41 0
+ (translate_statement_TCC45 0
   (translate_statement_TCC41-1 nil 3706378600 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -1713,7 +1884,7 @@
      real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil (translate_statement subtype "B" "(IL.pure?)")))
- (translate_statement_TCC42 0
+ (translate_statement_TCC46 0
   (translate_statement_TCC42-1 nil 3706378600 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -1761,7 +1932,7 @@
    nil
    (translate_statement subtype "stypes"
     "{stypes | FORALL i: preprocess.cvars(B)(i) IMPLIES i < stypes`length}")))
- (translate_statement_TCC43 0
+ (translate_statement_TCC47 0
   (translate_statement_TCC43-1 nil 3706378600 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -1805,7 +1976,7 @@
    nil
    (translate_statement subtype "tA"
     "{tA | typed_reduction.is_well_typed(B, tA, stypes, dom_types, tD)}")))
- (translate_statement_TCC44 0
+ (translate_statement_TCC48 0
   (translate_statement_TCC44-1 nil 3706378600
    ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -1853,7 +2024,7 @@
    (translate_statement termination
     "translate_statement(B, rv, stypes, dom_types, tD, tA, translate_vars)"
     "nil")))
- (translate_statement_TCC45 0
+ (translate_statement_TCC49 0
   (translate_statement_TCC45-1 nil 3706378600
    ("" (skeep* :preds? t)
     (("" (rewrite cvars_pure)
@@ -1893,7 +2064,7 @@
    (translate_statement subtype
     "stypes`length - 1 - IExpression_adt.index(x)"
     "below[stypes`length]")))
- (translate_statement_TCC46 0
+ (translate_statement_TCC50 0
   (translate_statement_TCC46-1 nil 3706378600 ("" (grind) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
