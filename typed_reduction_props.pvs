@@ -9,7 +9,7 @@ typed_reduction_props: THEORY
     tK, tK1, tK2: VAR typeinfo_ctx
 
     
-    a, b, c: VAR (atom?)
+%    a, b, c: VAR (atom?)
     u, v, w: VAR (value?)
     x, y, z: VAR (variable?)
     i, j, k, hole_type: VAR nat
@@ -86,7 +86,7 @@ typed_reduction_props: THEORY
       pure?(unmark(A)) = pure?(A)
 
     make_redex_types_match: LEMMA
-      NOT atom?(tS`state`redex) AND NOT atom?(trS`state`redex) AND
+      NOT value?(tS`state`redex) AND NOT value?(trS`state`redex) AND
       tS`state`context = hole AND trS`state`context = hole AND
       NOT releaseRedex?(make_redex_typed(trS)`state`redex) AND
       state_matches?(tS, trS) IMPLIES
