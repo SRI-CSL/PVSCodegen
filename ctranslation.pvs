@@ -74,10 +74,9 @@ ctranslation: THEORY
     struct_array: nat = 2
 
     do_allocate(n: nat, tp: nat, rv: (cvar?), tD): cstat =
-      sblock(seq3(
-        sassign(rv, emalloc(3)),
-        sassign(cfield(rv, struct_array), emalloc(n)),
-        scall(get_type_new_fid(tp, tD), seq1(rv))))
+      sdecl(cint, sblock(seq2(sassign(cvar(0), econstant(n)),
+                         sassign(cvar(cindex(rv)+1),
+                           ecall(get_type_new_fid(tp, tD), seq1(cvar(0)))))))
 
     % rv: var or return -> no, actually: rv is var. return at end
     translate_statement(A: (pure?), rv: (cvar?),
@@ -161,6 +160,31 @@ ctranslation: THEORY
             translate_statement(B, rv, stypes, dom_types, tD, tA, translate_vars)))
       ENDCASES
     MEASURE (A :: IExpression) BY <<
+
+    convert_value(u: (value?)): cvalue =
+      CASES u OF
+        ref(i): cref(2 * i),
+        constant(n): cintv(n),
+        nil: cnil
+      ENDCASES
+
+    store_matches(rS: rstate, cS: cstate): bool =
+      EXISTS (n: nat):
+        (FORALL i: rS`domain(i) = (i < n)) AND
+        cS`new_index = 2 * n AND
+        (FORALL (i: (rS`domain)):
+          IF rS`count(i) = 0 THEN
+            NOT cS`domain(2 * i) AND NOT cS`domain(2 * i + 1)
+          ELSE
+            cS`domain(2 * i) AND cS`domain(2 * i + 1) AND
+              cS`store(2 * i)`length = 3 AND
+              cS`store(2 * i + 1)`length = rS`store(i)`length AND
+              cintv(rS`count(i)) = cS`store(2 * i)`seq(struct_count) AND
+              cintv(rS`store(i)`length) = cS`store(2 * i)`seq(struct_array_length) AND
+              cS`store(2 * i)`seq(struct_array) = cref(2 * i + 1) AND
+              FORALL (j: below(rS`store(i)`length)):
+                cS`store(2 * i + 1)`seq(j) = convert_value(rS`store(i)`seq(j))
+          ENDIF)
 
     % % A should have type?
     % reconstruct_redex(A: (pure?), rv: lvalue, i: nat, cS: cstate): [IExpression, IContext] =

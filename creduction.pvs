@@ -43,7 +43,7 @@ creduction: THEORY
         enil: enil?
         ecall(cfun: nat, cargs: finseq[(cvar?)]): ecall?
         ebuiltin(cbuiltin: below(builtin_num), cbv1: (cvar?), cbv2: (cvar?)): ebuiltin?
-        emalloc(msize: nat): emalloc?
+        emalloc(msize: (cvar?)): emalloc?
       END cexpr
 
     e1, e2, e3: VAR cexpr
@@ -88,7 +88,7 @@ creduction: THEORY
         enil: FALSE,
         ecall(f, args) : EXISTS (j: below(args`length)): cindex(args`seq(j)) = i,
         ebuiltin(f, v1, v2) : i = cindex(v1) OR i = cindex(v2),
-        emalloc(n): FALSE
+        emalloc(v1): i = cindex(v1)
       ENDCASES
 
     vars(s1)(i) : RECURSIVE bool =
@@ -710,14 +710,20 @@ creduction: THEORY
                   ELSE
                     cS WITH [`error := TRUE]
                   ENDIF,
-                emalloc(n):
-                  cS WITH [`return_value := cref(cS`new_index),
-                           `domain := add(cS`new_index, cS`domain),
-                           `new_index := cS`new_index + 1,
-                           `store := cS`store WITH
-                              [(cS`new_index) |->
-                                (# length := n, seq := LAMBDA (i: below(n)): cundef #)],
-                           `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)],
+                emalloc(v1):
+                  LET x1 = cS`stack`seq(cS`stack`length - 1 - cindex(v1)) IN
+                  IF cintv?(x1) AND cintvalue(x1) >= 0 THEN
+                    cS WITH [`return_value := cref(cS`new_index),
+                             `domain := add(cS`new_index, cS`domain),
+                             `new_index := cS`new_index + 1,
+                             `store := cS`store WITH
+                                [(cS`new_index) |->
+                                  (# length := cintvalue(x1),
+                                     seq := LAMBDA (i: below(cintvalue(x1))): cundef #)],
+                             `callstack`seq(cS`callstack`length - 1) := cframe_next_pc(cS`cdefs)(lf)]
+                  ELSE
+                    cS WITH [`error := TRUE]
+                  ENDIF,
                 elv(lr1):
                   CASES lr1 OF
                     cvar(i):
