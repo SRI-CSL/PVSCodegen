@@ -62,6 +62,8 @@ ctranslation: THEORY
     shift(translate_vars)(i) : nat = translate_vars(i) + 1
     newvar(translate_vars)(i) : nat = IF i = 0 THEN 0 ELSE translate_vars(i - 1) + 1 ENDIF
 
+    scall_length(num_args: nat): nat = 1 + 2 * num_args
+    
     type_to_ctype(n: nat): RECURSIVE ctype =
       IF n = 0 THEN
         cint
@@ -107,7 +109,7 @@ ctranslation: THEORY
             )(args)
           IN
           LET nargs = map(LAMBDA x: cvar(translate_vars(index(x))))(args) IN
-          sblock(add(sassign(rv, ecall(f, nargs)), cntseq)),
+          sblock(add(sassign(rv, ecall(f, nargs)), add(sassign(rv, elv(rv)), cntseq))),
         letexpr(B, C):
           sdecl(type_to_ctype(lettype(tA)), sblock(seq3(
             translate_statement(B, cvar(0), stypes, dom_types, tD, lrhs(tA), shift(translate_vars)),
@@ -171,6 +173,7 @@ ctranslation: THEORY
     store_matches(rS: rstate, cS: cstate): bool =
       EXISTS (n: nat):
         (FORALL i: rS`domain(i) = (i < n)) AND
+        (FORALL i: cS`domain(i) IMPLIES i < 2 * n) AND
         cS`new_index = 2 * n AND
         (FORALL (i: (rS`domain)):
           IF rS`count(i) = 0 THEN
@@ -185,6 +188,58 @@ ctranslation: THEORY
               FORALL (j: below(rS`store(i)`length)):
                 cS`store(2 * i + 1)`seq(j) = convert_value(rS`store(i)`seq(j))
           ENDIF)
+
+    state_match_rec(A: (pure?), rv: (cvar?),
+      (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+      dom_types, D, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+      (translate_vars: [nat -> nat]), (rA: (contextPure?)),
+      (pc: below(clength(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars))))
+    ):
+      CASES A OF
+        letexpr(B, C):
+          LET b1 = translate_statement(B,cvar(0),stypes,dom_types,
+                                tD,lrhs(tA),shift(translate_vars)) IN
+          LET b2 = sassign(cvar(0),elv(cvar(0))) IN
+          LET b3 = translate_statement(C,cvar(cindex(rv)+1),add(lettype(tA),stypes),
+                                dom_types,tD,lbody(tA),newvar(translate_vars)))))
+          IF pc = 0 THEN
+            A = rA
+          ELSIF pc < 1+clength(b1) THEN
+            letexpr?(rA) AND letbody(rA) = C AND
+            state_match_rec(B,cvar(0),stypes,dom_types,D,tD,lrhs(tA),
+                            shift(translate_vars),letrhs(rA),pc-1)
+          ELSIF pc < 1+clength(b1)+clength(b2) THEN
+            letexpr?(rA) AND letbody(rA) = C AND pc = 1+clength(b1)+clength(b2) AND
+            value?(letrhs(rA)) AND %TODO IN STACK
+          ELSIF pc < 1+clength(b1)+clength(b2)+clength(b3) THEN
+            pop?(rA) AND
+            state_match_rec(C,cvar(cindex(rv)+1),add(lettype(tA),stypes),dom_types,
+                            D,tD,lbody(tA),newvar(translate_vars),pbody(rA),
+                            pc-1-clength(b1)-clength(b2))
+          ELSE
+            pop?(rA) AND value?(pbody(rA)) AND %TODO IN STACK
+          ENDIF,
+        ift(x, B, C):
+          LET b1 = translate_statement(B,rv,stypes,dom_types,tD,tthen(tA),translate_vars) IN
+          IF pc = 0 THEN
+            A = rA
+          ELSIF pc < 1 + clength(b1) THEN
+            state_match_rec(B,rv,stypes,dom_types,D,tD,tthen(tA),translate_vars,rA,pc-1)
+          ELSE
+            state_match_rec(C,rv,stypes,dom_types,D,tD,telse(tA),
+                            translate_vars,rA,pc-1-clength(b1))
+          ENDIF,
+        application(f, args): ,
+        lookup(x, y): ,
+        release(x, B):
+          IF pc < scall_length(1) THEN
+            A = rA AND pc = 0
+          ELSE
+            state_match_rec(B,rv,stypes,dom_types,D,tD,tA,
+                            translate_vars,rA,pc-scall_length(1))
+          ENDIF
+        ELSE A = rA AND pc = 0
+      ENDCASES
 
     % % A should have type?
     % reconstruct_redex(A: (pure?), rv: lvalue, i: nat, cS: cstate): [IExpression, IContext] =
