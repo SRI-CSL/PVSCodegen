@@ -60,6 +60,17 @@ iareduction: THEORY
        ENDIF
      MEASURE arity
 
+    iapply_nstack_ndr: LEMMA
+      FORALL ((arity: nat), dom, (S | every(domainValue?(dom))(S)),
+              (args: list[(variable?)] | length(args) = arity AND
+                      FORALL i: in_varlist(args)(i) IMPLIES i < S`length),
+              (str: Store(dom)), A,
+              (cnt: [i:(dom) -> {j|j=refcount(dom,str,S,A)(i)}])) :
+        FORALL (k: below(S`length)):
+          ref?(iapply_nstack(arity,dom,S,args,str,A,cnt)`1`seq(S`length - 1 - k)) IMPLIES
+            ref?(S`seq(S`length - 1 - k)) AND
+              NOT some(LAMBDA x: marked(x) AND index(x) = k)(args)
+
     npops(n: nat, A) : RECURSIVE IExpression =
       IF n = 0 THEN A ELSE pop(npops(n - 1, A)) ENDIF
     MEASURE n
@@ -98,7 +109,8 @@ iareduction: THEORY
       ENDIF
 
     iapplyReduce_ndr: JUDGEMENT
-      iapplyReduce(D)(grS | noDanglingRefs?(grS)) HAS_TYPE (noDanglingRefs?)
+      iapplyReduce(D)(grS | noDanglingRefs?(grS) AND applyRedex?(grS`redex))
+        HAS_TYPE (noDanglingRefs?)
       
     iareduce(D)(grS | noDanglingRefs?(grS)): rstate =
       LET t = to_topstate(grS) IN
