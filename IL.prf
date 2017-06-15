@@ -207,6 +207,16 @@
    ((fill def-decl "IExpression" IL nil)) nil
    (buildContext subtype "(hole, A)" "{K, B | fill(K, B) = A}")))
  (context_composition 0
+  (context_composition-2 nil 3706551297
+   ("" (induct-and-simplify "K1") nil nil)
+   ((IContext_induction formula-decl nil IL nil)
+    (compose def-decl "IContext" IL nil)
+    (fill def-decl "IExpression" IL nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IContext type-decl nil IL nil))
+   nil)
   (context_composition-1 nil 3646034275
    ("" (induct-and-simplify "K1") nil nil)
    ((IContext type-decl nil IL nil)

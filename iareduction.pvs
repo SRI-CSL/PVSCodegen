@@ -21,6 +21,9 @@ iareduction: THEORY
 
     Defs: TYPE = finseq[Definition]
 
+    defs_subtype: JUDGEMENT
+      Defs SUBTYPE_OF rreduction.Defs
+
     D: VAR Defs
 
     V: VAR finseq[(value?)]

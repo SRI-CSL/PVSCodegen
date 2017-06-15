@@ -1,7 +1,7 @@
 typed_rreduction: THEORY
   BEGIN
 
-    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, preprocess, rreduction, typeinfo, typeinfo_adt, typed_reduction, reduction_props, list2finseq_extra
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, preprocess, rreduction, typeinfo, typeinfo_adt, typed_reduction, reduction_props, list2finseq_extra, iareduction
 
     A, B, C: VAR IExpression
     tA, tB, tC: VAR typeinfo
@@ -21,11 +21,14 @@ typed_rreduction: THEORY
     
     Store(dom): TYPE = [(dom) -> finseq[(domainValue?(dom))]]
 
-    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) IMPLIES i < arity) AND unmark(A) = A} #]
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) = (i < arity)) AND unmark(A) = A} #]
 
     tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
 
     Defs: TYPE = finseq[Definition]
+
+    defs_subtype: JUDGEMENT
+      Defs SUBTYPE_OF rreduction.Defs
 
     D: VAR Defs
 
@@ -269,5 +272,50 @@ typed_rreduction: THEORY
       FORALL (grS : (noDanglingRefs?) | NOT grS`error):
         grS`stack`length - popDepth(grS`redex) - popDepth(grS`context) =
           reduce(D)(grS)`stack`length - popDepth(reduce(D)(grS)`redex) - popDepth(reduce(D)(grS)`context)
+
+    typed_iareduce(D)(tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)) : typed_rstate =
+      LET t = typed_to_topstate(tS) IN
+      IF value?(t`state`redex) THEN
+        t
+      ELSE
+        LET nS = make_redex_typed(t) IN
+        IF variable?(nS`state`redex) THEN
+          nS WITH [`state := variableReduce(D)(nS`state)]
+        ELSIF pureLetRedex?(nS`state`redex) THEN
+          nS WITH [`state := letReduce(D)(nS`state),
+                   `stack_types := add(lettype(nS`redex_type), nS`stack_types),
+                   `redex_type := popt(lbody(nS`redex_type))]
+        ELSIF applyRedex?(nS`state`redex) THEN
+          nS WITH [`state := iapplyReduce(D)(nS`state),
+                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, tS`def_types`seq(fun(nS`state`redex))`body_type)]
+        ELSIF pureIftRedex?(nS`state`redex) THEN
+          nS WITH [`state := ifReduce(D)(nS`state),
+                   `redex_type :=
+                     IF get(nS`state`stack)(condition(nS`state`redex)) = constant(0) THEN
+                       telse(nS`redex_type)
+                     ELSE
+                       tthen(nS`redex_type)
+                     ENDIF
+                  ]
+        ELSIF updateRedex?(nS`state`redex) THEN
+          nS WITH [`state := updateReduce(D)(nS`state),
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type) - 1]]
+        ELSIF lookupRedex?(nS`state`redex) THEN
+          nS WITH [`state := lookupReduce(D)(nS`state)]
+        ELSIF newintRedex?(nS`state`redex) THEN
+          nS WITH [`state := newintReduce(D)(nS`state),
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type) - 1]]
+        ELSIF newrefRedex?(nS`state`redex) THEN
+          nS WITH [`state := newrefReduce(D)(nS`state),
+                   `dom_types := nS`dom_types WITH [(least_out(nS`state`domain)) |-> leaftype(nS`redex_type) - 1]]
+        ELSIF popRedex?(nS`state`redex) THEN
+          nS WITH [`state := popReduce(D)(nS`state),
+                   `stack_types := tail(nS`stack_types),
+                   `redex_type := ptbody(nS`redex_type)]
+        ELSE
+          nS WITH [`state := releaseReduce(D)(nS`state)]
+        ENDIF
+      ENDIF
+
 
   END typed_rreduction
