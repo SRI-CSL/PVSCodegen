@@ -624,6 +624,14 @@ reduction_props: THEORY
       IF n = 0 OR rS`error THEN rS ELSE rreduce_n(D)(n - 1, reduce(D)(rS)) ENDIF
     MEASURE n
 
+    rreduce_n_ndr: LEMMA
+      FORALL (n: nat, rS: (noDanglingRefs?)):
+        noDanglingRefs?(rreduce_n(D)(n, rS))
+
+    rreduce_n_compose: LEMMA
+      FORALL (i,j: nat, rS: (noDanglingRefs?)):
+        rreduce_n(D)(i, rreduce_n(D)(j, rS)) = rreduce_n(D)(i + j, rS)
+
     build_redex_match: LEMMA
       contextPure?(A) AND contextPure?(B) AND
       translate_refs(translate)(unmark(A)) = B AND NOT release?(buildRedex(A)`2) IMPLIES

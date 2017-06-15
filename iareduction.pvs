@@ -1,0 +1,250 @@
+iareduction: THEORY
+  BEGIN
+
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, preprocess, reduction, rreduction, reduction_props
+
+    A, B, C: VAR IExpression
+    K, K1, K2: VAR IContext
+  
+    %a, b, c: VAR (atom?)
+    u, v, w: VAR (value?)
+    x, y, z: VAR (variable?)
+    i, j, k, n: VAR nat
+    F, X: VAR finite_set[nat]
+
+    S, S1, S2: VAR Stack
+    nS: VAR neStack
+
+    dom, dom1: VAR finite_set[nat]
+
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) = (i < arity)) AND unmark(A) = A} #]
+
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+
+    V: VAR finseq[(value?)]
+
+    L: VAR list[(variable?)]
+
+    rS, rS1, rS2: VAR rstate
+    grS, grS1, grS2: VAR rreduction.goodrstate
+
+    iapply_nstack((arity: nat), dom, (S | every(domainValue?(dom))(S)),
+                  (args: list[(variable?)] | length(args) = arity AND
+                          FORALL i: in_varlist(args)(i) IMPLIES i < S`length),
+                  (str: Store(dom)), A,
+                  (cnt: [i:(dom) -> {j|j=refcount(dom,str,S,A)(i)}])) :
+       RECURSIVE {((S1 | every(domainValue?(dom))(S1)),
+                   (ncnt: [i:(dom) -> {j|j=refcount(dom,str,S1,A)(i)}])) |
+                  S1`length = S`length + arity} =
+       IF arity = 0 THEN
+         (S, cnt)
+       ELSE
+         LET u = S`seq(S`length - 1 - index(car(args))) IN
+         LET nargs : {L | length(L) = length(args) - 1 AND
+                          FORALL i: in_varlist(L)(i) IMPLIES i < S`length + 1} =
+           map(LAMBDA y: y WITH [`index := index(y) + 1])(cdr(args)) IN
+         IF ref?(u) THEN
+           IF marked(car(args)) THEN
+             iapply_nstack(arity-1,dom,
+               push(u, S WITH [`seq(S`length - 1 - index(car(args))) := nil]),
+               nargs,str,A,cnt)
+           ELSE
+             iapply_nstack(arity-1,dom,push(u,S),nargs,str,A,
+                           cnt WITH [(refindex(u)) := cnt(refindex(u)) + 1])
+           ENDIF
+         ELSE
+           iapply_nstack(arity-1,dom,push(u,S),nargs,str,A,cnt)
+         ENDIF
+       ENDIF
+     MEASURE arity
+
+    npops(n: nat, A) : RECURSIVE IExpression =
+      IF n = 0 THEN A ELSE pop(npops(n - 1, A)) ENDIF
+    MEASURE n
+
+    npops_popDepth: LEMMA
+      popDepth(npops(n, A)) = n + popDepth(A)
+
+    npops_refs: LEMMA
+      refs(npops(n, A))(i) = refs(A)(i)
+
+    npops_contextPure: LEMMA
+      contextPure?(npops(n, A)) = contextPure?(A)
+
+    npops_vars: LEMMA
+      vars(npops(n, A))(i) = vars(A)(i + n)
+
+    npops_cvars: LEMMA
+      cvars(npops(n, A))(i) = cvars(A)(i)
+
+    npops_mark: LEMMA
+      mark(X)(npops(n, A)) = npops(n, mark(bumpn(X, n))(A))
+
+    iapplyReduce(D)(grS | applyRedex?(grS`redex)): rstate =
+      IF fun(grS`redex) < D`length AND
+          length(args(grS`redex)) = D`seq(fun(grS`redex))`arity THEN
+        LET def = D`seq(fun(grS`redex)) IN
+        LET (nstack, ncount) = iapply_nstack(def`arity, grS`domain, grS`stack,
+                                  args(grS`redex), grS`store, grS`redex, grS`count)
+        IN
+        grS WITH [`redex := npops(def`arity, mark(emptyset)(def`body)),
+                  `stack := nstack,
+                  `count := ncount
+                 ]
+      ELSE
+        grS WITH [`error := TRUE]
+      ENDIF
+
+    iapplyReduce_ndr: JUDGEMENT
+      iapplyReduce(D)(grS | noDanglingRefs?(grS)) HAS_TYPE (noDanglingRefs?)
+      
+    iareduce(D)(grS | noDanglingRefs?(grS)): rstate =
+      LET t = to_topstate(grS) IN
+      IF value?(t`redex) THEN
+        t
+      ELSE
+        LET nS : (noDanglingRefs?) = make_redex(t) IN
+        IF variable?(nS`redex) THEN
+          variableReduce(D)(nS)
+        ELSIF pureLetRedex?(nS`redex) THEN
+          letReduce(D)(nS)
+        ELSIF applyRedex?(nS`redex) THEN
+          iapplyReduce(D)(nS)
+        ELSIF pureIftRedex?(nS`redex) THEN
+          ifReduce(D)(nS)
+        ELSIF updateRedex?(nS`redex) THEN
+          updateReduce(D)(nS)
+        ELSIF lookupRedex?(nS`redex) THEN
+          lookupReduce(D)(nS)
+        ELSIF newintRedex?(nS`redex) THEN
+          newintReduce(D)(nS)
+        ELSIF newrefRedex?(nS`redex) THEN
+          newrefReduce(D)(nS)
+        ELSIF popRedex?(nS`redex) THEN
+          popReduce(D)(nS)
+        ELSE
+          releaseReduce(D)(nS)
+        ENDIF
+      ENDIF
+
+    iareduce_ndr: JUDGEMENT
+      iareduce(D)(grS | noDanglingRefs?(grS)) HAS_TYPE (noDanglingRefs?)
+
+    iapply_nstack_iterm((k: nat), dom, (S | every(domainValue?(dom))(S)),
+                  (args: list[(variable?)] | k <= 2 * length(args) AND
+                          FORALL i: in_varlist(args)(i) IMPLIES i < S`length),
+                  A, (cnt: [i:(dom) -> nat])) :
+       RECURSIVE [{S1 : Stack | every(domainValue?(dom))(S1)},
+                   [i:(dom) -> nat], IExpression] =
+       IF k = 0 THEN
+         (S, cnt, rreduction.letApply(length(args), args, A))
+       ELSE
+         LET u = S`seq(S`length - 1 - index(car(args))) IN
+         LET nargs : {L | length(L) = length(args) - 1 AND
+                          FORALL i: in_varlist(L)(i) IMPLIES i < S`length + 1} =
+           map(LAMBDA y: y WITH [`index := index(y) + 1])(cdr(args)) IN
+         LET nstack1: {S1 | every(domainValue?(dom))(S1)} =
+           IF ref?(u) AND marked(car(args)) THEN
+             S WITH [`seq(S`length - 1 - index(car(args))) := nil]
+           ELSE
+             S
+           ENDIF
+         IN
+         LET nstack : {S1 | every(domainValue?(dom))(S1)} = push(u, nstack1) IN
+         LET ncnt = IF ref?(u) AND NOT marked(car(args)) THEN
+           cnt WITH [(refindex(u)) := cnt(refindex(u)) + 1]
+         ELSE
+           cnt
+         ENDIF
+         IN
+         IF k = 1 THEN
+           (nstack1, ncnt, letexpr(u, rreduction.letApply(length(nargs), nargs, A)))
+         ELSE
+           LET (nnstack, nncnt, nA) = iapply_nstack_iterm(k-2,dom,nstack,nargs,A,ncnt) IN
+           (nnstack, nncnt, pop(nA))
+         ENDIF
+       ENDIF
+     MEASURE k
+
+    state_matches?(rS1, rS2): bool =
+      fill(rS1`context, rS1`redex) = fill(rS2`context, rS2`redex) AND
+      rS1`error = rS2`error AND
+      rS1`domain = rS2`domain AND
+      rS1`stack = rS2`stack AND
+      rS1`store = rS2`store AND
+      rS1`count = rS2`count
+
+    apply_iterm_match(D)(A, K, dom, (S | every(domainValue?(dom))(S)),
+        (L | FORALL i: in_varlist(L)(i) IMPLIES i < S`length),
+        (k: upto(2 * length(L))), rS, (str: Store(dom)), (cnt:[(dom)->nat])) : bool =
+      NOT rS`error AND rS`domain = dom AND rS`store = str AND
+      LET (S1, cnt, B) = iapply_nstack_iterm(k, dom, S, L, A, cnt) IN
+      rS`stack = S1 AND rS`count = cnt AND fill(rS`context, rS`redex) = fill(K, B)
+
+    applyReduce_match_rec: LEMMA
+      FORALL (k, (A: (pure?)), K, dom, (S | every(domainValue?(dom))(S)),
+        (L | k < 2 * length(L) AND (FORALL i: in_varlist(L)(i) IMPLIES i < S`length)
+                               AND (FORALL i: i < length(L) IMPLIES vars(A)(i))),
+        (rS: (noDanglingRefs?)),
+        (str: Store(dom)), (cnt:[(dom)->nat])):
+          apply_iterm_match(D)(A,K,dom,S,L,k,rS,str,cnt) IMPLIES
+            apply_iterm_match(D)(A,K,dom,S,L,k+1,reduce(D)(rS),str,cnt)
+
+    applyReduce_match_init: LEMMA
+      applyRedex?(grS`redex) AND noDanglingRefs?(grS) AND
+      fun(grS`redex) < D`length AND
+      length(args(grS`redex)) = D`seq(fun(grS`redex))`arity IMPLIES
+        apply_iterm_match(D)(mark(emptyset)(D`seq(fun(grS`redex))`body),
+          grS`context, grS`domain,
+          grS`stack, args(grS`redex), 0, reduce(D)(grS), grS`store, grS`count)
+
+    applyReduce_match_lemma: LEMMA
+      applyRedex?(grS`redex) AND noDanglingRefs?(grS) AND
+      fun(grS`redex) < D`length AND
+      length(args(grS`redex)) = D`seq(fun(grS`redex))`arity IMPLIES
+      FORALL (k: upto(2 * length(args(grS`redex)))):
+        apply_iterm_match(D)(mark(emptyset)(D`seq(fun(grS`redex))`body),
+          grS`context, grS`domain, grS`stack, args(grS`redex), k,
+          rreduce_n(D)(k+1,grS), grS`store, grS`count)
+
+    iapply_nstack_iterm_end: LEMMA
+      FORALL ((arity: nat), dom, (S | every(domainValue?(dom))(S)),
+                (args: list[(variable?)] | length(args) = arity AND
+                        FORALL i: in_varlist(args)(i) IMPLIES i < S`length),
+                (str: Store(dom)), A, B,
+                (cnt: [i:(dom) -> {j|j=refcount(dom,str,S,A)(i)}])):
+        iapply_nstack_iterm(2 * arity, dom, S, args, B, cnt)`1 =
+          iapply_nstack(arity, dom, S, args, str, A, cnt)`1 AND
+        iapply_nstack_iterm(2 * arity, dom, S, args, B, cnt)`2 =
+          iapply_nstack(arity, dom, S, args, str, A, cnt)`2 AND
+        iapply_nstack_iterm(2 * arity, dom, S, args, B, cnt)`3 =
+          npops(arity, B)
+
+    % applyReduce_match_rec: LEMMA
+    %   applyRedex?(grS`redex) AND noDanglingRefs?(grS) AND
+    %   fun(grS`redex) < D`length AND
+    %   length(args(grS`redex)) = D`seq(fun(grS`redex))`arity AND
+    %   k < 2 * length(args(grS`redex)) AND
+    %    (LET (S, cnt, A) = iapply_nstack_iterm(k, grS`domain, grS`stack, args(grS`redex),
+    %                         mark(emptyset)(D`seq(fun(grS`redex))`body), grS`count) IN
+    %     LET nS = rreduce_n(D)(k + 1, grS) IN
+    %     NOT nS`error AND nS`domain = grS`domain AND nS`stack = S AND nS`store = grS`store
+    %     AND nS`count = cnt AND fill(nS`context, nS`redex) = fill(grS`context, A))
+    %   IMPLIES
+    %    (LET (S, cnt, A) = iapply_nstack_iterm(k + 1, grS`domain, grS`stack,
+    %           args(grS`redex), mark(emptyset)(D`seq(fun(grS`redex))`body), grS`count) IN
+    %     LET nS = rreduce_n(D)(k + 2, grS) IN
+    %     NOT nS`error AND nS`domain = grS`domain AND nS`stack = S AND nS`store = grS`store
+    %     AND nS`count = cnt AND fill(nS`context, nS`redex) = fill(grS`context, A))        
+
+    applyReduce_match: LEMMA
+      applyRedex?(grS`redex) AND noDanglingRefs?(grS) IMPLIES
+        EXISTS (n: posnat): state_matches?(rreduce_n(D)(n, grS), iapplyReduce(D)(grS))
+
+    bisimulation_theorem: THEOREM
+      noDanglingRefs?(grS1) AND noDanglingRefs?(grS2) AND state_matches?(grS1, grS2) IMPLIES
+        EXISTS (n: posnat): state_matches?(rreduce_n(D)(n, grS1), iareduce(D)(grS2))
+
+END iareduction

@@ -725,6 +725,10 @@ rreduction      : THEORY
       LET (ctx, redex) = buildRedex(t`redex) IN
       (t :: rstate) WITH [`context := ctx, `redex := redex]
 
+    to_topstate_make_redex: LEMMA
+      FORALL (t: rtopstate):
+        NOT value?(t`redex) IMPLIES to_topstate(make_redex(t)) = t
+
     make_redex_idem: LEMMA
       FORALL (t: rtopstate):
         NOT value?(t`redex) IMPLIES

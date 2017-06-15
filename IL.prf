@@ -108,7 +108,6 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
-    (every adt-def-decl "boolean" list_adt nil)
     (application? adt-recognizer-decl "[IExpression -> boolean]"
                   IExpression_adt nil)
     (application adt-constructor-decl
@@ -456,8 +455,88 @@
    ((value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil))
    nil (buildRedex subtype "(hole, A)" "{K, B | fill(K, B) = A}")))
+ (not_value_redex_fill 0
+  (not_value_redex_fill-1 nil 3706468681
+   ("" (induct-and-simplify K) nil nil)
+   ((IContext type-decl nil IL nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (redex? const-decl "bool" IL nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (value? const-decl "bool" IL nil)
+    (fill def-decl "IExpression" IL nil)
+    (IContext_induction formula-decl nil IL nil)
+    (releaseRedex? const-decl "bool" IL nil)
+    (popRedex? const-decl "bool" IL nil)
+    (newrefRedex? const-decl "bool" IL nil)
+    (newintRedex? const-decl "bool" IL nil)
+    (lookupRedex? const-decl "bool" IL nil)
+    (updateRedex? const-decl "bool" IL nil)
+    (iftRedex? const-decl "bool" IL nil)
+    (applyRedex? const-decl "bool" IL nil)
+    (letRedex? const-decl "bool" IL nil))
+   shostak))
+ (buildRedex_fill 0
+  (buildRedex_fill-1 nil 3706468551
+   ("" (induct K)
+    (("1" (grind) nil nil)
+     ("2" (skeep* :preds? t)
+      (("2" (expand fill +)
+        (("2" (expand buildRedex +)
+          (("2" (lift-if)
+            (("2" (split)
+              (("1" (flatten)
+                (("1" (use not_value_redex_fill)
+                  (("1" (grind) nil nil)) nil))
+                nil)
+               ("2" (grind) nil nil))
+              nil))
+            nil))
+          nil))
+        nil))
+      nil)
+     ("3" (skeep* :preds? t)
+      (("3" (expand fill +)
+        (("3" (expand buildRedex +)
+          (("3" (lift-if)
+            (("3" (split)
+              (("1" (flatten)
+                (("1" (use not_value_redex_fill)
+                  (("1" (grind) nil nil)) nil))
+                nil)
+               ("2" (grind) nil nil))
+              nil))
+            nil))
+          nil))
+        nil))
+      nil))
+    nil)
+   ((IContext type-decl nil IL nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (redex? const-decl "bool" IL nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (fill def-decl "IExpression" IL nil)
+    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (IContext_induction formula-decl nil IL nil)
+    (value? const-decl "bool" IL nil)
+    (letRedex? const-decl "bool" IL nil)
+    (applyRedex? const-decl "bool" IL nil)
+    (iftRedex? const-decl "bool" IL nil)
+    (updateRedex? const-decl "bool" IL nil)
+    (lookupRedex? const-decl "bool" IL nil)
+    (newintRedex? const-decl "bool" IL nil)
+    (newrefRedex? const-decl "bool" IL nil)
+    (popRedex? const-decl "bool" IL nil)
+    (releaseRedex? const-decl "bool" IL nil)
+    (not_value_redex_fill formula-decl nil IL nil))
+   shostak))
  (buildRedexPure_TCC1 0
-  (buildRedexPure_TCC1-1 nil 3699114546
+  (buildRedexPure_TCC4-1 nil 3705953402
    ("" (recursive-judgement-tcc) nil nil)
    ((contextPure? def-decl "bool" IL nil)
     (IExpression type-decl nil IExpression_adt nil)
@@ -482,7 +561,7 @@
     (pureRedex? const-decl "bool" IL nil))
    nil
    (buildRedexPure_ subtype "(hole, A)"
-    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}")))
  (buildRedexPure_TCC2 0
   (buildRedexPure_TCC2-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
@@ -539,16 +618,15 @@
    (buildRedexPure_ subtype "(letc(K, C), B1)"
     "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}")))
  (buildRedexPure_TCC4 0
-  (buildRedexPure_TCC4-1 nil 3705953402
+  (buildRedexPure_TCC7-1 nil 3705953402
    ("" (recursive-judgement-tcc) nil nil)
    ((contextPure? def-decl "bool" IL nil)
     (IExpression type-decl nil IExpression_adt nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
-    (value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil)
-    (cpure? def-decl "bool" IL nil)
+    (cpure? def-decl "bool" IL nil) (value? const-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
     (pureLetRedex? const-decl "bool" IL nil)
     (applyRedex? const-decl "bool" IL nil)
@@ -617,15 +695,16 @@
    (buildRedexPure_ subtype "(popc(K), B1)"
     "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}")))
  (buildRedexPure_TCC7 0
-  (buildRedexPure_TCC7-1 nil 3705953402
+  (buildRedexPure_TCC1-1 nil 3699114546
    ("" (recursive-judgement-tcc) nil nil)
    ((contextPure? def-decl "bool" IL nil)
     (IExpression type-decl nil IExpression_adt nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
+    (value? const-decl "bool" IL nil)
     (fill def-decl "IExpression" IL nil)
-    (cpure? def-decl "bool" IL nil) (value? const-decl "bool" IL nil)
+    (cpure? def-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
     (pureLetRedex? const-decl "bool" IL nil)
     (applyRedex? const-decl "bool" IL nil)
@@ -641,7 +720,7 @@
     (pureRedex? const-decl "bool" IL nil))
    nil
    (buildRedexPure_ subtype "(hole, A)"
-    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}")))
+    "{K, B | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND atom?(B)))}")))
  (refs_TCC1 0
   (refs_TCC1-1 nil 3646033320
    ("" (typepred "IExpression_adt.<<")
@@ -857,11 +936,9 @@
     (bool nonempty-type-eq-decl nil booleans nil)
     (>= const-decl "bool" reals nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (popDepth def-decl "nat" IL nil)
     (fill def-decl "IExpression" IL nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
     (IContext_induction formula-decl nil IL nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil)
@@ -888,7 +965,6 @@
     (int nonempty-type-eq-decl nil integers nil)
     (>= const-decl "bool" reals nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (popDepth def-decl "nat" IL nil)
     (IExpression_induction formula-decl nil IExpression_adt nil))
    shostak))
  (in_varlist_TCC1 0
@@ -918,11 +994,9 @@
     nil)
    ((int_minus_int_is_int application-judgement "int" integers nil)
     (member def-decl "bool" list_props nil)
-    (L!1 skolem-const-decl "list[(variable?)]" IL nil)
     (index adt-accessor-decl "[(variable?) -> nat]" IExpression_adt
            nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
-    (some adt-def-decl "boolean" list_adt nil)
     (nat nonempty-type-eq-decl nil naturalnumbers nil)
     (>= const-decl "bool" reals nil)
     (int nonempty-type-eq-decl nil integers nil)
@@ -948,10 +1022,6 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (some_nth formula-decl nil finseq_theorems nil)
-    (i_1 skolem-const-decl "below(length(L!1))" IL nil)
-    (i skolem-const-decl
-       "{i | some[(variable?)](LAMBDA (v: (variable?)): index(v) = i)(L!1)}"
-       IL nil)
     (member_nth formula-decl nil finseq_theorems nil)
     (boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -959,7 +1029,6 @@
     (IExpression type-decl nil IExpression_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (list type-decl nil list_adt nil)
-    (every adt-def-decl "boolean" list_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (is_finite const-decl "bool" finite_sets nil)
@@ -1016,7 +1085,6 @@
     nil)
    ((int_minus_int_is_int application-judgement "int" integers nil)
     (is_finite const-decl "bool" finite_sets nil)
-    (X skolem-const-decl "finite_set[nat]" IL nil)
     (injective? const-decl "bool" functions nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -1025,7 +1093,6 @@
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
-    (j skolem-const-decl "nat" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
     (boolean nonempty-type-decl nil booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
@@ -1223,13 +1290,10 @@
      real_props nil)
     (emptyset const-decl "set" sets nil)
     (IContext_induction formula-decl nil IL nil)
-    (popDepth def-decl "nat" IL nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
     (fill def-decl "IExpression" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
@@ -1441,7 +1505,6 @@
       nil))
     nil)
    ((IExpression_induction formula-decl nil IExpression_adt nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)

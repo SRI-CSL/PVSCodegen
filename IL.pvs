@@ -163,6 +163,13 @@ IL  		: THEORY
       ENDCASES
       MEASURE A BY <<
 
+   not_value_redex_fill: LEMMA
+     redex?(A) IMPLIES NOT value?(fill(K, A))
+
+   buildRedex_fill: LEMMA
+     redex?(A) IMPLIES
+       buildRedex(fill(K, A)) = (K, A)
+
    buildRedexPure: RECURSIVE JUDGEMENT
      buildRedex(A: (contextPure?)) HAS_TYPE {(K, B) | fill(K, B) = A AND ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}
 
