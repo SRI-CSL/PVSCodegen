@@ -14,18 +14,21 @@ typed_reduction_props: THEORY
     x, y, z: VAR (variable?)
     i, j, k, hole_type: VAR nat
     F, X: VAR finite_set[nat]
+    S : VAR finseq[(value?)]
+    L : VAR list[(variable?)]
 
     dom: VAR finite_set[nat]
     
     Store(dom): TYPE = [(dom) -> finseq[(domainValue?(dom))]]
 
-    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) IMPLIES i < arity) AND unmark(A) = A} #]
+    Definition: TYPE = [# arity: nat, body: {A |  pure?(A) AND (FORALL i: vars(A)(i) = (i < arity)) AND unmark(A) = A} #]
 
     tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
 
     Defs: TYPE = finseq[Definition]
 
     D: VAR Defs
+    tD: VAR finseq[tdef]
 
     stypes, stypes2: VAR finseq[nat]
     dom_types, dom_types2: VAR [nat -> nat]
@@ -99,5 +102,61 @@ typed_reduction_props: THEORY
         state_matches?(typed_to_topstate(tS), typed_to_topstate(trS)) IMPLIES
           state_matches?(typed_reduce(D)(tS),
             typed_reduce_n(D)(top_releases_ct(trS`state`redex) + 1, trS))
+
+    iastate_matches(trS1, trS2): bool =
+      iareduction.state_matches?(trS1`state, trS2`state) AND
+      typeinfo_fill(trS1`context_type, trS1`redex_type) =
+        typeinfo_fill(trS2`context_type, trS2`redex_type) AND
+      trS1`stack_types = trS2`stack_types AND
+      trS1`def_types = trS2`def_types
+
+    iapply_nstacktypes_iterm((k: nat), stypes,
+                  (args_type: list[nat] | k <= 2 * length(args_type)),
+                  tA) :
+       RECURSIVE [finseq[nat], typeinfo] =
+       IF k = 0 THEN
+         (stypes, letApply_type(length(args_type), args_type, tA))
+       ELSIF k = 1 THEN
+         (stypes,
+           lett(car(args_type), leaft(car(args_type)),
+             letApply_type(length(args_type) - 1, cdr(args_type), tA)))
+       ELSE
+           LET (nstypes, ntA) =
+             iapply_nstacktypes_iterm(k-2,add(car(args_type),stypes),cdr(args_type),tA)
+           IN
+           (nstypes, popt(ntA))
+       ENDIF
+     MEASURE k
+
+    apply_iterm_match(D)(A, tA, K, tK, tD, dom, (S | every(domainValue?(dom))(S)),
+        (L | FORALL i: in_varlist(L)(i) IMPLIES i < S`length),
+        (k: upto(2 * length(L))), trS, (str: Store(dom)), (cnt:[(dom)->nat]),
+        (stypes | stypes`length = S`length),
+        (args_types : list[nat] | length(args_types) = length(L))) : bool =
+      apply_iterm_match(D)(A,K,dom,S,L,k,trS`state,str,cnt) AND
+      LET (stypes2, tB) = iapply_nstacktypes_iterm(k, stypes, args_types, tA) IN
+      trS`stack_types = stypes2 AND
+        typeinfo_fill(trS`context_type, trS`redex_type) = typeinfo_fill(tK, tB) AND
+        trS`def_types = tD
+
+    applyReduce_match_rec: LEMMA
+      FORALL (k, (A: (pure?)), K, dom, (S | every(domainValue?(dom))(S)),
+        (L | k < 2 * length(L) AND (FORALL i: in_varlist(L)(i) IMPLIES i < S`length)
+                               AND (FORALL i: i < length(L) IMPLIES vars(A)(i))),
+        (trS | NOT trS`state`error AND defs_well_typed(D, trS`def_types)), tA, tK, tD,
+        (str: Store(dom)), (cnt:[(dom)->nat]),
+        (stypes | stypes`length = S`length),
+        (args_types: list[nat] | length(args_types) = length(L))):
+          apply_iterm_match(D)(A,tA,K,tK,tD,dom,S,L,k,trS,str,cnt,stypes,args_types) IMPLIES
+            apply_iterm_match(D)(A,tA,K,tK,tD,dom,S,L,k+1,typed_reduce(D)(trS),str,cnt,stypes,args_types)
+
+
+
+    applyReduce_match: LEMMA
+      NOT trS`state`error AND NOT value?(typed_to_topstate(tS)`state`redex) AND
+        applyRedex?(make_redex_typed(typed_to_topstate(tS))`state`redex) IMPLIES
+          EXISTS (n: posnat):
+            iastate_matches(typed_reduce_n(D)(n, trS), typed_iareduce(D)(trS))
+
 
   END typed_reduction_props

@@ -74,6 +74,24 @@ iareduction: THEORY
             ref?(S`seq(S`length - 1 - k)) AND
               NOT some(LAMBDA x: marked(x) AND index(x) = k)(args)
 
+    iapply_nstack_indices: LEMMA
+       FORALL ((arity: nat), dom, (S | every(domainValue?(dom))(S)),
+              (args: list[(variable?)] | length(args) = arity AND
+                      FORALL i: in_varlist(args)(i) IMPLIES i < S`length),
+              (str: Store(dom)), A,
+              (cnt: [i:(dom) -> {j|j=refcount(dom,str,S,A)(i)}])) :
+         (FORALL (j: below(length(args))):
+           FORALL (k: below(j)):
+             index(nth(args, k)) = index(nth(args, j)) IMPLIES NOT marked(nth(args, k)))
+         IMPLIES
+         FORALL (k: below(S`length + arity)):
+           iapply_nstack(arity,dom,S,args,str,A,cnt)`1`seq(S`length+arity-1-k) =
+             IF k < arity THEN S`seq(S`length-1-index(nth(args, arity-1-k)))
+             ELSIF ref?(S`seq(S`length - 1 - (k-arity))) AND
+               some(LAMBDA x: marked(x) AND index(x) + arity = k)(args) THEN nil
+             ELSE S`seq(S`length - 1 - (k-arity))
+             ENDIF
+
     npops(n: nat, A) : RECURSIVE IExpression =
       IF n = 0 THEN A ELSE pop(npops(n - 1, A)) ENDIF
     MEASURE n

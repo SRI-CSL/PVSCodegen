@@ -32,17 +32,12 @@
     (every const-decl "bool" finseq_theorems nil)
     (domainValue? const-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (< const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) (< const-decl "bool" reals nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -76,16 +71,12 @@
     (rstate type-eq-decl nil rreduction nil)
     (refcount const-decl "nat" rreduction nil)
     (Store type-eq-decl nil reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
+    (<= const-decl "bool" reals nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (< const-decl "bool" reals nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (domainValue? const-decl "bool" IL nil)
     (every const-decl "bool" finseq_theorems nil)
     (finseq type-eq-decl nil finite_sequences nil)
@@ -121,11 +112,6 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (int_plus_int_is_int application-judgement "int" integers nil)
-    (state skolem-const-decl "{rS: rstate |
-   noDanglingRefs?(rS) AND
-    allReleaseMarked?(rS`redex) AND armc?(rS`context)}"
-     typed_reduction_props nil)
-    (i skolem-const-decl "nat" typed_reduction_props nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
@@ -147,16 +133,12 @@
     (rstate type-eq-decl nil rreduction nil)
     (refcount const-decl "nat" rreduction nil)
     (Store type-eq-decl nil reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
+    (<= const-decl "bool" reals nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (< const-decl "bool" reals nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (domainValue? const-decl "bool" IL nil)
     (every const-decl "bool" finseq_theorems nil)
     (finseq type-eq-decl nil finite_sequences nil)
@@ -221,16 +203,12 @@
     (rstate type-eq-decl nil rreduction nil)
     (refcount const-decl "nat" rreduction nil)
     (Store type-eq-decl nil reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
+    (<= const-decl "bool" reals nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (< const-decl "bool" reals nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (domainValue? const-decl "bool" IL nil)
     (every const-decl "bool" finseq_theorems nil)
     (finseq type-eq-decl nil finite_sequences nil)
@@ -268,11 +246,6 @@
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
      preprocess nil)
     (int_plus_int_is_int application-judgement "int" integers nil)
-    (state skolem-const-decl "{rS: rstate |
-   noDanglingRefs?(rS) AND
-    allReleaseMarked?(rS`redex) AND armc?(rS`context)}"
-     typed_reduction_props nil)
-    (i skolem-const-decl "nat" typed_reduction_props nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -311,7 +284,6 @@
     (set type-eq-decl nil sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (finite_set type-eq-decl nil finite_sets nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (< const-decl "bool" reals nil)
     (Definition type-eq-decl nil typed_reduction nil)
     (Defs type-eq-decl nil typed_reduction nil)
@@ -333,12 +305,9 @@
     (refs def-decl "bool" IL nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -347,7 +316,6 @@
     (armc? def-decl "bool" preprocess nil)
     (below type-eq-decl nil naturalnumbers nil)
     (value_of_type const-decl "boolean" typed_reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (is_well_typed def-decl "bool" typed_reduction nil)
     (typeinfo_ctx type-decl nil typed_reduction nil)
     (is_well_typed_ctx def-decl "bool" typed_reduction nil)
@@ -386,7 +354,6 @@
     (set type-eq-decl nil sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (finite_set type-eq-decl nil finite_sets nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (< const-decl "bool" reals nil)
     (Definition type-eq-decl nil typed_reduction nil)
     (Defs type-eq-decl nil typed_reduction nil)
@@ -408,12 +375,9 @@
     (refs def-decl "bool" IL nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -422,7 +386,6 @@
     (armc? def-decl "bool" preprocess nil)
     (below type-eq-decl nil naturalnumbers nil)
     (value_of_type const-decl "boolean" typed_reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (is_well_typed def-decl "bool" typed_reduction nil)
     (typeinfo_ctx type-decl nil typed_reduction nil)
     (is_well_typed_ctx def-decl "bool" typed_reduction nil)
@@ -460,7 +423,6 @@
     (set type-eq-decl nil sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (finite_set type-eq-decl nil finite_sets nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (< const-decl "bool" reals nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (unmark def-decl "IExpression" preprocess nil)
@@ -480,12 +442,9 @@
     (refs def-decl "bool" IL nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -494,7 +453,6 @@
     (armc? def-decl "bool" preprocess nil)
     (below type-eq-decl nil naturalnumbers nil)
     (value_of_type const-decl "boolean" typed_reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (tdef type-eq-decl nil typed_reduction nil)
     (is_well_typed def-decl "bool" typed_reduction nil)
     (typeinfo_ctx type-decl nil typed_reduction nil)
@@ -518,6 +476,10 @@
    (typed_reduce_n termination
     "typed_reduce_n(D)(n - 1, typed_rreduction.typed_reduce(D)(trS))"
     "nil")))
+ (typed_reduce_n_state_TCC1 0
+  (typed_reduce_n_state_TCC1-1 nil 3706632797
+   ("" (subtype-tcc) nil nil) nil nil
+   (typed_reduce_n_state subtype "D" "Defs")))
  (typed_reduce_n_state 0
   (typed_reduce_n_state-1 nil 3703356460
    ("" (induct n)
@@ -561,7 +523,6 @@
     (typeinfo_ctx type-decl nil typed_reduction nil)
     (is_well_typed def-decl "bool" typed_reduction nil)
     (tdef type-eq-decl nil typed_reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (value_of_type const-decl "boolean" typed_reduction nil)
     (below type-eq-decl nil naturalnumbers nil)
     (armc? def-decl "bool" preprocess nil)
@@ -570,12 +531,9 @@
     (rstate type-eq-decl nil rreduction nil)
     (refcount const-decl "nat" rreduction nil)
     (Store type-eq-decl nil reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
+    (<= const-decl "bool" reals nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (refs def-decl "bool" IL nil)
@@ -593,7 +551,6 @@
     (unmark def-decl "IExpression" preprocess nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (< const-decl "bool" reals nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
@@ -826,9 +783,7 @@
     (release? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
-    (< const-decl "bool" reals nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (<= const-decl "bool" reals nil) (< const-decl "bool" reals nil)
     (finite_set type-eq-decl nil finite_sets nil)
     (is_finite const-decl "bool" finite_sets nil)
     (set type-eq-decl nil sets nil)
@@ -865,14 +820,12 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (singleton const-decl "(singleton?)" sets nil)
-    (vars def-decl "finite_set[nat]" IL nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (emptyset const-decl "set" sets nil)
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
-    (every adt-def-decl "boolean" list_adt nil)
     (list type-decl nil list_adt nil)
     (PRED type-eq-decl nil defined_types nil)
     (real_lt_is_strict_total_order name-judgement
@@ -884,8 +837,6 @@
      IExpression_adt nil)
     (value? const-decl "bool" IL nil)
     (translate_refs_value judgement-tcc nil reduction_props nil)
-    (letexpr1_var skolem-const-decl "IExpression" typed_reduction_props
-     nil)
     (unmark_value judgement-tcc nil preprocess nil)
     (letrhs adt-accessor-decl "[(letexpr?) -> IExpression]"
      IExpression_adt nil)
@@ -914,8 +865,6 @@
      IExpression_adt nil)
     (pop adt-constructor-decl "[IExpression -> (pop?)]" IExpression_adt
          nil)
-    (pop1_var skolem-const-decl "IExpression" typed_reduction_props
-     nil)
     (pbody adt-accessor-decl "[(pop?) -> IExpression]" IExpression_adt
      nil)
     (popt? adt-recognizer-decl "[typeinfo -> boolean]" typeinfo_adt
@@ -1414,17 +1363,12 @@
     (every const-decl "bool" finseq_theorems nil)
     (domainValue? const-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (< const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) (< const-decl "bool" reals nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -1433,7 +1377,6 @@
     (armc? def-decl "bool" preprocess nil)
     (below type-eq-decl nil naturalnumbers nil)
     (value_of_type const-decl "boolean" typed_reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (tdef type-eq-decl nil typed_reduction nil)
     (is_well_typed def-decl "bool" typed_reduction nil)
     (typeinfo_ctx type-decl nil typed_reduction nil)
@@ -1445,14 +1388,10 @@
     (estate type-eq-decl nil reduction nil)
     (typed_state type-eq-decl nil typed_reduction nil)
     (tdef type-eq-decl nil typed_reduction_props nil)
-    (tS skolem-const-decl "typed_state" typed_reduction_props nil)
-    (i skolem-const-decl "nat" typed_reduction_props nil)
     (cvars_vars formula-decl nil preprocess nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (int_plus_int_is_int application-judgement "int" integers nil)
-    (trS skolem-const-decl "typed_rstate" typed_reduction_props nil)
-    (i skolem-const-decl "nat" typed_reduction_props nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
@@ -3706,17 +3645,12 @@
     (every const-decl "bool" finseq_theorems nil)
     (domainValue? const-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (< const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) (< const-decl "bool" reals nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -3725,7 +3659,6 @@
     (armc? def-decl "bool" preprocess nil)
     (below type-eq-decl nil naturalnumbers nil)
     (value_of_type const-decl "boolean" typed_reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
     (tdef type-eq-decl nil typed_reduction nil)
     (is_well_typed def-decl "bool" typed_reduction nil)
     (typeinfo_ctx type-decl nil typed_reduction nil)
@@ -3833,9 +3766,7 @@
      nil)
     (pureLetRedex? const-decl "bool" IL nil)
     (variable_match formula-decl nil reduction_props nil)
-    (tS skolem-const-decl "typed_state" typed_reduction_props nil)
     (goodrstate type-eq-decl nil reduction_props nil)
-    (rS skolem-const-decl "typed_rstate" typed_reduction_props nil)
     (make_redex const-decl "{rS | pureRedex?(rS`redex)}" rreduction
      nil)
     (to_topstate const-decl "topstate" reduction nil)
@@ -3888,8 +3819,7 @@
       AND noDanglingRefs?(rS1)}" rreduction nil)
     (top_release_reduce formula-decl nil reduction_props nil)
     (int_plus_int_is_int application-judgement "int" integers nil)
-    (top_releases_reduce formula-decl nil reduction_props nil)
-    (D skolem-const-decl "Defs" typed_reduction_props nil))
+    (top_releases_reduce formula-decl nil reduction_props nil))
    shostak)
   (bisimulation_lemma-11 "" 3706361472
    ("" (measure-induct+ "top_releases_ct(trS`state`redex)" ("trS"))
@@ -15227,5 +15157,448 @@
       nil)
      ("4" (split) (("1" (propax) nil nil) ("2" (propax) nil nil)) nil))
     nil)
-   nil shostak)))
+   nil shostak))
+ (iapply_nstacktypes_iterm_TCC1 0
+  (iapply_nstacktypes_iterm_TCC1-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm subtype "args_type" "(cons?[nat])")))
+ (iapply_nstacktypes_iterm_TCC2 0
+  (iapply_nstacktypes_iterm_TCC2-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm subtype
+    "list_props[nat].length(args_type) - 1" "nat")))
+ (iapply_nstacktypes_iterm_TCC3 0
+  (iapply_nstacktypes_iterm_TCC3-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm subtype "list_adt[nat].cdr(args_type)"
+    "{args_type_1: list[nat] | list_props[nat].length(args_type_1) = list_props[nat].length(args_type) - 1}")))
+ (iapply_nstacktypes_iterm_TCC4 0
+  (iapply_nstacktypes_iterm_TCC4-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm subtype "k - 2" "nat")))
+ (iapply_nstacktypes_iterm_TCC5 0
+  (iapply_nstacktypes_iterm_TCC5-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm subtype "args_type" "(cons?[nat])")))
+ (iapply_nstacktypes_iterm_TCC6 0
+  (iapply_nstacktypes_iterm_TCC6-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm subtype "list_adt[nat].cdr(args_type)"
+    "{args_type: list[nat] | k - 2 <= 2 * list_props[nat].length(args_type)}")))
+ (iapply_nstacktypes_iterm_TCC7 0
+  (iapply_nstacktypes_iterm_TCC7-1 nil 3706632220
+   ("" (termination-tcc) nil nil) nil nil
+   (iapply_nstacktypes_iterm termination
+    "iapply_nstacktypes_iterm(k - 2, more_finseq[nat].add(list_adt[nat].car(args_type), stypes), list_adt[nat].cdr(args_type), tA)"
+    "nil")))
+ (apply_iterm_match_TCC1 0
+  (apply_iterm_match_TCC2-1 nil 3706632220 ("" (subtype-tcc) nil nil)
+   nil nil
+   (apply_iterm_match subtype "args_types"
+    "{args_type: list[nat] | k <= 2 * list_props[nat].length(args_type)}")))
+ (applyReduce_match_rec_TCC1 0
+  (applyReduce_match_rec_TCC1-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (applyReduce_match_rec subtype "k"
+    "upto(2 * list_props[(IExpression_adt.variable?)].length(L))")))
+ (applyReduce_match_rec_TCC2 0
+  (applyReduce_match_rec_TCC2-1 nil 3706632220
+   ("" (subtype-tcc) nil nil) nil nil
+   (applyReduce_match_rec subtype "k + 1"
+    "upto(2 * list_props[(IExpression_adt.variable?)].length(L))")))
+ (applyReduce_match_rec 0
+  (applyReduce_match_rec-1 nil 3706632239
+   ("" (measure-induct+ k ("k"))
+    (("" (name-replace k "x!1")
+      (("" (skeep* :preds? t)
+        (("" (case-replace "k = 0")
+          (("1" (delete -13)
+            (("1" (expand apply_iterm_match)
+              (("1" (use applyReduce_match_rec)
+                (("1" (flatten)
+                  (("1" (assert)
+                    (("1" (replace -2)
+                      (("1" (assert)
+                        (("1" (rewrite typed_reduce_state)
+                          (("1" (assert)
+                            (("1"
+                              (expand iapply_nstacktypes_iterm
+                                      (-15 -16 2))
+                              (("1"
+                                (rewrite typed_reduce_defs)
+                                (("1"
+                                  (assert)
+                                  (("1"
+                                    (expand apply_iterm_match -14)
+                                    (("1"
+                                      (expand
+                                       iapply_nstack_iterm
+                                       -14
+                                       3)
+                                      (("1"
+                                        (flatten)
+                                        (("1"
+                                          (expand rreduction.letApply)
+                                          (("1"
+                                            (rewrite vars_letApply)
+                                            (("1"
+                                              (case
+                                               "vars(A)(length(L) - 1)")
+                                              (("1"
+                                                (assert)
+                                                (("1"
+                                                  (postpone)
+                                                  nil
+                                                  nil))
+                                                nil)
+                                               ("2"
+                                                (inst? -9)
+                                                (("2"
+                                                  (split)
+                                                  (("1"
+                                                    (propax)
+                                                    nil
+                                                    nil)
+                                                   ("2"
+                                                    (assert)
+                                                    nil
+                                                    nil))
+                                                  nil))
+                                                nil))
+                                              nil)
+                                             ("2"
+                                              (rewrite map_length)
+                                              (("2"
+                                                (expand length 1 2)
+                                                (("2"
+                                                  (lift-if)
+                                                  (("2"
+                                                    (split)
+                                                    (("1"
+                                                      (expand
+                                                       length
+                                                       -7)
+                                                      (("1"
+                                                        (lift-if)
+                                                        (("1"
+                                                          (assert)
+                                                          nil
+                                                          nil))
+                                                        nil))
+                                                      nil)
+                                                     ("2"
+                                                      (assert)
+                                                      nil
+                                                      nil))
+                                                    nil))
+                                                  nil))
+                                                nil))
+                                              nil)
+                                             ("3"
+                                              (expand length -7)
+                                              (("3"
+                                                (lift-if)
+                                                (("3"
+                                                  (split)
+                                                  (("1"
+                                                    (assert)
+                                                    nil
+                                                    nil)
+                                                   ("2"
+                                                    (assert)
+                                                    nil
+                                                    nil))
+                                                  nil))
+                                                nil))
+                                              nil))
+                                            nil))
+                                          nil))
+                                        nil))
+                                      nil))
+                                    nil))
+                                  nil))
+                                nil))
+                              nil))
+                            nil))
+                          nil))
+                        nil))
+                      nil))
+                    nil))
+                  nil)
+                 ("2" (hide 3)
+                  (("2" (split)
+                    (("1" (expand k) (("1" (propax) nil nil)) nil)
+                     ("2" (propax) nil nil) ("3" (propax) nil nil))
+                    nil))
+                  nil))
+                nil))
+              nil))
+            nil)
+           ("2" (case-replace "k = 1")
+            (("1" (hide -13)
+              (("1" (expand apply_iterm_match)
+                (("1" (expand iapply_nstacktypes_iterm)
+                  (("1" (expand iapply_nstacktypes_iterm)
+                    (("1" (flatten)
+                      (("1" (use applyReduce_match_rec)
+                        (("1" (rewrite typed_reduce_state)
+                          (("1" (assert)
+                            (("1" (expand apply_iterm_match -14)
+                              (("1"
+                                (expand iapply_nstack_iterm -14)
+                                (("1" (postpone) nil nil))
+                                nil))
+                              nil))
+                            nil))
+                          nil)
+                         ("2" (hide 4)
+                          (("2" (split)
+                            (("1" (expand k) (("1" (propax) nil nil))
+                              nil)
+                             ("2" (propax) nil nil)
+                             ("3" (propax) nil nil))
+                            nil))
+                          nil))
+                        nil))
+                      nil))
+                    nil))
+                  nil))
+                nil))
+              nil)
+             ("2" (expand apply_iterm_match (3 -12))
+              (("2" (use applyReduce_match_rec)
+                (("1" (expand apply_iterm_match (4 -14))
+                  (("1" (flatten)
+                    (("1" (assert)
+                      (("1" (rewrite typed_reduce_state)
+                        (("1" (assert)
+                          (("1" (inst -13 "k-2")
+                            (("1" (assert)
+                              (("1"
+                                (expand iapply_nstacktypes_iterm +)
+                                (("1"
+                                  (assert)
+                                  (("1"
+                                    (expand
+                                     iapply_nstacktypes_iterm
+                                     (-15 -16))
+                                    (("1"
+                                      (inst? -13)
+                                      (("1"
+                                        (inst? -13)
+                                        (("1"
+                                          (inst? -13)
+                                          (("1"
+                                            (inst? -13)
+                                            (("1"
+                                              (inst? -13)
+                                              (("1"
+                                                (inst
+                                                 -13
+                                                 "cdr(L)"
+                                                 tA
+                                                 _
+                                                 str
+                                                 cnt
+                                                 stypes
+                                                 "cdr(args_types)")
+                                                (("1"
+                                                  (postpone)
+                                                  nil
+                                                  nil)
+                                                 ("2"
+                                                  (expand length -12)
+                                                  (("2"
+                                                    (lift-if -12)
+                                                    (("2"
+                                                      (lift-if -12)
+                                                      (("2"
+                                                        (lift-if -12)
+                                                        (("2"
+                                                          (expand
+                                                           length
+                                                           -6)
+                                                          (("2"
+                                                            (lift-if
+                                                             -6)
+                                                            (("2"
+                                                              (split
+                                                               -6)
+                                                              (("1"
+                                                                (grind)
+                                                                nil
+                                                                nil)
+                                                               ("2"
+                                                                (flatten)
+                                                                (("2"
+                                                                  (assert)
+                                                                  nil
+                                                                  nil))
+                                                                nil))
+                                                              nil))
+                                                            nil))
+                                                          nil))
+                                                        nil))
+                                                      nil))
+                                                    nil))
+                                                  nil)
+                                                 ("3"
+                                                  (split)
+                                                  (("1"
+                                                    (expand k)
+                                                    (("1"
+                                                      (expand
+                                                       length
+                                                       -6)
+                                                      (("1"
+                                                        (lift-if -6)
+                                                        (("1"
+                                                          (split -6)
+                                                          (("1"
+                                                            (grind)
+                                                            nil
+                                                            nil)
+                                                           ("2"
+                                                            (grind)
+                                                            nil
+                                                            nil))
+                                                          nil))
+                                                        nil))
+                                                      nil))
+                                                    nil)
+                                                   ("2"
+                                                    (skeep)
+                                                    (("2"
+                                                      (inst -8 i)
+                                                      (("2"
+                                                        (expand
+                                                         in_varlist)
+                                                        (("2"
+                                                          (expand
+                                                           some
+                                                           -8)
+                                                          (("2"
+                                                            (lift-if)
+                                                            (("2"
+                                                              (split)
+                                                              (("1"
+                                                                (expand
+                                                                 length
+                                                                 -8)
+                                                                (("1"
+                                                                  (lift-if)
+                                                                  (("1"
+                                                                    (assert)
+                                                                    nil
+                                                                    nil))
+                                                                  nil))
+                                                                nil)
+                                                               ("2"
+                                                                (assert)
+                                                                nil
+                                                                nil))
+                                                              nil))
+                                                            nil))
+                                                          nil))
+                                                        nil))
+                                                      nil))
+                                                    nil)
+                                                   ("3"
+                                                    (skeep)
+                                                    (("3"
+                                                      (inst -9 i)
+                                                      (("3"
+                                                        (split)
+                                                        (("1"
+                                                          (propax)
+                                                          nil
+                                                          nil)
+                                                         ("2"
+                                                          (expand
+                                                           length
+                                                           1)
+                                                          (("2"
+                                                            (lift-if)
+                                                            (("2"
+                                                              (split)
+                                                              (("1"
+                                                                (expand
+                                                                 length
+                                                                 -7)
+                                                                (("1"
+                                                                  (assert)
+                                                                  nil
+                                                                  nil))
+                                                                nil)
+                                                               ("2"
+                                                                (assert)
+                                                                nil
+                                                                nil))
+                                                              nil))
+                                                            nil))
+                                                          nil))
+                                                        nil))
+                                                      nil))
+                                                    nil))
+                                                  nil)
+                                                 ("4"
+                                                  (expand length -6)
+                                                  (("4"
+                                                    (lift-if)
+                                                    (("4"
+                                                      (split)
+                                                      (("1"
+                                                        (grind)
+                                                        nil
+                                                        nil)
+                                                       ("2"
+                                                        (grind)
+                                                        nil
+                                                        nil))
+                                                      nil))
+                                                    nil))
+                                                  nil))
+                                                nil))
+                                              nil))
+                                            nil))
+                                          nil))
+                                        nil))
+                                      nil))
+                                    nil))
+                                  nil))
+                                nil))
+                              nil))
+                            nil))
+                          nil))
+                        nil))
+                      nil))
+                    nil))
+                  nil)
+                 ("2" (split)
+                  (("1" (expand k) (("1" (propax) nil nil)) nil)
+                   ("2" (propax) nil nil) ("3" (propax) nil nil))
+                  nil))
+                nil))
+              nil))
+            nil))
+          nil))
+        nil))
+      nil))
+    nil)
+   nil shostak))
+ (applyReduce_match_TCC1 0
+  (applyReduce_match_TCC1-1 nil 3706632220 ("" (subtype-tcc) nil nil)
+   nil nil
+   (applyReduce_match subtype "typed_reduction.typed_to_topstate(tS)"
+    "{tS | typed_reduction.tS`state`context = IL.hole AND NOT IL.value?(typed_reduction.tS`state`redex)}")))
+ (applyReduce_match_TCC2 0
+  (applyReduce_match_TCC2-1 nil 3706632220 ("" (subtype-tcc) nil nil)
+   nil nil
+   (applyReduce_match subtype "trS"
+    "{trS | typed_reduction.defs_well_typed(D, trS`def_types)}")))
+ (applyReduce_match_TCC3 0
+  (applyReduce_match_TCC3-1 nil 3706632220 ("" (subtype-tcc) nil nil)
+   nil nil
+   (applyReduce_match subtype "trS"
+    "{tS | NOT typed_rreduction.tS`state`error AND typed_reduction.defs_well_typed(D, typed_rreduction.tS`def_types)}"))))
 

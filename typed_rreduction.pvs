@@ -273,6 +273,39 @@ typed_rreduction: THEORY
         grS`stack`length - popDepth(grS`redex) - popDepth(grS`context) =
           reduce(D)(grS)`stack`length - popDepth(reduce(D)(grS)`redex) - popDepth(reduce(D)(grS)`context)
 
+    npopts(n: nat, tA): RECURSIVE typeinfo =
+      IF n = 0 THEN tA ELSE popt(npopts(n - 1, tA)) ENDIF
+    MEASURE n
+
+    npopts_expr_type: LEMMA
+      expr_type(npopts(k, tA)) = expr_type(tA)
+
+    npops_is_well_typed: LEMMA
+      FORALL (A: (contextPure?), tA, (stypes | k + popDepth(A) <= stypes`length AND FORALL i: cvars(A)(i) IMPLIES i < stypes`length), dom_types, def_types):
+        is_well_typed(npops(k, A), npopts(k, tA), stypes, dom_types, def_types) =
+          is_well_typed(A, tA, stypes, dom_types, def_types)
+
+    iapply_nstack_types((arity: nat), stypes,
+      (args: list[(variable?)] | length(args) = arity AND
+        FORALL i: in_varlist(args)(i) IMPLIES i < stypes`length)):
+    RECURSIVE {stypes2 | stypes2`length = stypes`length + arity} =
+      IF arity = 0 THEN
+        stypes
+      ELSE
+        iapply_nstack_types(arity-1,
+          add(stypes`seq(stypes`length-1-index(car(args))),stypes),
+          map(LAMBDA y: y WITH [`index := index(y)+1])(cdr(args)))
+      ENDIF
+    MEASURE arity
+
+    npops_arm: LEMMA
+      allReleaseMarked?(npops(k, A)) = allReleaseMarked?(A)
+
+    iapplyReduce_arm: LEMMA
+      FORALL (grS: rstate | NOT grS`error):
+        applyRedex?(grS`redex) AND allReleaseMarked?(grS`redex) AND armc?(grS`context)
+          IMPLIES allReleaseMarked?(iapplyReduce(D)(grS)`redex) AND armc?(iapplyReduce(D)(grS)`context)
+
     typed_iareduce(D)(tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)) : typed_rstate =
       LET t = typed_to_topstate(tS) IN
       IF value?(t`state`redex) THEN
@@ -287,7 +320,11 @@ typed_rreduction: THEORY
                    `redex_type := popt(lbody(nS`redex_type))]
         ELSIF applyRedex?(nS`state`redex) THEN
           nS WITH [`state := iapplyReduce(D)(nS`state),
-                   `redex_type := letApply_type(length(tS`def_types`seq(fun(nS`state`redex))`args_type), tS`def_types`seq(fun(nS`state`redex))`args_type, tS`def_types`seq(fun(nS`state`redex))`body_type)]
+                   `redex_type :=
+                      npopts(length(args(nS`state`redex)),
+                        tS`def_types`seq(fun(nS`state`redex))`body_type),
+                   `stack_types :=
+                      nS`stack_types o tS`def_types`seq(fun(nS`state`redex))`args_type]
         ELSIF pureIftRedex?(nS`state`redex) THEN
           nS WITH [`state := ifReduce(D)(nS`state),
                    `redex_type :=

@@ -74,6 +74,10 @@ preprocess  % [ parameters ]
    (FORALL (j: below(length(L))):
      marked(nth(markvars(X)(L), j)) => NOT X(index(nth(L, j))))
 
+   markvars_mark_def: LEMMA
+     FORALL (j: below(length(L))):
+       marked(nth(markvars(X)(L), j)) = (NOT X(index(nth(L, j))) AND FORALL (k: below(length(L))): index(nth(L, k)) = index(nth(L, j)) IMPLIES k <= j)
+
 %marking is idempotent
   markvars_idem: LEMMA
    markvars(X)(markvars(Y)(L)) = markvars(X)(L)
