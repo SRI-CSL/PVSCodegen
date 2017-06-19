@@ -1,0 +1,446 @@
+ireduction: THEORY
+  BEGIN
+
+    IMPORTING finite_set_theorems, list2finseq_extra, finseq_theorems
+
+    i, j, k: VAR nat
+
+    pop[T: TYPE](S: finseq[T] | S`length > 0): finseq[T] =
+      (# length := S`length - 1, seq := LAMBDA (i: below(S`length - 1)): S`seq(i) #)
+
+    length_cdr[T: TYPE]: LEMMA
+      FORALL (l: list[T]):
+        cons?(l) IMPLIES length(cdr(l)) = length(l) - 1
+
+    nth_cdr[T: TYPE]: LEMMA
+      FORALL (l: list[T]):
+        cons?(l) AND i < length(cdr(l)) IMPLIES nth(cdr(l), i) = nth(l, i + 1)
+
+    endi[T: TYPE](S: finseq[T], i: below(S`length)): T =
+      S`seq(S`length - 1 - i)
+
+    iexpr: DATATYPE
+      BEGIN
+        ivar(vindex: nat, vmarked: bool): ivar?
+        iconstant(ival: int): iconstant?
+        inil: inil?
+        icall(ifun: nat, iargs: list[(ivar?)]): icall?
+        iupdate(itarget, ilhs, irhs: (ivar?)): iupdate?
+        ilookup(iaval, ipos: (ivar?)): ilookup?
+        inewint(size: nat): inewint?
+        inewref(size: nat): inewref?
+      END iexpr
+
+    ivalue: DATATYPE
+      BEGIN
+        vref(vindex: nat): vref?
+        vint(vvalue: nat): vint?
+        vnil: vnil?
+        vundef: vundef?
+      END ivalue
+
+    istat: DATATYPE
+      BEGIN
+        iassign(avar: (ivar?), aexpr: iexpr): iassign?
+        idecl(dtype: nat, dstat: istat): idecl?
+        iif(icond: (ivar?), iftrue, iffalse: istat): iif?
+        iskip: iskip?
+        iblock(block1, block2: istat): iblock?
+        irelease(rvar: (ivar?)): irelease?
+        %ireturn(rvar: (ivar?)): ireturn?
+      END istat
+
+    e, e1, e2, e3: VAR iexpr
+    x, x1, x2, x3: VAR (ivar?)
+    v, v1, v2, v3: VAR ivalue
+    s, s1, s2, s3: VAR istat
+        
+    dom: VAR finite_set[nat]
+    Store(dom): TYPE = [(dom) -> finseq[ivalue]]
+    Stack: TYPE = finseq[ivalue]
+
+    vars(e)(i): bool =
+      CASES e OF
+        ivar(j, b): i = j,
+        icall(f, l): some(LAMBDA x: vindex(x) = i)(l),
+        iupdate(x1, x2, x3): i = vindex(x1) OR i = vindex(x2) OR i = vindex(x3),
+        ilookup(x1, x2): i = vindex(x1) OR i = vindex(x2)
+        ELSE FALSE
+      ENDCASES
+
+    vars(s)(i): RECURSIVE bool =
+      CASES s OF
+        iassign(x, e): i = vindex(x) OR vars(e)(i),
+        idecl(n, s2): vars(s2)(i + 1),
+        iif(x, s1, s2): i = vindex(x) OR vars(s1)(i) OR vars(s2)(i),
+        iskip: FALSE,
+        irelease(x): i = vindex(x),
+        iblock(s1, s2): vars(s1)(i) OR vars(s2)(i)
+        %ireturn(x): i = index(x)
+      ENDCASES
+    MEASURE s BY <<
+
+    slength(s): RECURSIVE posnat =
+      CASES s OF
+        iassign(x, e): 1,
+        iif(x, s1, s2): 1 + slength(s1) + slength(s2),
+        iskip: 1,
+        irelease(x): 1,
+        idecl(n, s2): 2 + slength(s2),
+        iblock(s1, s2): slength(s1) + slength(s2)
+        %ireturn(x): 1
+      ENDCASES
+    MEASURE s BY <<
+
+    stack_size_at(s, (i: upto(slength(s)))): RECURSIVE nat =
+      CASES s OF
+        iassign(x, e): 0,
+        iif(x, s1, s2):
+          IF i = 0 THEN
+            0
+          ELSIF i <= slength(s1) + 1 THEN
+            stack_size_at(s1, i - 1)
+          ELSE
+            stack_size_at(s2, i - 1 - slength(s1))
+          ENDIF,
+        iblock(s1, s2):
+          IF i <= slength(s1) THEN
+            stack_size_at(s1, i)
+          ELSE
+            stack_size_at(s2, i - slength(s1))
+          ENDIF,
+        iskip: 0,
+        irelease(x): 0,
+        idecl(n, s2):
+          IF i = 0 THEN
+            0
+          ELSIF i <= slength(s2) + 1 THEN
+            1 + stack_size_at(s2, i - 1)
+          ELSE
+            0
+          ENDIF
+        %ireturn(x): 0
+      ENDCASES
+    MEASURE s BY <<
+
+    stack_size_at_zero: LEMMA
+      stack_size_at(s, 0) = 0
+    stack_size_at_end: LEMMA
+      stack_size_at(s, slength(s)) = 0
+    AUTO_REWRITE+ stack_size_at_zero
+    AUTO_REWRITE+ stack_size_at_end
+
+    executable_stat?(s, (i: upto(slength(s)))): bool =
+      CASES s OF
+        iassign(x, e): i = 0,
+        %ireturn(x): i = 0,
+        irelease(x): i = 0,
+        iif(x, s1, s2): i = 0,
+        iskip: i = 0,
+        idecl(n, s2): i = 0 OR i = slength(s2) + 1
+        ELSE FALSE
+      ENDCASES
+
+    extract_stat(s, (i: below(slength(s)))): RECURSIVE
+        {(s1, j) | j < slength(s1) AND executable_stat?(s1, j)} =
+      CASES s OF
+        idecl(n, s2):
+          IF i = 0 THEN
+            (s, i)
+          ELSIF i < 1 + slength(s2) THEN
+            extract_stat(s2, i - 1)
+          ELSE
+            (s, i)
+          ENDIF,
+        iif(x, s1, s2):
+          IF i = 0 THEN
+            (s, i)
+          ELSIF i < 1 + slength(s1) THEN
+            extract_stat(s1, i - 1)
+          ELSE
+            extract_stat(s2, i - 1 - slength(s1))
+          ENDIF,
+        iblock(s1, s2):
+          IF i < slength(s1) THEN
+            extract_stat(s1, i)
+          ELSE
+            extract_stat(s2, i - slength(s1))
+          ENDIF
+        ELSE (s, i)
+      ENDCASES
+    MEASURE s BY <<
+
+    is_fun_call_at(s, (i: upto(slength(s))), f: nat): bool =
+      i < slength(s) AND iassign?(extract_stat(s, i)`1) AND
+        icall?(aexpr(extract_stat(s, i)`1)) AND ifun(aexpr(extract_stat(s, i)`1)) = f
+
+    Definition: TYPE = [#
+      arity: nat,
+      body: {s | FORALL i: vars(s)(i) IMPLIES i < arity + 1}
+    #]
+    D: VAR finseq[Definition]
+
+    stack_frame(D): TYPE = [#
+      ffct: below(D`length),
+      fpc: upto(slength(D`seq(ffct)`body)),
+      fdepth: {k: nat | k = stack_size_at(D`seq(ffct)`body, fpc) + D`seq(ffct)`arity + 1}
+    #]
+
+    fdepth_sum(D)(C: finseq[stack_frame(D)]): nat =
+      Sigma((LAMBDA i: i < C`length), (LAMBDA i: IF i < C`length THEN C`seq(i)`fdepth ELSE 0 ENDIF))
+
+    fdepth_sum_eq: LEMMA
+      FORALL (C1, C2: finseq[stack_frame(D)]):
+        C1`length = C2`length AND
+        (FORALL (i: below(C1`length)): C1`seq(i)`fdepth = C2`seq(i)`fdepth) IMPLIES
+          fdepth_sum(D)(C1) = fdepth_sum(D)(C2)
+
+    fdepth_sum_pop: LEMMA
+      FORALL (C: finseq[stack_frame(D)]):
+        C`length > 0 IMPLIES
+          fdepth_sum(D)(C) = C`seq(C`length - 1)`fdepth + fdepth_sum(D)(pop(C))
+
+    istate: TYPE = [#
+      error: bool,
+      defs: finseq[Definition],
+      callstack: {C: finseq[stack_frame(defs)] |
+        FORALL (i | i < C`length - 1):
+          is_fun_call_at(defs`seq(C`seq(i)`ffct)`body, C`seq(i)`fpc, C`seq(i+1)`ffct)
+      },
+      stack: {S: Stack | S`length = 1 + fdepth_sum(defs)(callstack)},
+      domain: finite_set[nat],
+      store: Store(domain)
+    #]
+
+    iS, iS1, iS2: VAR istate
+
+    next_pc(s, (i: below(slength(s)))): RECURSIVE upto(slength(s)) =
+      CASES s OF
+        idecl(n, s2):
+          IF i = 0 THEN
+            1
+          ELSIF i < 1 + slength(s2) THEN
+            1 + next_pc(s2, i - 1)
+          ELSE
+            slength(s)
+          ENDIF,
+        iblock(s1, s2):
+          IF i < slength(s1) THEN
+            next_pc(s1, i)
+          ELSE
+            slength(s1) + next_pc(s2, i - slength(s1))
+          ENDIF,
+        iif(x, s1, s2):
+          IF i = 0 THEN
+            1
+          ELSIF i < 1 + slength(s1) THEN
+            IF next_pc(s1, i - 1) < slength(s1) THEN
+              1 + next_pc(s1, i - 1)
+            ELSE
+              slength(s)
+            ENDIF
+          ELSE
+            1 + slength(s1) + next_pc(s2, i - 1 - slength(s1))
+          ENDIF
+        ELSE i + 1
+      ENDCASES
+    MEASURE s BY <<
+
+    next_pc_pos: RECURSIVE JUDGEMENT
+      next_pc(s, (i: below(slength(s)))) HAS_TYPE posnat
+
+    extract_stat_index: LEMMA
+      i < slength(s1) IMPLIES
+        i + slength(extract_stat(s1, i)`1) - extract_stat(s1, i)`2 <= slength(s1)
+
+    state_extract_stat(iS | iS`callstack`length > 0):
+        {(s1, j) | j < slength(s1) AND executable_stat?(s1, j)} =
+      IF endi(iS`callstack, 0)`fpc =
+          slength(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body) THEN
+        (iskip, 0)
+      ELSE
+        extract_stat(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body,
+          endi(iS`callstack, 0)`fpc)
+      ENDIF
+
+    stack_size_at_next_pc_decl_begin: LEMMA
+      i < slength(s) AND idecl?(extract_stat(s, i)`1) AND extract_stat(s, i)`2 = 0 IMPLIES
+        stack_size_at(s, next_pc(s, i)) = stack_size_at(s, i) + 1
+
+    stack_size_at_next_pc_decl_end: LEMMA
+      i < slength(s) AND idecl?(extract_stat(s, i)`1) AND
+          extract_stat(s, i)`2 = slength(extract_stat(s, i)`1) - 1 IMPLIES
+        stack_size_at(s, next_pc(s, i)) + 1 = stack_size_at(s, i)
+
+    next_pc_if_no_overflow: LEMMA
+      i < slength(s) AND iif?(extract_stat(s, i)`1) IMPLIES
+        i + 1 + slength(iftrue(extract_stat(s, i)`1)) <= slength(s)
+
+    stack_size_at_next_pc_iftrue: LEMMA
+      i < slength(s) AND iif?(extract_stat(s, i)`1) IMPLIES
+        stack_size_at(s, i + 1) = stack_size_at(s, i)
+
+    stack_size_at_next_pc_iffalse: LEMMA
+      i < slength(s) AND iif?(extract_stat(s, i)`1) IMPLIES
+        stack_size_at(s, i + 1 + slength(iftrue(extract_stat(s, i)`1))) =
+          stack_size_at(s, i)
+
+    stack_size_at_vars: LEMMA
+      i < slength(s) AND NOT idecl?(extract_stat(s, i)`1) IMPLIES
+        vars(extract_stat(s, i)`1)(j + stack_size_at(s, i)) IMPLIES vars(s)(j)
+
+    frame_vars: LEMMA
+      FORALL (cf: stack_frame(D)):
+        cf`fpc < slength(D`seq(cf`ffct)`body) AND
+        NOT idecl?(extract_stat(D`seq(cf`ffct)`body, cf`fpc)`1) AND
+        vars(extract_stat(D`seq(cf`ffct)`body, cf`fpc)`1)(j) IMPLIES
+          j < cf`fdepth
+
+    pushRedex?(iS | iS`callstack`length > 0): bool =
+      idecl?(state_extract_stat(iS)`1) AND state_extract_stat(iS)`2 = 0
+
+    popRedex?(iS | iS`callstack`length > 0): bool =
+      idecl?(state_extract_stat(iS)`1) AND
+        state_extract_stat(iS)`2 = slength(state_extract_stat(iS)`1) - 1
+
+    ifRedex?(iS | iS`callstack`length > 0): bool =
+      iif?(state_extract_stat(iS)`1)
+
+    returnRedex?(iS | iS`callstack`length > 0): bool =
+      endi(iS`callstack, 0)`fpc =
+        slength(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body)
+
+    variableRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        ivar?(aexpr(state_extract_stat(iS)`1))
+
+    valueRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        (iconstant?(aexpr(state_extract_stat(iS)`1)) OR
+         inil?(aexpr(state_extract_stat(iS)`1)))
+    
+    applicationRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        icall?(aexpr(state_extract_stat(iS)`1))
+
+    lookupRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        ilookup?(aexpr(state_extract_stat(iS)`1))
+
+    updateRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        iupdate?(aexpr(state_extract_stat(iS)`1))
+
+    newintRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        inewint?(aexpr(state_extract_stat(iS)`1))
+
+    newrefRedex?(iS | iS`callstack`length > 0): bool =
+      iassign?(state_extract_stat(iS)`1) AND
+        inewref?(aexpr(state_extract_stat(iS)`1))
+
+    releaseRedex?(iS | iS`callstack`length > 0): bool =
+      irelease?(state_extract_stat(iS)`1)
+
+    istate_vars: LEMMA
+      iS`callstack`length > 0 AND
+      NOT returnRedex?(iS) AND NOT pushRedex?(iS) AND NOT popRedex?(iS) AND
+      vars(state_extract_stat(iS)`1)(j) IMPLIES
+        j < iS`stack`length
+
+    get_frame_body(iS | iS`callstack`length > 0): [stack_frame(iS`defs), istat] =
+      (endi(iS`callstack, 0), iS`defs`seq(endi(iS`callstack, 0)`ffct)`body)
+
+    pushReduce(iS | iS`callstack`length > 0 AND pushRedex?(iS)): istate =
+      LET (lf, fbody) = get_frame_body(iS) IN
+      iS WITH [`stack := add(vundef, iS`stack),
+               `callstack`seq(iS`callstack`length - 1) :=
+                 lf WITH [
+                   `fdepth := lf`fdepth + 1,
+                   `fpc := next_pc(fbody, lf`fpc)
+                 ]
+              ]
+
+    popReduce(iS | iS`callstack`length > 0 AND popRedex?(iS)): istate =
+      LET (lf, fbody) = get_frame_body(iS) IN
+      iS WITH [`stack := pop(iS`stack),
+               `callstack`seq(iS`callstack`length - 1) :=
+                 lf WITH [
+                   `fdepth := lf`fdepth - 1,
+                   `fpc := next_pc(fbody, lf`fpc)
+                 ]
+              ]
+
+    ifReduce(iS | iS`callstack`length > 0 AND ifRedex?(iS)): istate =
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 iN
+      LET j = vindex(icond(s)) IN
+      IF endi(iS`stack, j) = vint(0) OR endi(iS`stack, j) = vnil THEN
+        iS WITH [`callstack`seq(iS`callstack`length - 1) :=
+                   lf WITH [`fpc := lf`fpc + 1 + slength(iftrue(s))]
+                ]
+      ELSE
+        iS WITH [`callstack`seq(iS`callstack`length - 1) :=
+                   lf WITH [`fpc := lf`fpc + 1]
+                ]
+      ENDIF
+
+    returnReduce(iS | iS`callstack`length > 0 AND returnRedex?(iS)): istate =
+      iS
+
+    releaseReduce(iS | iS`callstack`length > 0 AND releaseRedex?(iS)): istate =
+      iS
+
+    variableReduce(iS | iS`callstack`length > 0 AND variableRedex?(iS)): istate =
+      iS
+
+    valueReduce(iS | iS`callstack`length > 0 AND valueRedex?(iS)): istate =
+      iS
+
+    applicationReduce(iS | iS`callstack`length > 0 AND applicationRedex?(iS)): istate =
+      iS
+
+    lookupReduce(iS | iS`callstack`length > 0 AND lookupRedex?(iS)): istate =
+      iS
+
+    updateReduce(iS | iS`callstack`length > 0 AND updateRedex?(iS)): istate =
+      iS
+
+    newintReduce(iS | iS`callstack`length > 0 AND newintRedex?(iS)): istate =
+      iS
+
+    newrefReduce(iS | iS`callstack`length > 0 AND newrefRedex?(iS)): istate =
+      iS
+
+    reduce(iS | NOT iS`error): istate =
+      IF iS`callstack`length = 0 THEN
+        iS
+      ELSIF pushRedex?(iS) THEN
+        pushReduce(iS)
+      ELSIF popRedex?(iS) THEN
+        popReduce(iS)
+      ELSIF ifRedex?(iS) THEN
+        ifReduce(iS)
+      ELSIF returnRedex?(iS) THEN
+        returnReduce(iS)
+      ELSIF releaseRedex?(iS) THEN
+        releaseReduce(iS)
+      ELSIF variableRedex?(iS) THEN
+        variableReduce(iS)
+      ELSIF valueRedex?(iS) THEN
+        valueReduce(iS)
+      ELSIF applicationRedex?(iS) THEN
+        applicationReduce(iS)
+      ELSIF lookupRedex?(iS) THEN
+        lookupReduce(iS)
+      ELSIF updateRedex?(iS) THEN
+        updateReduce(iS)
+      ELSIF newintRedex?(iS) THEN
+        newintReduce(iS)
+      ELSIF newrefRedex?(iS) THEN
+        newrefReduce(iS)
+      ELSE
+        iS WITH [`error := TRUE]
+      ENDIF
+
+  END ireduction
