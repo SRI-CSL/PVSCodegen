@@ -8,6 +8,11 @@ ireduction: THEORY
     pop[T: TYPE](S: finseq[T] | S`length > 0): finseq[T] =
       (# length := S`length - 1, seq := LAMBDA (i: below(S`length - 1)): S`seq(i) #)
 
+    length_positive[T: TYPE]: LEMMA
+      FORALL (l: list[T]):
+        NOT length(l) = 0 IMPLIES cons?(l)
+    AUTO_REWRITE+ length_positive
+
     length_cdr[T: TYPE]: LEMMA
       FORALL (l: list[T]):
         cons?(l) IMPLIES length(cdr(l)) = length(l) - 1
@@ -33,7 +38,7 @@ ireduction: THEORY
 
     ivalue: DATATYPE
       BEGIN
-        vref(vindex: nat): vref?
+        vref(vrefindex: nat): vref?
         vint(vvalue: nat): vint?
         vnil: vnil?
         vundef: vundef?
@@ -58,6 +63,14 @@ ireduction: THEORY
     dom: VAR finite_set[nat]
     Store(dom): TYPE = [(dom) -> finseq[ivalue]]
     Stack: TYPE = finseq[ivalue]
+    S, S1, S2: VAR Stack
+    L: VAR list[(ivar?)]
+
+
+    domainValue?(dom)(v): bool =
+      v = vnil OR vint?(v) OR (vref?(v) AND dom(vrefindex(v)))
+    in_varlist(l: list[(ivar?)])(i): bool =
+      some(LAMBDA x: vindex(x) = i)(l)
 
     vars(e)(i): bool =
       CASES e OF
@@ -183,7 +196,9 @@ ireduction: THEORY
     stack_frame(D): TYPE = [#
       ffct: below(D`length),
       fpc: upto(slength(D`seq(ffct)`body)),
-      fdepth: {k: nat | k = stack_size_at(D`seq(ffct)`body, fpc) + D`seq(ffct)`arity + 1}
+      fdepth: {k: nat | k = stack_size_at(D`seq(ffct)`body, fpc) + D`seq(ffct)`arity + 1
+        OR (fpc = slength(D`seq(ffct)`body) AND k >= 1)
+      }
     #]
 
     fdepth_sum(D)(C: finseq[stack_frame(D)]): nat =
@@ -209,7 +224,8 @@ ireduction: THEORY
       },
       stack: {S: Stack | S`length = 1 + fdepth_sum(defs)(callstack)},
       domain: finite_set[nat],
-      store: Store(domain)
+      store: Store(domain),
+      count: [(domain) -> int]
     #]
 
     iS, iS1, iS2: VAR istate
@@ -262,6 +278,10 @@ ireduction: THEORY
         extract_stat(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body,
           endi(iS`callstack, 0)`fpc)
       ENDIF
+
+    stack_size_at_next_pc: LEMMA
+      i < slength(s) AND NOT idecl?(extract_stat(s, i)`1) IMPLIES
+        stack_size_at(s, next_pc(s, i)) = stack_size_at(s, i)
 
     stack_size_at_next_pc_decl_begin: LEMMA
       i < slength(s) AND idecl?(extract_stat(s, i)`1) AND extract_stat(s, i)`2 = 0 IMPLIES
@@ -386,7 +406,27 @@ ireduction: THEORY
       ENDIF
 
     returnReduce(iS | iS`callstack`length > 0 AND returnRedex?(iS)): istate =
-      iS
+      LET lf = endi(iS`callstack, 0) IN
+      IF lf`fdepth > 1 THEN
+        iS WITH [`callstack`seq(iS`callstack`length - 1) :=
+                   lf WITH [`fdepth := lf`fdepth - 1],
+                 `stack := pop(iS`stack)]
+      ELSIF iS`callstack`length > 1 THEN
+        LET nc = pop(iS`callstack) IN
+        LET niS = iS WITH [`callstack := nc,
+                           `stack := pop(iS`stack)] IN
+        LET nf = endi(nc, 0) IN
+        LET cbody = iS`defs`seq(nf`ffct)`body IN
+        LET cvar = vindex(avar(extract_stat(cbody, nf`fpc)`1)) IN
+        niS WITH [`callstack := nc WITH
+                   [`seq(nc`length - 1) := nf WITH
+                     [`fpc := next_pc(cbody, nf`fpc)]],
+                 `stack := niS`stack WITH [
+                   `seq(niS`stack`length - 1 - cvar) := endi(iS`stack, 0)]]
+      ELSE
+        iS WITH [`callstack := pop(iS`callstack),
+                 `stack := pop(iS`stack) WITH [`seq(0) := iS`stack`seq(1)]]
+      ENDIF
 
     releaseReduce(iS | iS`callstack`length > 0 AND releaseRedex?(iS)): istate =
       iS
@@ -397,8 +437,53 @@ ireduction: THEORY
     valueReduce(iS | iS`callstack`length > 0 AND valueRedex?(iS)): istate =
       iS
 
+    iapply_nstack((arity: nat), dom, S,
+      (args: list[(ivar?)] | length(args) = arity AND
+        FORALL i: in_varlist(args)(i) IMPLIES
+          i < S`length AND domainValue?(dom)(endi(S, i))),
+        (cnt: [(dom) -> int])):
+    RECURSIVE {(S1, (ncnt: [(dom) -> int])) | S1`length = S`length + arity} =
+      IF arity = 0 THEN
+        (S, cnt)
+      ELSE
+        LET u = S`seq(S`length - 1 - vindex(car(args))) IN
+        LET nargs : {L | length(L) = length(args) - 1 AND
+                         FORALL i: in_varlist(L)(i) IMPLIES i < S`length + 1} =
+          map(LAMBDA x: x WITH [`vindex := vindex(x) + 1])(cdr(args)) IN
+        LET nstack = add(u, IF vref?(u) AND vmarked(car(args)) THEN
+            S WITH [`seq(S`length - 1 - vindex(car(args))) := vnil]
+          ELSE
+            S
+          ENDIF) IN
+        LET ncnt = IF vref?(u) AND NOT vmarked(car(args)) THEN
+            cnt WITH [(vrefindex(u)) := cnt(vrefindex(u)) + 1]
+          ELSE
+            cnt
+          ENDIF IN
+        iapply_nstack(arity - 1, dom, nstack, nargs, ncnt)
+      ENDIF
+    MEASURE arity
+
     applicationReduce(iS | iS`callstack`length > 0 AND applicationRedex?(iS)): istate =
-      iS
+      LET s = state_extract_stat(iS)`1 IN
+      IF ifun(aexpr(s)) < iS`defs`length AND
+          length(iargs(aexpr(s))) = iS`defs`seq(ifun(aexpr(s)))`arity AND
+          (FORALL (i: below(length(iargs(aexpr(s))))):
+            domainValue?(iS`domain)(endi(iS`stack, vindex(nth(iargs(aexpr(s)), i)))))
+      THEN
+        LET (nstack, ncnt) = iapply_nstack(length(iargs(aexpr(s))), iS`domain,
+            add(vundef, iS`stack),
+            map(LAMBDA x: x WITH [`vindex := vindex(x) + 1])(iargs(aexpr(s))), iS`count)
+        IN
+        iS WITH [`callstack := add((# ffct := ifun(aexpr(s)),
+                                      fpc := 0,
+                                      fdepth := 1 + length(iargs(aexpr(s)))
+                                    #), iS`callstack),
+                 `stack := nstack,
+                 `count := ncnt]
+      ELSE
+        iS WITH [`error := TRUE]
+      ENDIF
 
     lookupReduce(iS | iS`callstack`length > 0 AND lookupRedex?(iS)): istate =
       iS

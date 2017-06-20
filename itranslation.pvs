@@ -1,0 +1,274 @@
+itranslation: THEORY
+  BEGIN
+
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, iareduction, typed_reduction, typed_rreduction, typed_reduction_props, ireduction
+
+    A, B, C: VAR IExpression
+    i, j, k: VAR nat
+    x, y, z: VAR (variable?)
+    stypes: VAR finseq[nat]
+    dom_types: VAR [nat -> nat]
+    tA: VAR typeinfo
+    translate_vars: VAR [nat -> nat]
+
+    Definition: TYPE = [# arity: nat,
+                          body: {A |  pure?(A) AND
+                                      (FORALL i: vars(A)(i) = (i < arity)) AND
+                                      unmark(A) = A}
+                       #]
+
+    tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
+    Defs: TYPE = finseq[Definition]
+
+    D: VAR Defs
+    tD: VAR finseq[tdef]
+
+    shift(translate_vars)(i) : nat = translate_vars(i) + 1
+    newvar(translate_vars)(i) : nat = IF i = 0 THEN 0 ELSE translate_vars(i - 1) + 1 ENDIF
+
+    translate_statement(A: (pure?), rv: (ivar?),
+      (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+      dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+      (translate_vars: [nat -> nat])
+    ): RECURSIVE istat =
+      CASES A OF
+        variable(j, b): iassign(rv, ivar(translate_vars(j), b)),
+        constant(n): iassign(rv, iconstant(n)),
+        nil: iassign(rv, inil),
+        application(f, args):
+          iassign(rv, icall(f, map(LAMBDA x: ivar(translate_vars(index(x)), marked(x)))(args))),
+        letexpr(B, C):
+          idecl(lettype(tA), iblock(
+            translate_statement(B, ivar(0, FALSE), stypes, dom_types, tD, lrhs(tA), shift(translate_vars)),
+            iblock(iskip,
+            translate_statement(C, ivar(vindex(rv) + 1, FALSE), add(lettype(tA), stypes),
+                                dom_types, tD, lbody(tA), newvar(translate_vars)))))
+        ,
+        ift(x, B, C):
+          iif(ivar(translate_vars(index(x)), marked(x)),
+            translate_statement(B, rv, stypes, dom_types, tD, tthen(tA), translate_vars),
+            translate_statement(C, rv, stypes, dom_types, tD, telse(tA), translate_vars)),
+        update(target, lhs, rhs):
+          iassign(rv, iupdate(ivar(translate_vars(index(target)), marked(target)),
+                              ivar(translate_vars(index(lhs)), marked(lhs)),
+                              ivar(translate_vars(index(rhs)), marked(rhs)))),
+        lookup(arr, pos):
+          LET s = iassign(rv, ilookup(ivar(translate_vars(index(arr)), FALSE),
+                                      ivar(translate_vars(index(pos)), marked(pos)))) IN
+          IF marked(arr) THEN
+            iblock(s, irelease(ivar(translate_vars(index(arr)), TRUE)))
+          ELSE
+            s
+          ENDIF,
+        newint(n): iassign(rv, inewint(n)),
+        newref(n): iassign(rv, inewref(n)),
+        release(x, B):
+          iblock(irelease(ivar(translate_vars(index(x)), marked(x))),
+            translate_statement(B, rv, stypes, dom_types, tD, tA, translate_vars))
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_length(A: (pure?)): RECURSIVE posnat =
+      CASES A OF
+        variable(j, b): 1,
+        constant(n): 1,
+        nil: 1,
+        application(f, args): 1,
+        letexpr(B, C):
+          3 + translate_length(B) + translate_length(C),
+        ift(x, B, C):
+          1 + translate_length(B) + translate_length(C),
+        update(target, lhs, rhs): 1,
+        lookup(arr, pos):
+          IF marked(arr) THEN 2 ELSE 1 ENDIF,
+        newint(n): 1,
+        newref(n): 1,
+        release(x, B): 1 + translate_length(B)
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_length_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat])):
+      slength(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars)) =
+        translate_length(A)
+    AUTO_REWRITE+ translate_length_def
+
+    translate_stack_size_at(A: (pure?), pc: upto(translate_length(A))): RECURSIVE nat =
+      CASES A OF
+        variable(j, b): 0,
+        constant(n): 0,
+        nil: 0,
+        application(f, args): 0,
+        letexpr(B, C):
+          IF pc = 0 THEN
+            0
+          ELSIF pc <= 1+translate_length(B) THEN
+            1 + translate_stack_size_at(B, pc - 1)
+          ELSIF pc <= 2+translate_length(B) + translate_length(C) THEN
+            1 + translate_stack_size_at(C, pc - 2 - translate_length(B))
+          ELSE
+            0
+          ENDIF,
+        ift(x, B, C):
+          IF pc = 0 THEN
+            0
+          ELSIF pc <= 1 + translate_length(B) THEN
+            translate_stack_size_at(B, pc - 1)
+          ELSE
+            translate_stack_size_at(C, pc - 1 - translate_length(B))
+          ENDIF,
+        update(target, lhs, rhs): 0,
+        lookup(arr, pos): 0,
+        newint(n): 0,
+        newref(n): 0,
+        release(x, B): IF pc = 0 THEN 0 ELSE translate_stack_size_at(B, pc - 1) ENDIF
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_stack_size_at_zero: LEMMA
+      FORALL (A: (pure?)): translate_stack_size_at(A, 0) = 0
+    AUTO_REWRITE+ translate_stack_size_at_zero
+    translate_stack_size_at_end: LEMMA
+      FORALL (A: (pure?)): translate_stack_size_at(A, translate_length(A)) = 0
+    AUTO_REWRITE+ translate_stack_size_at_end
+
+    translate_stack_size_at_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: upto(translate_length(A))):
+      stack_size_at(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc) =
+        translate_stack_size_at(A, pc)
+    AUTO_REWRITE+ translate_stack_size_at_def
+
+    translate_is_fun_call_at(A: (pure?), (pc: upto(translate_length(A))), f: nat):
+        RECURSIVE bool =
+      CASES A OF
+        application(f2, args): pc = 0 AND f = f2,
+        letexpr(B, C):
+          IF pc = 0 THEN
+            FALSE
+          ELSIF pc < 1+translate_length(B) THEN
+            translate_is_fun_call_at(B, pc - 1, f)
+          ELSIF pc = 1+translate_length(B) THEN
+            FALSE
+          ELSIF pc <= 2+translate_length(B) + translate_length(C) THEN
+            translate_is_fun_call_at(C, pc - 2 - translate_length(B), f)
+          ELSE
+            FALSE
+          ENDIF,
+        ift(x, B, C):
+          IF pc = 0 THEN
+            FALSE
+          ELSIF pc < 1 + translate_length(B) THEN
+            translate_is_fun_call_at(B, pc - 1, f)
+          ELSE
+            translate_is_fun_call_at(C, pc - 1 - translate_length(B), f)
+          ENDIF,
+        release(x, B): pc > 0 AND translate_is_fun_call_at(B, pc - 1, f)
+        ELSE FALSE
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_is_fun_call_at_end: LEMMA
+      FORALL (A: (pure?)): NOT translate_is_fun_call_at(A, translate_length(A), k)
+
+    translate_is_fun_call_at_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: upto(translate_length(A)), f: nat):
+      is_fun_call_at(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc, f) =
+        translate_is_fun_call_at(A, pc, f)
+    AUTO_REWRITE+ translate_is_fun_call_at_def
+
+
+    ival_to_val(v: ivalue): IExpression =
+      CASES v OF
+        vref(u): ref(u),
+        vint(n): constant(n),
+        vnil: nil,
+        vundef: variable(0,FALSE) % Certainly not a value
+      ENDCASES
+
+    reconstruct_state(A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                      (pc: below(translate_length(A))),
+                      (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)
+    ): RECURSIVE [IExpression, IContext, [nat -> nat]] =
+      CASES A OF
+        letexpr(B, C):
+          LET lb1 = translate_length(B) IN
+          LET lb2 = 1 IN
+          LET lb3 = translate_length(C) IN
+          IF pc = 0 THEN
+            (A, hole, translate_vars)
+          ELSIF pc < 1+lb1 THEN
+            LET (nA, nK, tv) = reconstruct_state(B,shift(translate_vars),S,
+                                                 pc-1,ivar(0, FALSE)) IN
+            (nA, letc(nK, C), tv)
+          ELSIF pc < 1+lb1+lb2 THEN
+            (letexpr(ival_to_val(endi(S, 0)), C), hole, shift(translate_vars))
+          ELSIF pc < 1+lb1+lb2+lb3 THEN
+            LET (nA, nK, tv) = reconstruct_state(C,newvar(translate_vars),S,
+                                     pc-1-lb1-lb2,ivar(vindex(rv)+1, FALSE)) IN
+            (nA, popc(nK), tv)
+          ELSE
+            (pop(ival_to_val(endi(S, vindex(rv) + 1))), hole, shift(translate_vars))
+          ENDIF,
+        ift(x, B, C):
+          LET lb1 = translate_length(B) IN
+          IF pc = 0 THEN
+            (A, hole, translate_vars)
+          ELSIF pc < 1 + lb1 THEN
+            reconstruct_state(B,translate_vars,S,pc-1,rv)
+          ELSE
+            reconstruct_state(C,translate_vars,S,pc-1-lb1,rv)
+          ENDIF,
+        lookup(x, y):
+          IF pc = 0 THEN
+            (A,hole,translate_vars)
+          ELSE
+            (release(x, ival_to_val(endi(S, vindex(rv)))), hole, translate_vars)
+          ENDIF,
+        release(x, B):
+          IF pc = 0 THEN
+            (A, hole, translate_vars)
+          ELSE
+            reconstruct_state(B,translate_vars,S,pc-1,rv)
+          ENDIF
+        ELSE (A, hole, translate_vars)
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    call_reconstruct_state(A: (pure?), (translate_vars: [nat -> nat]), f: nat,
+            (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))
+    ): RECURSIVE [IContext, [nat -> nat]] =
+      CASES A OF
+        letexpr(B, C):
+          LET lb1 = translate_length(B) IN
+          IF pc < 1+lb1 THEN
+            LET (nK, tv) = call_reconstruct_state(B,shift(translate_vars),f,pc-1) IN
+            (letc(nK, C), tv)
+          ELSE
+            LET (nK, tv) = call_reconstruct_state(C,newvar(translate_vars),f,pc-2-lb1) IN
+            (popc(nK), tv)
+          ENDIF,
+        ift(x, B, C):
+          LET lb1 = translate_length(B) IN
+          IF pc < 1 + lb1 THEN
+            call_reconstruct_state(B,translate_vars,f,pc-1)
+          ELSE
+            call_reconstruct_state(C,translate_vars,f,pc-1-lb1)
+          ENDIF,
+        release(x, B):
+          call_reconstruct_state(B,translate_vars,f,pc-1),
+        application(f, args):
+          (hole, translate_vars)
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+
+END itranslation
