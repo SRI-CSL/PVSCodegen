@@ -39,7 +39,7 @@ ireduction: THEORY
     ivalue: DATATYPE
       BEGIN
         vref(vrefindex: nat): vref?
-        vint(vvalue: nat): vint?
+        vint(vvalue: int): vint?
         vnil: vnil?
         vundef: vundef?
       END ivalue

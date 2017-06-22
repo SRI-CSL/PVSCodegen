@@ -4,12 +4,16 @@ itranslation: THEORY
     IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, iareduction, typed_reduction, typed_rreduction, typed_reduction_props, ireduction
 
     A, B, C: VAR IExpression
+    K, K1, K2: VAR IContext
     i, j, k: VAR nat
     x, y, z: VAR (variable?)
+    trS, trS1, trS2: VAR typed_rstate
+    iS, iS1, iS2: VAR istate
     stypes: VAR finseq[nat]
     dom_types: VAR [nat -> nat]
     tA: VAR typeinfo
     translate_vars: VAR [nat -> nat]
+    dom: VAR finite_set[nat]
 
     Definition: TYPE = [# arity: nat,
                           body: {A |  pure?(A) AND
@@ -67,6 +71,58 @@ itranslation: THEORY
             translate_statement(B, rv, stypes, dom_types, tD, tA, translate_vars))
       ENDCASES
     MEASURE (A :: IExpression) BY <<
+
+    translate_ivars(A: (pure?), rv: (ivar?), (translate_vars: [nat -> nat]))(i: nat):
+        RECURSIVE bool =
+      CASES A OF
+        variable(j, b): i = vindex(rv) OR i = translate_vars(j),
+        constant(n): i = vindex(rv),
+        nil: i = vindex(rv),
+        application(f, args):
+          i = vindex(rv) OR some(LAMBDA x: i = translate_vars(index(x)))(args),
+        letexpr(B, C):
+          translate_ivars(B, ivar(0, FALSE), shift(translate_vars))(i + 1) OR
+          translate_ivars(C, ivar(vindex(rv) + 1, FALSE), newvar(translate_vars))(i + 1),
+        ift(x, B, C):
+          i = translate_vars(index(x)) OR
+            translate_ivars(B, rv, translate_vars)(i) OR
+            translate_ivars(C, rv, translate_vars)(i),
+        update(target, lhs, rhs):
+          i = vindex(rv) OR i = translate_vars(index(target)) OR
+            i = translate_vars(index(lhs)) OR i = translate_vars(index(rhs)),
+        lookup(arr, pos):
+          i = vindex(rv) OR i = translate_vars(index(arr)) OR
+            i = translate_vars(index(pos)),
+        newint(n): i = vindex(rv),
+        newref(n): i = vindex(rv),
+        release(x, B):
+          i = translate_vars(index(x)) OR translate_ivars(B, rv, translate_vars)(i)
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_ivars_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), i):
+          vars(translate_statement(A, rv, stypes, dom_types, tD, tA, translate_vars))(i) =
+            translate_ivars(A, rv, translate_vars)(i)
+    AUTO_REWRITE+ translate_ivars_def
+
+    translate_ivars_vars: LEMMA
+      FORALL (A: (pure?), rv: (ivar?), translate_vars: [nat -> nat]):
+        translate_ivars(A, rv, translate_vars)(i) =
+          (i = vindex(rv) OR EXISTS j: vars(A)(j) AND translate_vars(j) = i)
+
+    translate_definitions(D, (tD | defs_well_typed(D, tD))): finseq[ireduction.Definition] =
+      (# length := D`length,
+         seq := LAMBDA (i: below(D`length)):
+           (# arity := D`seq(i)`arity,
+              body := translate_statement(D`seq(i)`body, ivar(D`seq(i)`arity, FALSE),
+                        tD`seq(i)`args_type, (LAMBDA j: 0), tD, tD`seq(i)`body_type,
+                        (LAMBDA j: j))
+            #)
+       #)
 
     translate_length(A: (pure?)): RECURSIVE posnat =
       CASES A OF
@@ -185,6 +241,46 @@ itranslation: THEORY
         translate_is_fun_call_at(A, pc, f)
     AUTO_REWRITE+ translate_is_fun_call_at_def
 
+    translate_next_pc(A: (pure?), pc: below(translate_length(A))):
+        RECURSIVE upto(translate_length(A)) =
+      CASES A OF
+        letexpr(B, C):
+          IF pc = 0 THEN
+            1
+          ELSIF pc < 1+translate_length(B) THEN
+            1 + translate_next_pc(B, pc - 1)
+          ELSIF pc = 1+translate_length(B) THEN
+            2 + translate_length(B)
+          ELSIF pc < 2+translate_length(B) + translate_length(C) THEN
+            2 + translate_length(B) + translate_next_pc(C, pc - 2 - translate_length(B))
+          ELSE
+            translate_length(A)
+          ENDIF,
+        ift(x, B, C):
+          IF pc = 0 THEN
+            1
+          ELSIF pc < 1 + translate_length(B) THEN
+            IF translate_next_pc(B, pc - 1) < translate_length(B) THEN
+              1 + translate_next_pc(B, pc - 1)
+            ELSE
+              translate_length(A)
+            ENDIF
+          ELSE
+            1 + translate_length(B) + translate_next_pc(C, pc - 1 - translate_length(B))
+          ENDIF,
+        release(x, B): IF pc = 0 THEN 1 ELSE 1 + translate_next_pc(B, pc - 1) ENDIF
+        ELSE pc + 1
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_next_pc_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: below(translate_length(A))):
+      next_pc(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc) =
+        translate_next_pc(A, pc)
+    AUTO_REWRITE+ translate_next_pc
 
     ival_to_val(v: ivalue): IExpression =
       CASES v OF
@@ -192,6 +288,13 @@ itranslation: THEORY
         vint(n): constant(n),
         vnil: nil,
         vundef: variable(0,FALSE) % Certainly not a value
+      ENDCASES
+
+    val_to_ival(v: (value?)): ivalue =
+      CASES v OF
+        ref(u): vref(u),
+        constant(n): vint(n),
+        nil: vnil
       ENDCASES
 
     reconstruct_state(A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
@@ -243,6 +346,60 @@ itranslation: THEORY
       ENDCASES
     MEASURE (A :: IExpression) BY <<
 
+    reconstruct_state_tv_high: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        j >= popDepth(reconstruct_state(A, translate_vars, S, pc, rv)`2) IMPLIES
+          reconstruct_state(A, translate_vars, S, pc, rv)`3(j) =
+            translate_vars(j - popDepth(reconstruct_state(A, translate_vars, S, pc, rv)`2)) + translate_stack_size_at(A, pc)
+
+    reconstruct_state_tv_low: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        j < popDepth(reconstruct_state(A, translate_vars, S, pc, rv)`2)
+          IMPLIES
+            reconstruct_state(A, translate_vars, S, pc, rv)`3(j) <
+              translate_stack_size_at(A, pc)
+
+    reconstruct_state_popDepth: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        popDepth(reconstruct_state(A, translate_vars, S, pc, rv)`1) <= 1
+
+    npopcs(n: nat, K): RECURSIVE IContext =
+      IF n = 0 THEN K ELSE popc(npopcs(n - 1, K)) ENDIF
+    MEASURE n
+
+    npopcs_popDepth: LEMMA
+      popDepth(npopcs(k, K)) = k + popDepth(K)
+
+    fct_reconstruct_state(A: (pure?), (S : ireduction.Stack), (arity: nat),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: upto(translate_length(A)) |
+          pc = translate_length(A) OR translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        [IExpression, IContext, [nat -> nat]] =
+      IF pc = translate_length(A) THEN
+        IF fdepth = 1 THEN
+          (ival_to_val(endi(S, fdepth - 1)), hole, LAMBDA j: j)
+        ELSE
+          (pop(ival_to_val(endi(S, fdepth - 1))), npopcs(fdepth - 2, hole), LAMBDA j: j)
+        ENDIF
+      ELSE
+        LET (B, K, tv) = reconstruct_state(A, (LAMBDA j: j), S, pc, ivar(arity, FALSE)) IN
+        (B, npopcs(arity, K), tv)
+      ENDIF
+
+    fct_reconstruct_state_tv: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: upto(translate_length(A)) |
+          pc = translate_length(A) OR translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+          j < popDepth(fct_reconstruct_state(A, S, arity, fdepth, pc)`2) + popDepth(fct_reconstruct_state(A, S, arity, fdepth, pc)`1) IMPLIES
+            fct_reconstruct_state(A, S, arity, fdepth, pc)`3(j) < fdepth
+
     call_reconstruct_state(A: (pure?), (translate_vars: [nat -> nat]), f: nat,
             (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))
     ): RECURSIVE [IContext, [nat -> nat]] =
@@ -270,5 +427,155 @@ itranslation: THEORY
       ENDCASES
     MEASURE (A :: IExpression) BY <<
 
+    call_reconstruct_state_tv_high: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), f: nat,
+            (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))):
+        j >= popDepth(call_reconstruct_state(A, translate_vars, f, pc)`1) IMPLIES
+          call_reconstruct_state(A, translate_vars, f, pc)`2(j) =
+            translate_vars(j - popDepth(call_reconstruct_state(A, translate_vars, f, pc)`1)) + translate_stack_size_at(A, pc)
+
+    call_reconstruct_state_tv_low: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), f: nat,
+            (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))):
+        j < popDepth(call_reconstruct_state(A, translate_vars, f, pc)`1) IMPLIES
+          call_reconstruct_state(A, translate_vars, f, pc)`2(j) <
+            translate_stack_size_at(A, pc)
+
+    compose_all(l: finseq[IContext]): RECURSIVE IContext =
+      IF l`length = 0 THEN
+        hole
+      ELSE
+        compose(compose_all(pop(l)), endi(l, 0))
+      ENDIF
+    MEASURE l`length
+
+    compose_popDepth: LEMMA
+      popDepth(compose(K1, K2)) = popDepth(K1) + popDepth(K2)
+
+    pop_add[T: TYPE]: LEMMA
+      FORALL (l: finseq[T], x: T):
+        pop(add(x, l)) = l
+    AUTO_REWRITE+ pop_add
+
+    sum[T: TYPE](f: [T -> nat], l: finseq[T]): nat =
+      Sigma((LAMBDA i: i < l`length), (LAMBDA i: IF i < l`length THEN f(l`seq(i)) ELSE 0 ENDIF))
+
+    sum_pop[T: TYPE]: LEMMA
+      FORALL (f: [T -> nat], l: finseq[T]):
+        l`length > 0 IMPLIES sum(f, l) = f(endi(l, 0)) + sum(f, pop(l))
+
+    sum_add[T: TYPE]: LEMMA
+      FORALL (f: [T -> nat], l: finseq[T], a: T):
+        sum(f, add(a, l)) = sum(f, l) + f(a)
+    AUTO_REWRITE+ sum_add
+
+    sum_emptyseq[T: TYPE]: LEMMA
+      FORALL (f: [T -> nat]):
+        sum(f, empty_seq[T]) = 0
+    AUTO_REWRITE+ sum_emptyseq
+
+    sum_eq[T1, T2: TYPE]: LEMMA
+      FORALL (f1: [T1 -> nat], l1: finseq[T1], f2: [T2 -> nat], l2: finseq[T2]):
+        l1`length = l2`length AND
+        (FORALL (i: below(l1`length)): f1(l1`seq(i)) = f2(l2`seq(i))) IMPLIES
+          sum(f1, l1) = sum(f2, l2)
+
+    sum_map[T: TYPE]: LEMMA
+      FORALL (f: [T -> nat], l: finseq[T]):
+        sum(f, l) = sum((LAMBDA i: i), (#
+          length := l`length, seq := LAMBDA (i: below(l`length)): f(l`seq(i)) #))
+
+    fdepth_sum_sum: LEMMA
+      FORALL (D: finseq[ireduction.Definition], C: finseq[stack_frame(D)]):
+        fdepth_sum(D)(C) = sum((LAMBDA (cf: stack_frame(D)): cf`fdepth), C)
+
+    istate_stack_length: LEMMA
+      iS`stack`length = 1 + sum((LAMBDA (cf: stack_frame(iS`defs)): cf`fdepth), iS`callstack)
+
+    compose_all_popDepth: LEMMA
+      FORALL (l: finseq[IContext]):
+        popDepth(compose_all(l)) = sum(popDepth, l)
+
+    compose_translate_vars(tv1, tv2: [nat -> nat], pdepth, fdepth: nat)(i) : nat =
+      IF i < pdepth THEN
+        tv1(i)
+      ELSE
+        fdepth + tv2(i - pdepth)
+      ENDIF
+
+    compose_all_tv(l: finseq[[[nat -> nat], nat, nat]]): RECURSIVE [nat -> nat] =
+      IF l`length = 0 THEN
+        (LAMBDA j: j)
+      ELSE
+        LET (tv, p, f) = endi(l, 0) IN
+        compose_translate_vars(tv, compose_all_tv(pop(l)), p, f)
+      ENDIF
+    MEASURE l`length
+
+    compose_all_tv_bound: LEMMA
+      FORALL (l: finseq[[[nat -> nat], nat, nat]], k):
+        (FORALL (i: below(l`length)):
+          FORALL (j: below(l`seq(i)`2)): l`seq(i)`1(j) < l`seq(i)`3) AND
+        k < sum((LAMBDA (r: [[nat -> nat], nat, nat]): r`2), l) IMPLIES
+          compose_all_tv(l)(k) < sum((LAMBDA (r: [[nat -> nat], nat, nat]): r`3), l)
+
+    store_matches(dom, (str1: [(dom) -> finseq[(value?)]]), (str2: [(dom) -> finseq[ivalue]])): bool =
+      FORALL (i: (dom)):
+        str1(i)`length = str2(i)`length AND
+        FORALL (j: below(str1(i)`length)):
+          str2(i)`seq(j) = val_to_ival(str1(i)`seq(j))
+
+    count_matches(dom, (cnt1, cnt2: [(dom) -> int])): bool =
+      FORALL (i: (dom)): cnt1(i) = cnt2(i)
+
+    translate_defs_funcall: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        iS`defs = translate_definitions(D, trS`def_types) IMPLIES
+          FORALL (i | i < iS`callstack`length - 1):
+            translate_is_fun_call_at(D`seq(iS`callstack`seq(i)`ffct)`body,
+              iS`callstack`seq(i)`fpc, iS`callstack`seq(i + 1)`ffct)
+
+    translate_defs_funcall2: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        iS`defs = translate_definitions(D, trS`def_types) IMPLIES
+          FORALL (i: below(iS`callstack`length - 1)):
+            iS`callstack`seq(i)`fpc <= translate_length(D`seq(iS`callstack`seq(i)`ffct)`body) AND
+            translate_is_fun_call_at(D`seq(iS`callstack`seq(i)`ffct)`body,
+              iS`callstack`seq(i)`fpc, iS`callstack`seq(i + 1)`ffct)
+
+    state_matches(D, (trS | defs_well_typed(D, trS`def_types)), iS): bool =
+      iS`defs = translate_definitions(D, trS`def_types) AND
+      iS`domain = trS`state`domain AND
+      store_matches(trS`state`domain, trS`state`store, iS`store) AND
+      count_matches(trS`state`domain, trS`state`count, iS`count) AND
+      IF iS`callstack`length = 0 THEN
+        trS`state`context = hole AND
+          value?(trS`state`redex) AND
+          iS`stack`seq(0) = val_to_ival(trS`state`redex)
+      ELSE
+        LET fv = endi(iS`callstack, 0) IN
+        LET (A, K, tv) = fct_reconstruct_state(D`seq(fv`ffct)`body, iS`stack,
+                           D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc) IN
+        LET K1 = compose_all((#
+          length := iS`callstack`length - 1,
+          seq := LAMBDA (i: below(iS`callstack`length - 1)):
+            npopcs(D`seq(iS`callstack`seq(i)`ffct)`arity,
+              call_reconstruct_state(D`seq(iS`callstack`seq(i)`ffct)`body,
+                (LAMBDA j: j), iS`callstack`seq(i + 1)`ffct,
+                iS`callstack`seq(i)`fpc)`1) #)) IN
+        LET tv1 = compose_all_tv((#
+          length := iS`callstack`length - 1,
+          seq := LAMBDA (i: below(iS`callstack`length - 1)):
+            LET (K2, tv2) = call_reconstruct_state(D`seq(iS`callstack`seq(i)`ffct)`body,
+                              (LAMBDA j: j), iS`callstack`seq(i + 1)`ffct,
+                              iS`callstack`seq(i)`fpc) IN
+            (tv2, popDepth(K2) + D`seq(iS`callstack`seq(i)`ffct)`arity,
+                  iS`callstack`seq(i)`fdepth) #))
+        IN
+        LET tv2 = compose_translate_vars(tv, tv1, popDepth(K) + popDepth(A), fv`fdepth) IN
+        A = trS`state`redex AND compose(K1, K) = trS`state`context AND
+        FORALL (i: below(popDepth(trS`state`redex) + popDepth(trS`state`context))):
+          endi(iS`stack, tv2(i)) = val_to_ival(endi(trS`state`stack, i))
+      ENDIF
 
 END itranslation
