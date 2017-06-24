@@ -330,6 +330,11 @@ ireduction: THEORY
       endi(iS`callstack, 0)`fpc =
         slength(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body)
 
+    skipRedex?(iS | iS`callstack`length > 0): bool =
+      endi(iS`callstack, 0)`fpc <
+        slength(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body) AND
+      iskip?(state_extract_stat(iS)`1)
+
     variableRedex?(iS | iS`callstack`length > 0): bool =
       iassign?(state_extract_stat(iS)`1) AND
         ivar?(aexpr(state_extract_stat(iS)`1))
@@ -428,6 +433,11 @@ ireduction: THEORY
                  `stack := pop(iS`stack) WITH [`seq(0) := iS`stack`seq(1)]]
       ENDIF
 
+    skipReduce(iS | iS`callstack`length > 0 AND skipRedex?(iS)): istate =
+      iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc :=
+                  next_pc(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body,
+                          endi(iS`callstack, 0)`fpc)]
+
     releaseReduce(iS | iS`callstack`length > 0 AND releaseRedex?(iS)): istate =
       iS
 
@@ -508,6 +518,8 @@ ireduction: THEORY
         ifReduce(iS)
       ELSIF returnRedex?(iS) THEN
         returnReduce(iS)
+      ELSIF skipRedex?(iS) THEN
+        skipReduce(iS)
       ELSIF releaseRedex?(iS) THEN
         releaseReduce(iS)
       ELSIF variableRedex?(iS) THEN

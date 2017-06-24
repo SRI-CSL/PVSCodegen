@@ -90,6 +90,39 @@ IL  		: THEORY
 
    context_composition: LEMMA
      fill(compose(K1, K2), A) = fill(K1, fill(K2, A))
+
+   compose_assoc: LEMMA
+     FORALL (K1, K2, K3: IContext):
+       compose(compose(K1, K2), K3) = compose(K1, compose(K2, K3))
+
+   fill_depth(A): RECURSIVE nat =
+     CASES A OF
+       letexpr(B, C): 1 + fill_depth(B),
+       pop(B): 1 + fill_depth(B)
+       ELSE 0
+     ENDCASES
+   MEASURE A BY <<
+
+   fill_depth(K): RECURSIVE nat =
+     CASES K OF
+       hole: 0,
+       letc(K1, B): 1 + fill_depth(K1),
+       popc(K1): 1 + fill_depth(K1)
+     ENDCASES
+   MEASURE K BY <<
+
+   fill_depth_rw: LEMMA
+     fill_depth(fill(K, A)) = fill_depth(K) + fill_depth(A)
+
+   fill_eq_empty: LEMMA
+     fill(K, A) = A IMPLIES K = hole
+
+   fill_eq_ctx: LEMMA
+     fill(K1, A) = fill(K2, A) IMPLIES K1 = K2
+
+   fill_eq: LEMMA
+     fill(K, A) = fill(K, B) IMPLIES A = B
+
 %A pure expression does not contain a pop or a reference expression
    pure?(A): RECURSIVE bool =
    (CASES A OF
