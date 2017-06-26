@@ -583,7 +583,7 @@ itranslation: THEORY
             translate_vars
 
     reconstruct_state_tv_next_pc: LEMMA
-      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack), (S2 : ireduction.Stack | S2`length = S`length),
                 (pc: below(translate_length(A))),
                 (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
         NOT translate_extract_decl_begin(A, pc) AND NOT translate_extract_decl_end(A, pc)
@@ -591,7 +591,7 @@ itranslation: THEORY
         AND translate_next_pc(A, pc) < translate_length(A)
         IMPLIES
           reconstruct_state(A, translate_vars, S, translate_next_pc(A, pc), rv)`3 =
-            reconstruct_state(A, translate_vars, S, pc, rv)`3
+            reconstruct_state(A, translate_vars, S2, pc, rv)`3
 
     avar_assign_vindex_bound: LEMMA
       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (rv: (ivar?)),
@@ -677,6 +677,18 @@ itranslation: THEORY
           pc = translate_length(A) OR translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
           j < popDepth(fct_reconstruct_state(A, S, arity, fdepth, pc)`2) + popDepth(fct_reconstruct_state(A, S, arity, fdepth, pc)`1) IMPLIES
             fct_reconstruct_state(A, S, arity, fdepth, pc)`3(j) < fdepth
+
+    fct_reconstruct_state_tv_next_pc: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack),
+          (S2 : ireduction.Stack | S2`length = S`length),
+          (arity : nat), (fdepth : posnat | fdepth <= S`length),
+          (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        NOT translate_extract_decl_begin(A, pc) AND
+        NOT translate_extract_decl_end(A, pc) AND
+        NOT translate_extract_skip(A, pc)
+        IMPLIES
+          fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`3 =
+            fct_reconstruct_state(A, S2, arity, fdepth, pc)`3
 
     fct_reconstruct_state_next_pc: LEMMA
       FORALL (A: (pure?), (S : ireduction.Stack),
