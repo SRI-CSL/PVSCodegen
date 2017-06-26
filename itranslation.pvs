@@ -626,7 +626,6 @@ itranslation: THEORY
         reconstruct_state(A, translate_vars, S, pc, rv)`2 =
           reconstruct_state(A, translate_vars, S2, pc, rv)`2
  
-
     reconstruct_state_next_pc: LEMMA
       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
                 (S2 : ireduction.Stack | S2`length = S`length),
@@ -640,6 +639,39 @@ itranslation: THEORY
             reconstruct_state(A, translate_vars, S, translate_next_pc(A, pc), rv)`1) =
               fill(reconstruct_state(A, translate_vars, S2, pc, rv)`2,
                 ival_to_val(endi(S, vindex(avar(translate_extract_assign(A, rv, translate_vars, pc))))))
+
+    decl_begin_next_pc: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_decl_begin(A, pc) IMPLIES
+          translate_next_pc(A, pc) < translate_length(A)
+
+    translate_stack_size_at_next_pc_decl_begin: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_decl_begin(A, pc) IMPLIES
+          translate_stack_size_at(A, translate_next_pc(A, pc)) =
+            translate_stack_size_at(A, pc) + 1
+
+    reconstruct_state_decl_begin_letexpr: LEMMA
+       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_decl_begin(A, pc) IMPLIES
+          letexpr?(reconstruct_state(A, translate_vars, S, pc, rv)`1)
+
+    reconstruct_state_next_pc_decl_begin: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (S2 : ireduction.Stack | S2`length = S`length + 1),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_decl_begin(A, pc)
+        IMPLIES
+          reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`1 =
+            letrhs(reconstruct_state(A, translate_vars, S, pc, rv)`1) AND
+          reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`2 =
+            compose(reconstruct_state(A, translate_vars, S, pc, rv)`2,
+              letc(hole, body(reconstruct_state(A, translate_vars, S, pc, rv)`1))) AND
+          reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`3 =
+            shift(reconstruct_state(A, translate_vars, S, pc, rv)`3)
 
     npopcs(n: nat, K): RECURSIVE IContext =
       IF n = 0 THEN K ELSE popc(npopcs(n - 1, K)) ENDIF
