@@ -648,6 +648,12 @@ itranslation: THEORY
     npopcs_popDepth: LEMMA
       popDepth(npopcs(k, K)) = k + popDepth(K)
 
+    npopcs_fill: LEMMA
+      fill(npopcs(k, K), A) = npops(k, fill(K, A))
+
+    npops_end: LEMMA
+      npops(k, pop(A)) = npops(k + 1, A)
+
     fct_reconstruct_state(A: (pure?), (S : ireduction.Stack), (arity: nat),
         (fdepth: posnat | fdepth <= S`length),
         (pc: upto(translate_length(A)) |
@@ -671,6 +677,21 @@ itranslation: THEORY
           pc = translate_length(A) OR translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
           j < popDepth(fct_reconstruct_state(A, S, arity, fdepth, pc)`2) + popDepth(fct_reconstruct_state(A, S, arity, fdepth, pc)`1) IMPLIES
             fct_reconstruct_state(A, S, arity, fdepth, pc)`3(j) < fdepth
+
+    fct_reconstruct_state_next_pc: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack),
+          (S2 : ireduction.Stack | S2`length = S`length),
+          (arity : nat), (fdepth : posnat | fdepth <= S`length),
+          (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_is_assign(A, pc) AND
+        NOT ilookup?(aexpr(translate_extract_assign(A,
+          ivar(arity, FALSE), (LAMBDA j: j), pc)))
+        IMPLIES
+          fill(fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`2,
+            fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`1) =
+              fill(fct_reconstruct_state(A, S2, arity, fdepth, pc)`2,
+                ival_to_val(endi(S, vindex(avar(translate_extract_assign(A,
+                  ivar(arity, FALSE), (LAMBDA j: j), pc))))))
 
     call_reconstruct_state(A: (pure?), (translate_vars: [nat -> nat]), f: nat,
             (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))
@@ -922,7 +943,52 @@ itranslation: THEORY
             endi(trS2`state`stack, i + popDepth(A2) + popDepth(K2)))
         IMPLIES
           redex_matches(D, trS2, iS2)
-         
+
+    fill_fill_eq: LEMMA
+      fill(K1, A) = fill(K2, B) IMPLIES
+        ((EXISTS K: K1 = compose(K2, K) AND B = fill(K, A)) OR
+         (EXISTS K: NOT K = hole AND K2 = compose(K1, K) AND A = fill(K, B)))
+
+    fill_fill_eq2: LEMMA
+      fill(K1, A) = fill(K2, B) AND NOT letexpr?(A) AND NOT pop?(A) IMPLIES
+        (EXISTS K: K1 = compose(K2, K) AND B = fill(K, A))
+
+    redex_stillmatch_assign: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)),
+                 (trS2 | trS2`def_types = trS`def_types),
+                 (iS, iS2: {iS | iS`defs = translate_definitions(D, trS`def_types) AND
+                            iS`callstack`length > 0}),
+                 (fv1, fv2: stack_frame(iS`defs)),
+                 (A1: IExpression), (K1: IContext), (tv1: [nat -> nat])):
+        trS`state`context = trS2`state`context AND
+        pop(iS`callstack) = pop(iS2`callstack) AND
+        fv1 = endi(iS`callstack, 0) AND
+        fv2 = endi(iS2`callstack, 0) AND
+        fv1`ffct = fv2`ffct AND
+        fv1`fpc < translate_length(D`seq(fv1`ffct)`body) AND
+        fv2`fpc = translate_next_pc(D`seq(fv1`ffct)`body, fv1`fpc) AND
+        fv1`fdepth = fv2`fdepth AND
+        translate_extract_is_assign(D`seq(fv1`ffct)`body, fv1`fpc) AND
+        NOT ilookup?(aexpr(translate_extract_assign(D`seq(fv1`ffct)`body,
+          ivar(D`seq(fv1`ffct)`arity, FALSE), (LAMBDA j: j), fv1`fpc))) AND
+        redex_matches(D, trS, iS) AND
+        (A1, K1, tv1) = fct_reconstruct_state(D`seq(fv1`ffct)`body, iS`stack,
+          D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc) AND
+        A1 = trS`state`redex AND
+        popDepth(trS`state`redex) = 0 AND popDepth(trS2`state`redex) = 0 AND
+        trS`state`stack`length = trS2`state`stack`length AND
+        trS2`state`redex = ival_to_val(endi(iS2`stack,
+          vindex(avar(translate_extract_assign(D`seq(fv1`ffct)`body,
+            ivar(D`seq(fv1`ffct)`arity, FALSE), (LAMBDA j: j), fv1`fpc))))) AND
+        (FORALL (i: below(popDepth(K1))):
+          endi(iS2`stack, tv1(i)) = val_to_ival(endi(trS2`state`stack, i))) AND
+        (FORALL (i: below(iS`stack`length - fv1`fdepth)):
+          endi(iS`stack, i + fv1`fdepth) = endi(iS2`stack, i + fv1`fdepth)) AND
+        (FORALL (i: below(trS`state`stack`length - popDepth(K1))):
+          endi(trS`state`stack, i + popDepth(K1)) =
+            endi(trS2`state`stack, i + popDepth(K1)))
+        IMPLIES
+          redex_matches(D, trS2, iS2)
 
     state_matches(D, (trS | defs_well_typed(D, trS`def_types)), iS): bool =
       iS`defs = translate_definitions(D, trS`def_types) AND
