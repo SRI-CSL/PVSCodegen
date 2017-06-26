@@ -4,7 +4,7 @@ itranslation: THEORY
     IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, iareduction, typed_reduction, typed_rreduction, typed_reduction_props, ireduction
 
     A, B, C: VAR IExpression
-    K, K1, K2: VAR IContext
+    K, K1, K2, K3: VAR IContext
     i, j, k: VAR nat
     x, y, z: VAR (variable?)
     trS, trS1, trS2: VAR typed_rstate
