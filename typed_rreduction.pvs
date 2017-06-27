@@ -354,5 +354,8 @@ typed_rreduction: THEORY
         ENDIF
       ENDIF
 
+    typed_iareduce_def_types: LEMMA
+      FORALL (tS | NOT tS`state`error AND defs_well_typed(D, tS`def_types)):
+        typed_iareduce(D)(tS)`def_types = tS`def_types
 
   END typed_rreduction

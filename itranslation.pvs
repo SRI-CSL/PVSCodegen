@@ -1238,6 +1238,6 @@ itranslation: THEORY
         NOT trS`state`error AND NOT iS`error AND
         state_matches(D, trS, iS) AND iS`callstack`length > 0 AND skipRedex?(iS)
         IMPLIES
-          state_matches(D, typed_reduce(D)(trS), skipReduce(iS))
+          state_matches(D, typed_iareduce(D)(trS), skipReduce(iS))
 
 END itranslation
