@@ -331,6 +331,15 @@ itranslation: THEORY
       ENDCASES
     MEASURE (A :: IExpression) BY <<
 
+    translate_extract_decl_begin_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: below(translate_length(A))):
+      (idecl?(extract_stat(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc)`1) AND
+      extract_stat(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc)`2 = 0) =
+        translate_extract_decl_begin(A, pc)
+
     translate_extract_decl_end(A: (pure?), pc: below(translate_length(A))): RECURSIVE bool =
       CASES A OF
         letexpr(B, C):
@@ -683,6 +692,9 @@ itranslation: THEORY
     npopcs_fill: LEMMA
       fill(npopcs(k, K), A) = npops(k, fill(K, A))
 
+    npopcs_compose: LEMMA
+      compose(npopcs(k, K1), K2) = npopcs(k, compose(K1, K2))
+
     npops_end: LEMMA
       npops(k, pop(A)) = npops(k + 1, A)
 
@@ -736,6 +748,22 @@ itranslation: THEORY
               fill(fct_reconstruct_state(A, S2, arity, fdepth, pc)`2,
                 ival_to_val(endi(S, vindex(avar(translate_extract_assign(A,
                   ivar(arity, FALSE), (LAMBDA j: j), pc))))))
+
+    fct_reconstruct_state_next_pc_decl_begin: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack),
+                (S2 : ireduction.Stack | S2`length = S`length + 1),
+                (arity : nat), (fdepth : posnat | fdepth <= S`length),
+                (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_decl_begin(A, pc)
+        IMPLIES
+          fct_reconstruct_state(A, S2, arity, fdepth + 1, translate_next_pc(A, pc))`1 =
+            letrhs(fct_reconstruct_state(A, S, arity, fdepth, pc)`1) AND
+          fct_reconstruct_state(A, S2, arity, fdepth + 1, translate_next_pc(A, pc))`2 =
+            compose(fct_reconstruct_state(A, S, arity, fdepth, pc)`2,
+              letc(hole, body(fct_reconstruct_state(A, S, arity, fdepth, pc)`1))) AND
+          fct_reconstruct_state(A, S2, arity, fdepth + 1, translate_next_pc(A, pc))`3 =
+            shift(fct_reconstruct_state(A, S, arity, fdepth, pc)`3)
+
 
     call_reconstruct_state(A: (pure?), (translate_vars: [nat -> nat]), f: nat,
             (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))
