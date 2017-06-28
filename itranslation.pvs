@@ -400,6 +400,14 @@ itranslation: THEORY
       ENDCASES
     MEASURE (A :: IExpression) BY <<
 
+    translate_extract_skip_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: below(translate_length(A))):
+      iskip?(extract_stat(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc)`1) =
+        translate_extract_skip(A, pc)
+
     translate_extract_decl_begin_skip: LEMMA
       FORALL (A: (pure?), pc: below(translate_length(A))):
         translate_extract_decl_begin(A, pc) IMPLIES NOT translate_extract_skip(A, pc)
@@ -1227,11 +1235,77 @@ itranslation: THEORY
         redex_matches(D, trS, iS)
       ENDIF
 
+    ival_to_val_val_to_ival: LEMMA
+      FORALL (u: (value?)):
+        ival_to_val(val_to_ival(u)) = u
+    AUTO_REWRITE+ ival_to_val_val_to_ival
+
+    ival_to_val_value: LEMMA
+      FORALL (u: ivalue):
+        NOT vundef?(u) IMPLIES value?(ival_to_val(u))
+
+    ival_to_val_rvalue: LEMMA
+      FORALL (u: ivalue):
+        value?(ival_to_val(u)) IMPLIES NOT vundef?(u)
+
+    val_to_ival_ival_to_val: LEMMA
+      FORALL (u: ivalue):
+        NOT vundef?(u) IMPLIES
+          val_to_ival(ival_to_val(u)) = u
+    AUTO_REWRITE+ val_to_ival_ival_to_val
+
+    redex_matches_fill: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), trS2, iS):
+        trS2`def_types = trS`def_types AND
+        fill(trS2`state`context, trS2`state`redex) = fill(trS`state`context, trS`state`redex) AND
+        trS2`state`stack = trS`state`stack IMPLIES
+          redex_matches(D, trS2, iS) = redex_matches(D, trS, iS)
+
+    state_matches_fill: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), trS2, iS):
+        trS2`def_types = trS`def_types AND
+        fill(trS2`state`context, trS2`state`redex) = fill(trS`state`context, trS`state`redex) AND
+        trS2`state`domain = trS`state`domain AND
+        trS2`state`store = trS`state`store AND
+        trS2`state`stack = trS`state`stack AND
+        trS2`state`count = trS`state`count IMPLIES
+          state_matches(D, trS2, iS) = state_matches(D, trS, iS)
+
+    redex_matches_to_topstate: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        redex_matches(D, typed_to_topstate(trS), iS) = redex_matches(D, trS, iS)
+
+    redex_matches_make_redex: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        trS`state`context = hole AND NOT value?(trS`state`redex) IMPLIES
+          redex_matches(D, make_redex_typed(trS), iS) = redex_matches(D, trS, iS)
+
+    state_matches_to_topstate: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        state_matches(D, typed_to_topstate(trS), iS) = state_matches(D, trS, iS)
+
+    state_matches_make_redex: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        trS`state`context = hole AND NOT value?(trS`state`redex) IMPLIES
+          state_matches(D, make_redex_typed(trS), iS) = state_matches(D, trS, iS)
+
     pushReduce_match: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
         NOT trS`state`error AND NOT iS`error AND
         state_matches(D, trS, iS) AND iS`callstack`length > 0 AND pushRedex?(iS) IMPLIES
           state_matches(D, trS, pushReduce(iS))
+
+    skipRedex_pc: LEMMA
+      iS`defs = translate_definitions(D, tD) AND
+      iS`callstack`length > 0 AND
+      skipRedex?(iS) IMPLIES
+        endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+
+    skipRedex_skip: LEMMA
+      iS`defs = translate_definitions(D, tD) AND
+      iS`callstack`length > 0 AND
+      skipRedex?(iS) IMPLIES
+        translate_extract_skip(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
 
     skipReduce_match: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
