@@ -644,6 +644,11 @@ itranslation: THEORY
           translate_stack_size_at(A, translate_next_pc(A, pc)) =
             translate_stack_size_at(A, pc) + 1
 
+    translate_stack_size_at_next_pc_decl_end: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_decl_end(A, pc) IMPLIES
+          translate_stack_size_at(A, translate_next_pc(A, pc)) = translate_stack_size_at(A, pc) - 1
+
     skip_next_pc: LEMMA
       FORALL (A: (pure?), pc: below(translate_length(A))):
         translate_extract_skip(A, pc) IMPLIES
@@ -743,6 +748,21 @@ itranslation: THEORY
         translate_extract_skip(A, pc) IMPLIES
           translate_is_result_defined(A, S, translate_next_pc(A, pc), rv)
 
+    translate_is_result_defined_decl_end_overflow: LEMMA
+      FORALL (A: (pure?), S: ireduction.Stack, pc: below(translate_length(A)),
+        (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):    
+        translate_extract_decl_end(A, pc) AND
+        translate_next_pc(A, pc) = translate_length(A) IMPLIES
+        translate_is_result_defined(A, S, pc, rv) = NOT vundef?(endi(S, vindex(rv) + 1))
+
+    translate_is_result_defined_decl_end_next_pc: LEMMA
+      FORALL (A: (pure?), S: ireduction.Stack, pc: below(translate_length(A)),
+        (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):    
+        translate_extract_decl_end(A, pc) AND
+        translate_next_pc(A, pc) < translate_length(A) AND
+        translate_is_result_defined(A, S, pc, rv) IMPLIES
+          translate_is_result_defined(A, pop(S), translate_next_pc(A, pc), rv)
+
     reconstruct_state_assign_hole_pc_overflow: LEMMA
       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
           (pc: below(translate_length(A))),
@@ -832,17 +852,20 @@ itranslation: THEORY
           reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`3 =
             (LAMBDA i: IF i = 0 THEN 0 ELSE reconstruct_state(A, translate_vars, S, pc, rv)`3(i - 1) ENDIF)
 
-    translate_stack_size_at_next_pc_decl_end: LEMMA
-      FORALL (A: (pure?), pc: below(translate_length(A))):
-        translate_extract_decl_end(A, pc) IMPLIES
-          translate_stack_size_at(A, translate_next_pc(A, pc)) = translate_stack_size_at(A, pc) - 1
-
     reconstruct_state_decl_end_pop: LEMMA
       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
           (pc: below(translate_length(A))),
           (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
         translate_extract_decl_end(A, pc) IMPLIES
           pop?(reconstruct_state(A, translate_vars, S, pc, rv)`1)
+
+    reconstruct_state_decl_end_pop_redex: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_decl_end(A, pc) AND
+        translate_is_result_defined(A, S, pc, rv) IMPLIES
+          popRedex?(reconstruct_state(A, translate_vars, S, pc, rv)`1)
 
     reconstruct_state_next_pc_decl_end_overflow: LEMMA
       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
@@ -919,6 +942,14 @@ itranslation: THEORY
           NOT vundef?(endi(S,
             vindex(avar(translate_extract_assign(A, ivar(arity, FALSE), (LAMBDA j: j), pc)))))
 
+
+    fct_is_result_defined_decl_end_next_pc: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_decl_end(A, pc) AND
+        fct_is_result_defined(A, S, arity, fdepth, pc) IMPLIES
+          fct_is_result_defined(A, pop(S), arity, fdepth - 1, translate_next_pc(A, pc))
 
     fct_reconstruct_state_tv: LEMMA
       FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
@@ -1392,5 +1423,26 @@ itranslation: THEORY
         state_matches(D, trS, iS) AND iS`callstack`length > 0 AND skipRedex?(iS)
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), skipReduce(iS))
+
+    popRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        popRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+
+    popRedex_decl_end: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        popRedex?(iS) IMPLIES
+          translate_extract_decl_end(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
+
+    popReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND popRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), popReduce(iS))
 
 END itranslation
