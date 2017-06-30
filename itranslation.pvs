@@ -1362,7 +1362,7 @@ itranslation: THEORY
     AUTO_REWRITE+ val_to_ival_ival_to_val
 
     redex_matches_fill: LEMMA
-      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), trS2, iS):
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), trS2, (iS | iS`defs = translate_definitions(D, trS`def_types) AND iS`callstack`length > 0)):
         trS2`def_types = trS`def_types AND
         fill(trS2`state`context, trS2`state`redex) = fill(trS`state`context, trS`state`redex) AND
         trS2`state`stack = trS`state`stack IMPLIES
@@ -1380,11 +1380,11 @@ itranslation: THEORY
           state_matches(D, trS2, iS) = state_matches(D, trS, iS)
 
     redex_matches_to_topstate: LEMMA
-      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), (iS | iS`callstack`length > 0)):
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), (iS | iS`defs = translate_definitions(D, trS`def_types) AND iS`callstack`length > 0)):
         redex_matches(D, typed_to_topstate(trS), iS) = redex_matches(D, trS, iS)
 
     redex_matches_make_redex: LEMMA
-      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), (iS | iS`callstack`length > 0)):
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), (iS | iS`defs = translate_definitions(D, trS`def_types) AND iS`callstack`length > 0)):
         trS`state`context = hole AND NOT value?(trS`state`redex) IMPLIES
           redex_matches(D, make_redex_typed(trS), iS) = redex_matches(D, trS, iS)
 
