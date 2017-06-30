@@ -1445,4 +1445,12 @@ itranslation: THEORY
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), popReduce(iS))
 
+    returnReduce_match1: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND returnRedex?(iS) AND
+        endi(iS`callstack, 0)`fdepth > 1
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), returnReduce(iS))      
+
 END itranslation
