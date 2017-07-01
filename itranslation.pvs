@@ -1453,4 +1453,61 @@ itranslation: THEORY
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), returnReduce(iS))      
 
+    returnReduce_match2: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length = 1 AND returnRedex?(iS) AND
+        endi(iS`callstack, 0)`fdepth = 1
+        IMPLIES
+          state_matches(D, trS, returnReduce(iS))
+
+    reconstruct_state_extract_call: LEMMA
+       FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length),
+          (f: nat | translate_is_fun_call_at(A, pc, f))):
+        reconstruct_state(A, translate_vars, S, pc, rv)`2 =
+          call_reconstruct_state(A, translate_vars, f, pc)`1 AND
+        reconstruct_state(A, translate_vars, S, pc, rv)`3 =
+          call_reconstruct_state(A, translate_vars, f, pc)`2
+
+    extract_call_context_pop: LEMMA
+      FORALL (D, (tD | defs_well_typed(D, tD)),
+       (iS, iS2: {iS | iS`callstack`length > 0 AND
+               iS`defs = translate_definitions(D, tD)})):
+        iS2`callstack = pop(iS`callstack) IMPLIES
+          extract_call_context(D, tD, iS) =
+            compose(extract_call_context(D, tD, iS2),
+              npopcs(D`seq(endi(iS2`callstack, 0)`ffct)`arity,
+                call_reconstruct_state(D`seq(endi(iS2`callstack, 0)`ffct)`body,
+                  (LAMBDA j: j), endi(iS`callstack, 0)`ffct,
+                  endi(iS2`callstack, 0)`fpc)`1))
+
+    extract_call_tv_pop: LEMMA
+      FORALL (D, (tD | defs_well_typed(D, tD)),
+        (iS, iS2: {iS | iS`callstack`length > 0 AND
+              iS`defs = translate_definitions(D, tD)})):
+      iS2`callstack = pop(iS`callstack) IMPLIES
+        extract_call_tv(D, tD, iS) =
+            LET (K2, tv2) =
+              call_reconstruct_state(D`seq(endi(iS2`callstack, 0)`ffct)`body,
+                (LAMBDA j: j), endi(iS`callstack, 0)`ffct,
+                endi(iS2`callstack, 0)`fpc) IN
+            compose_translate_vars(tv2, extract_call_tv(D, tD, iS2),
+              popDepth(K2) + D`seq(endi(iS2`callstack, 0)`ffct)`arity,
+              endi(iS2`callstack, 0)`fdepth)
+
+    translate_is_fun_call_at_assign: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A)), f: nat):
+        translate_is_fun_call_at(A, pc, f) IMPLIES
+          translate_extract_is_assign(A, pc)
+
+    returnReduce_match3: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 1 AND returnRedex?(iS) AND
+        endi(iS`callstack, 0)`fdepth = 1
+        IMPLIES
+          state_matches(D, trS, returnReduce(iS))
+
 END itranslation
