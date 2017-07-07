@@ -57,13 +57,8 @@ itranslation: THEORY
                               ivar(translate_vars(index(lhs)), marked(lhs)),
                               ivar(translate_vars(index(rhs)), marked(rhs)))),
         lookup(arr, pos):
-          LET s = iassign(rv, ilookup(ivar(translate_vars(index(arr)), FALSE),
-                                      ivar(translate_vars(index(pos)), marked(pos)))) IN
-          IF marked(arr) THEN
-            iblock(s, irelease(ivar(translate_vars(index(arr)), TRUE)))
-          ELSE
-            s
-          ENDIF,
+          iassign(rv, ilookup(ivar(translate_vars(index(arr)), marked(arr)),
+                                      ivar(translate_vars(index(pos)), marked(pos)))),
         newint(n): iassign(rv, inewint(n)),
         newref(n): iassign(rv, inewref(n)),
         release(x, B):
@@ -135,8 +130,7 @@ itranslation: THEORY
         ift(x, B, C):
           1 + translate_length(B) + translate_length(C),
         update(target, lhs, rhs): 1,
-        lookup(arr, pos):
-          IF marked(arr) THEN 2 ELSE 1 ENDIF,
+        lookup(arr, pos): 1,
         newint(n): 1,
         newref(n): 1,
         release(x, B): 1 + translate_length(B)
@@ -500,7 +494,7 @@ itranslation: THEORY
                               ivar(translate_vars(index(lhs)), marked(lhs)),
                               ivar(translate_vars(index(rhs)), marked(rhs)))),
         lookup(arr, pos):
-          iassign(rv, ilookup(ivar(translate_vars(index(arr)), FALSE),
+          iassign(rv, ilookup(ivar(translate_vars(index(arr)), marked(arr)),
                                       ivar(translate_vars(index(pos)), marked(pos)))),
         newint(n): iassign(rv, inewint(n)),
         newref(n): iassign(rv, inewref(n))
@@ -554,12 +548,6 @@ itranslation: THEORY
             reconstruct_state(B,translate_vars,S,pc-1,rv)
           ELSE
             reconstruct_state(C,translate_vars,S,pc-1-lb1,rv)
-          ENDIF,
-        lookup(x, y):
-          IF pc = 0 THEN
-            (A,hole,translate_vars)
-          ELSE
-            (release(x, ival_to_val(endi(S, vindex(rv)))), hole, translate_vars)
           ENDIF,
         release(x, B):
           IF pc = 0 THEN
@@ -786,7 +774,6 @@ itranslation: THEORY
                 (pc: below(translate_length(A))),
                 (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
         translate_extract_is_assign(A, pc) AND
-        NOT ilookup?(aexpr(translate_extract_assign(A, rv, translate_vars, pc))) AND
         translate_next_pc(A, pc) < translate_length(A)
         IMPLIES
           fill(reconstruct_state(A, translate_vars, S, translate_next_pc(A, pc), rv)`2,
@@ -976,10 +963,7 @@ itranslation: THEORY
           (S2 : ireduction.Stack | S2`length = S`length),
           (arity : nat), (fdepth : posnat | fdepth <= S`length),
           (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
-        translate_extract_is_assign(A, pc) AND
-        NOT ilookup?(aexpr(translate_extract_assign(A,
-          ivar(arity, FALSE), (LAMBDA j: j), pc)))
-        IMPLIES
+        translate_extract_is_assign(A, pc) IMPLIES
           fill(fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`2,
             fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`1) =
               fill(fct_reconstruct_state(A, S2, arity, fdepth, pc)`2,
@@ -1307,8 +1291,6 @@ itranslation: THEORY
         fv2`fpc = translate_next_pc(D`seq(fv1`ffct)`body, fv1`fpc) AND
         fv1`fdepth = fv2`fdepth AND
         translate_extract_is_assign(D`seq(fv1`ffct)`body, fv1`fpc) AND
-        NOT ilookup?(aexpr(translate_extract_assign(D`seq(fv1`ffct)`body,
-          ivar(D`seq(fv1`ffct)`arity, FALSE), (LAMBDA j: j), fv1`fpc))) AND
         redex_matches(D, trS, iS) AND
         (A1, K1, tv1) = fct_reconstruct_state(D`seq(fv1`ffct)`body, iS`stack,
           D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc) AND
@@ -1471,36 +1453,61 @@ itranslation: THEORY
         reconstruct_state(A, translate_vars, S, pc, rv)`3 =
           call_reconstruct_state(A, translate_vars, f, pc)`2
 
+    translate_extract_assign_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: below(translate_length(A))):
+      translate_extract_is_assign(A, pc) IMPLIES
+        extract_stat(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc)`1 =
+          translate_extract_assign(A, rv, translate_vars, pc)
+
     extract_call_context_pop: LEMMA
       FORALL (D, (tD | defs_well_typed(D, tD)),
        (iS, iS2: {iS | iS`callstack`length > 0 AND
                iS`defs = translate_definitions(D, tD)})):
-        iS2`callstack = pop(iS`callstack) IMPLIES
+        iS`callstack`length > 1 AND
+        endi(iS`callstack, 1)`ffct = endi(iS2`callstack, 0)`ffct AND
+        pop(iS2`callstack) = pop(pop(iS`callstack)) IMPLIES
           extract_call_context(D, tD, iS) =
             compose(extract_call_context(D, tD, iS2),
-              npopcs(D`seq(endi(iS2`callstack, 0)`ffct)`arity,
-                call_reconstruct_state(D`seq(endi(iS2`callstack, 0)`ffct)`body,
+              npopcs(D`seq(endi(iS`callstack, 1)`ffct)`arity,
+                call_reconstruct_state(D`seq(endi(iS`callstack, 1)`ffct)`body,
                   (LAMBDA j: j), endi(iS`callstack, 0)`ffct,
-                  endi(iS2`callstack, 0)`fpc)`1))
+                  endi(iS`callstack, 1)`fpc)`1))
 
     extract_call_tv_pop: LEMMA
       FORALL (D, (tD | defs_well_typed(D, tD)),
         (iS, iS2: {iS | iS`callstack`length > 0 AND
               iS`defs = translate_definitions(D, tD)})):
-      iS2`callstack = pop(iS`callstack) IMPLIES
+      iS`callstack`length > 1 AND
+      endi(iS`callstack, 1)`ffct = endi(iS2`callstack, 0)`ffct AND
+      pop(iS2`callstack) = pop(pop(iS`callstack)) IMPLIES
         extract_call_tv(D, tD, iS) =
             LET (K2, tv2) =
-              call_reconstruct_state(D`seq(endi(iS2`callstack, 0)`ffct)`body,
+              call_reconstruct_state(D`seq(endi(iS`callstack, 1)`ffct)`body,
                 (LAMBDA j: j), endi(iS`callstack, 0)`ffct,
-                endi(iS2`callstack, 0)`fpc) IN
+                endi(iS`callstack, 1)`fpc) IN
             compose_translate_vars(tv2, extract_call_tv(D, tD, iS2),
-              popDepth(K2) + D`seq(endi(iS2`callstack, 0)`ffct)`arity,
-              endi(iS2`callstack, 0)`fdepth)
+              popDepth(K2) + D`seq(endi(iS`callstack, 1)`ffct)`arity,
+              endi(iS`callstack, 1)`fdepth)
 
     translate_is_fun_call_at_assign: LEMMA
       FORALL (A: (pure?), pc: below(translate_length(A)), f: nat):
         translate_is_fun_call_at(A, pc, f) IMPLIES
           translate_extract_is_assign(A, pc)
+
+    return_pc_end: LEMMA
+      FORALL (D, (tD | defs_well_typed(D, tD)), iS):
+        iS`defs = translate_definitions(D, tD) AND iS`callstack`length > 1 IMPLIES
+          endi(iS`callstack, 1)`fpc <
+            translate_length(D`seq(endi(iS`callstack, 1)`ffct)`body)
+
+    return_pc_assign: LEMMA
+      FORALL (D, (tD | defs_well_typed(D, tD)), iS):
+        iS`defs = translate_definitions(D, tD) AND iS`callstack`length > 1 IMPLIES
+          translate_extract_is_assign(D`seq(endi(iS`callstack, 1)`ffct)`body,
+            endi(iS`callstack, 1)`fpc)
 
     returnReduce_match3: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
