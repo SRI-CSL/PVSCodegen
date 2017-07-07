@@ -1509,6 +1509,45 @@ itranslation: THEORY
           translate_extract_is_assign(D`seq(endi(iS`callstack, 1)`ffct)`body,
             endi(iS`callstack, 1)`fpc)
 
+    reconstruct_state_assign_popDepth: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_is_assign(A, pc) IMPLIES
+          popDepth(reconstruct_state(A, translate_vars, S, pc, rv)`1) = 0
+
+    avar_assign_vindex_bound2: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?))):
+        translate_extract_is_assign(A, pc) IMPLIES
+          vindex(avar(translate_extract_assign(A, rv, translate_vars, pc))) =
+            vindex(rv) + translate_stack_size_at(A, pc) OR
+          vindex(avar(translate_extract_assign(A, rv, translate_vars, pc))) <
+            translate_stack_size_at(A, pc)
+
+    avar_assign_neq: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length),
+                (i: nat)):
+        translate_extract_is_assign(A, pc) AND
+        i < popDepth(reconstruct_state(A, translate_vars, S, pc, rv)`2) IMPLIES
+          NOT reconstruct_state(A, translate_vars, S, pc, rv)`3(i) =
+            vindex(avar(translate_extract_assign(A, rv, translate_vars, pc)))
+
+    avar_assign_neq_next_pc: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (arity: nat), (fdepth : posnat | fdepth <= S`length),
+                (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth),
+              (i: nat)):
+        translate_extract_is_assign(A, pc) AND
+        i < popDepth(fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`1) +
+            popDepth(fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`2)
+        IMPLIES
+        NOT fct_reconstruct_state(A, S, arity, fdepth, translate_next_pc(A, pc))`3(i) =
+          vindex(avar(translate_extract_assign(A, ivar(arity, FALSE), (LAMBDA j: j), pc)))
+
     returnReduce_match3: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
         NOT trS`state`error AND NOT iS`error AND
