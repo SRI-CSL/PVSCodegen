@@ -132,7 +132,21 @@ iareduction: THEORY
     iapplyReduce_ndr: JUDGEMENT
       iapplyReduce(D)(grS | noDanglingRefs?(grS) AND applyRedex?(grS`redex))
         HAS_TYPE (noDanglingRefs?)
-      
+
+    aifReduce(D)(grS | pureIftRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
+      IF marked(condition(grS`redex)) THEN
+        releaseReduce(D)(ifReduce(D)(grS))
+      ELSE
+        ifReduce(D)(grS)
+      ENDIF
+
+    alookupReduce(D)(grS | lookupRedex?(grS`redex) AND noDanglingRefs?(grS)): rstate =
+      IF marked(arrayvalue(grS`redex)) AND NOT lookupReduce(D)(grS)`error THEN
+        releaseReduce(D)(lookupReduce(D)(grS))
+      ELSE
+        lookupReduce(D)(grS)
+      ENDIF
+
     iareduce(D)(grS | noDanglingRefs?(grS)): rstate =
       LET t = to_topstate(grS) IN
       IF value?(t`redex) THEN
@@ -146,11 +160,11 @@ iareduction: THEORY
         ELSIF applyRedex?(nS`redex) THEN
           iapplyReduce(D)(nS)
         ELSIF pureIftRedex?(nS`redex) THEN
-          ifReduce(D)(nS)
+          aifReduce(D)(nS)
         ELSIF updateRedex?(nS`redex) THEN
           updateReduce(D)(nS)
         ELSIF lookupRedex?(nS`redex) THEN
-          lookupReduce(D)(nS)
+          alookupReduce(D)(nS)
         ELSIF newintRedex?(nS`redex) THEN
           newintReduce(D)(nS)
         ELSIF newrefRedex?(nS`redex) THEN
