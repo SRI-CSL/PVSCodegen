@@ -1782,5 +1782,142 @@ itranslation: THEORY
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), ifReduce(iS))
 
+    stat_is_assign?(A: IExpression): boolean =
+      NOT letexpr?(A) AND NOT release?(A) AND NOT ift?(A) AND NOT pop?(A) AND NOT ref?(A)
+
+    translate_statement_assign(A: (stat_is_assign?), (translate_vars: [nat -> nat])): iexpr =
+      CASES A OF
+        variable(j, b): ivar(translate_vars(j), b),
+        constant(n): iconstant(n),
+        nil: inil,
+        application(f, args):
+          icall(f, map(LAMBDA x: ivar(translate_vars(index(x)), marked(x)))(args)),
+        update(target, lhs, rhs):
+          iupdate(ivar(translate_vars(index(target)), marked(target)),
+                  ivar(translate_vars(index(lhs)), marked(lhs)),
+                  ivar(translate_vars(index(rhs)), marked(rhs))),
+        lookup(arr, pos):
+          ilookup(ivar(translate_vars(index(arr)), marked(arr)),
+                  ivar(translate_vars(index(pos)), marked(pos))),
+        newint(n): inewint(n),
+        newref(n): inewref(n)
+      ENDCASES
+
+    reconstruct_state_assign_aexpr: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_is_assign(A, pc) IMPLIES
+          stat_is_assign?(reconstruct_state(A, translate_vars, S, pc, rv)`1) AND
+          aexpr(translate_extract_assign(A, rv, translate_vars, pc)) =
+            translate_statement_assign(reconstruct_state(A, translate_vars, S, pc, rv)`1,
+              reconstruct_state(A, translate_vars, S, pc, rv)`3)
+
+    fct_reconstruct_state_assign_aexpr: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_is_assign(A, pc) IMPLIES
+          stat_is_assign?(fct_reconstruct_state(A, S, arity, fdepth, pc)`1) AND
+          aexpr(translate_extract_assign(A, ivar(arity, FALSE), (LAMBDA j: j), pc)) =
+            translate_statement_assign(fct_reconstruct_state(A, S, arity, fdepth, pc)`1,
+              fct_reconstruct_state(A, S, arity, fdepth, pc)`3)
+
+    applicationRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        applicationRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+
+    applicationRedex_assign: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        applicationRedex?(iS) IMPLIES
+          translate_extract_is_assign(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
+
+    iapply_nstack_match: LEMMA
+      FORALL ((arity: nat), dom,
+              (S : finseq[(value?)] | every(IL.domainValue?(dom))(S)),
+              (S2 : ireduction.Stack),
+              (k : upto(S`length)),
+              (translate_vars: [nat -> nat] |
+                injective?(translate_vars) AND
+                FORALL i: i < k IMPLIES translate_vars(i) < S2`length AND
+                  endi(S2, translate_vars(i)) = val_to_ival(endi(S, i))),
+              (args: list[(variable?)] | length(args) = arity AND
+                      FORALL i: in_varlist(args)(i) IMPLIES i < k),
+              (args2: list[(ivar?)] | length(args2) = arity AND
+                (FORALL i: in_varlist(args2)(i) IMPLIES
+                  i < S2`length AND domainValue?(dom)(endi(S2, i))) AND
+                (FORALL (i: below(arity)):
+                  nth(args2, i) = ivar(translate_vars(index(nth(args, i))), marked(nth(args, i))))),
+              (str: reduction.Store(dom)), A,
+              (cnt: [i:(dom) -> {j|j=refcount(dom,str,S,A)(i)}]),
+              (cnt2: [(dom) -> int])
+              ) :
+         count_matches(dom, cnt, cnt2) IMPLIES
+           count_matches(dom, iareduction.iapply_nstack(arity, dom, S, args, str, A, cnt)`2, ireduction.iapply_nstack(arity, dom, S2, args2, cnt2)`2) AND
+           FORALL i: i < k + arity IMPLIES
+             endi(ireduction.iapply_nstack(arity, dom, S2, args2, cnt2)`1,
+               compose_translate_vars((LAMBDA i: i), translate_vars, arity, arity)(i)) =
+                 val_to_ival(endi(iareduction.iapply_nstack(arity, dom, S, args, str, A, cnt)`1, i))
+
+    reconstruct_state_tv_inj: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        injective?(translate_vars) IMPLIES
+          injective?(reconstruct_state(A, translate_vars, S, pc, rv)`3)
+
+    fct_reconstruct_state_tv_inj: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        injective?(fct_reconstruct_state(A, S, arity, fdepth, pc)`3)
+
+    call_reconstruct_state_tv_inj: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), f: nat,
+            (pc: upto(translate_length(A)) | translate_is_fun_call_at(A, pc, f))):
+        injective?(translate_vars) IMPLIES
+          injective?(call_reconstruct_state(A, translate_vars, f, pc)`2)
+
+    compose_translate_vars_inj: LEMMA
+      FORALL (tv1, tv2: [nat -> nat], pdepth, fdepth: nat):
+        injective?(tv1) AND injective?(tv2) AND
+          (FORALL i: i < pdepth IMPLIES tv1(i) < fdepth)
+          IMPLIES
+            injective?(compose_translate_vars(tv1, tv2, pdepth, fdepth))
+
+    compose_all_tv_inj: LEMMA
+      FORALL (l: finseq[[[nat -> nat], nat, nat]]):
+        (FORALL (i: below(l`length)):
+           injective?(l`seq(i)`1) AND
+           (FORALL j: j < l`seq(i)`2 IMPLIES l`seq(i)`1(j) < l`seq(i)`3))
+        IMPLIES
+          injective?(compose_all_tv(l))
+
+    extract_call_tv_inj: LEMMA
+      FORALL (D, (tD | defs_well_typed(D, tD)),
+                 (iS | iS`callstack`length > 0 AND
+                       iS`defs = translate_definitions(D, tD))):
+        injective?(extract_call_tv(D, tD, iS))
+
+    endi_add_zero[T: TYPE]: LEMMA
+      FORALL (x: T, l: finseq[T]):
+        endi(add(x, l), 0) = x
+
+    endi_add_tl[T: TYPE]: LEMMA
+      FORALL (x: T, l: finseq[T]):
+        i > 0 IMPLIES
+          endi(add(x, l), i) = endi(l, i - 1)
+
+    applicationReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND applicationRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), applicationReduce(iS))
 
 END itranslation
