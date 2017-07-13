@@ -21,6 +21,8 @@ itranslation: THEORY
                                       unmark(A) = A}
                        #]
 
+    me(A: (pure?)): (pure?) = mark(emptyset)(A)
+
     tdef: TYPE = [# return_type: nat, args_type: finseq[nat], body_type: typeinfo #]
     Defs: TYPE = finseq[Definition]
 
@@ -113,7 +115,7 @@ itranslation: THEORY
       (# length := D`length,
          seq := LAMBDA (i: below(D`length)):
            (# arity := D`seq(i)`arity,
-              body := translate_statement(D`seq(i)`body, ivar(D`seq(i)`arity, FALSE),
+              body := translate_statement(me(D`seq(i)`body), ivar(D`seq(i)`arity, FALSE),
                         tD`seq(i)`args_type, (LAMBDA j: 0), tD, tD`seq(i)`body_type,
                         (LAMBDA j: j))
             #)
@@ -1194,15 +1196,15 @@ itranslation: THEORY
       FORALL (D, (tD | defs_well_typed(D, tD)), iS):
         iS`defs = translate_definitions(D, tD) IMPLIES
           FORALL (i | i < iS`callstack`length - 1):
-            translate_is_fun_call_at(D`seq(iS`callstack`seq(i)`ffct)`body,
+            translate_is_fun_call_at(me(D`seq(iS`callstack`seq(i)`ffct)`body),
               iS`callstack`seq(i)`fpc, iS`callstack`seq(i + 1)`ffct)
 
     translate_defs_funcall2: LEMMA
       FORALL (D, (tD | defs_well_typed(D, tD)), iS):
         iS`defs = translate_definitions(D, tD) IMPLIES
           FORALL (i: below(iS`callstack`length - 1)):
-            iS`callstack`seq(i)`fpc <= translate_length(D`seq(iS`callstack`seq(i)`ffct)`body) AND
-            translate_is_fun_call_at(D`seq(iS`callstack`seq(i)`ffct)`body,
+            iS`callstack`seq(i)`fpc <= translate_length(me(D`seq(iS`callstack`seq(i)`ffct)`body)) AND
+            translate_is_fun_call_at(me(D`seq(iS`callstack`seq(i)`ffct)`body),
               iS`callstack`seq(i)`fpc, iS`callstack`seq(i + 1)`ffct)
 
     extract_call_context(D, (tD | defs_well_typed(D, tD)),
@@ -1212,7 +1214,7 @@ itranslation: THEORY
         length := iS`callstack`length - 1,
         seq := LAMBDA (i: below(iS`callstack`length - 1)):
           npopcs(D`seq(iS`callstack`seq(i)`ffct)`arity,
-            call_reconstruct_state(D`seq(iS`callstack`seq(i)`ffct)`body,
+            call_reconstruct_state(me(D`seq(iS`callstack`seq(i)`ffct)`body),
             (LAMBDA j: j), iS`callstack`seq(i + 1)`ffct, iS`callstack`seq(i)`fpc)`1)
       #))
 
@@ -1231,7 +1233,7 @@ itranslation: THEORY
       compose_all_tv((#
           length := iS`callstack`length - 1,
           seq := LAMBDA (i: below(iS`callstack`length - 1)):
-            LET (K2, tv2) = call_reconstruct_state(D`seq(iS`callstack`seq(i)`ffct)`body,
+            LET (K2, tv2) = call_reconstruct_state(me(D`seq(iS`callstack`seq(i)`ffct)`body),
                               (LAMBDA j: j), iS`callstack`seq(i + 1)`ffct,
                               iS`callstack`seq(i)`fpc) IN
             (tv2, popDepth(K2) + D`seq(iS`callstack`seq(i)`ffct)`arity,
@@ -1257,7 +1259,7 @@ itranslation: THEORY
     redex_matches(D, (trS | defs_well_typed(D, trS`def_types)),
       (iS | iS`defs = translate_definitions(D, trS`def_types) AND iS`callstack`length > 0)): bool =
       LET fv = endi(iS`callstack, 0) IN
-      LET (A, K, tv) = fct_reconstruct_state(D`seq(fv`ffct)`body, iS`stack,
+      LET (A, K, tv) = fct_reconstruct_state(me(D`seq(fv`ffct)`body), iS`stack,
                          D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc) IN
       LET K1 = extract_call_context(D, trS`def_types, iS) IN
       LET tv1 = extract_call_tv(D, trS`def_types, iS) IN
@@ -1265,7 +1267,7 @@ itranslation: THEORY
       fill(compose(K1, K), A) = fill(trS`state`context, trS`state`redex) AND
       (FORALL (i: below(popDepth(trS`state`redex) + popDepth(trS`state`context))):
         endi(iS`stack, tv2(i)) = val_to_ival(endi(trS`state`stack, i))) AND
-      fct_is_result_defined(D`seq(fv`ffct)`body, iS`stack, D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc)
+      fct_is_result_defined(me(D`seq(fv`ffct)`body), iS`stack, D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc)
 
     redex_matches_l: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)),
@@ -1273,7 +1275,7 @@ itranslation: THEORY
         redex_matches(D, trS, iS) =
         (FORALL ((fv: stack_frame(iS`defs)), A, K, K1, (tv, tv1, tv2: [nat -> nat])):
           fv = endi(iS`callstack, 0) AND
-          (A, K, tv) = fct_reconstruct_state(D`seq(fv`ffct)`body, iS`stack,
+          (A, K, tv) = fct_reconstruct_state(me(D`seq(fv`ffct)`body), iS`stack,
                          D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc) AND
           K1 = extract_call_context(D, trS`def_types, iS) AND
           tv1 = extract_call_tv(D, trS`def_types, iS) AND
@@ -1281,7 +1283,7 @@ itranslation: THEORY
           fill(compose(K1, K), A) = fill(trS`state`context, trS`state`redex) AND
           (FORALL (i: below(popDepth(trS`state`redex) + popDepth(trS`state`context))):
             endi(iS`stack, tv2(i)) = val_to_ival(endi(trS`state`stack, i))) AND
-          fct_is_result_defined(D`seq(fv`ffct)`body, iS`stack, D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc))
+          fct_is_result_defined(me(D`seq(fv`ffct)`body), iS`stack, D`seq(fv`ffct)`arity, fv`fdepth, fv`fpc))
 
     redex_stillmatch1: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)),
@@ -1296,9 +1298,9 @@ itranslation: THEORY
         fv2 = endi(iS2`callstack, 0) AND
         fv1`ffct = fv2`ffct AND
         redex_matches(D, trS, iS) AND
-        (A1, K1, tv1) = fct_reconstruct_state(D`seq(fv1`ffct)`body, iS`stack,
+        (A1, K1, tv1) = fct_reconstruct_state(me(D`seq(fv1`ffct)`body), iS`stack,
           D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc) AND
-        (A2, K2, tv2) = fct_reconstruct_state(D`seq(fv2`ffct)`body, iS2`stack,
+        (A2, K2, tv2) = fct_reconstruct_state(me(D`seq(fv2`ffct)`body), iS2`stack,
            D`seq(fv2`ffct)`arity, fv2`fdepth, fv2`fpc) AND
         A1 = trS`state`redex AND
         K1 = compose(K2, K3) AND
@@ -1312,7 +1314,7 @@ itranslation: THEORY
         (FORALL (i: below(trS`state`stack`length - popDepth(A1) - popDepth(K1))):
           endi(trS`state`stack, i + popDepth(A1) + popDepth(K1)) =
             endi(trS2`state`stack, i + popDepth(A2) + popDepth(K2))) AND
-        fct_is_result_defined(D`seq(fv2`ffct)`body, iS2`stack, D`seq(fv2`ffct)`arity, fv2`fdepth, fv2`fpc)
+        fct_is_result_defined(me(D`seq(fv2`ffct)`body), iS2`stack, D`seq(fv2`ffct)`arity, fv2`fdepth, fv2`fpc)
         IMPLIES
           redex_matches(D, trS2, iS2)
 
@@ -1337,19 +1339,19 @@ itranslation: THEORY
         fv1 = endi(iS`callstack, 0) AND
         fv2 = endi(iS2`callstack, 0) AND
         fv1`ffct = fv2`ffct AND
-        fv1`fpc < translate_length(D`seq(fv1`ffct)`body) AND
-        fv2`fpc = translate_next_pc(D`seq(fv1`ffct)`body, fv1`fpc) AND
+        fv1`fpc < translate_length(me(D`seq(fv1`ffct)`body)) AND
+        fv2`fpc = translate_next_pc(me(D`seq(fv1`ffct)`body), fv1`fpc) AND
         fv1`fdepth = fv2`fdepth AND
-        translate_extract_is_assign(D`seq(fv1`ffct)`body, fv1`fpc) AND
+        translate_extract_is_assign(me(D`seq(fv1`ffct)`body), fv1`fpc) AND
         redex_matches(D, trS, iS) AND
-        (A1, K1, tv1) = fct_reconstruct_state(D`seq(fv1`ffct)`body, iS`stack,
+        (A1, K1, tv1) = fct_reconstruct_state(me(D`seq(fv1`ffct)`body), iS`stack,
           D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc) AND
         A1 = trS`state`redex AND
         popDepth(trS`state`redex) = 0 AND popDepth(trS2`state`redex) = 0 AND
         trS`state`stack`length = trS2`state`stack`length AND
         value?(trS2`state`redex) AND
         trS2`state`redex = ival_to_val(endi(iS2`stack,
-          vindex(avar(translate_extract_assign(D`seq(fv1`ffct)`body,
+          vindex(avar(translate_extract_assign(me(D`seq(fv1`ffct)`body),
             ivar(D`seq(fv1`ffct)`arity, FALSE), (LAMBDA j: j), fv1`fpc))))) AND
         (FORALL (i: below(popDepth(K1))):
           endi(iS2`stack, tv1(i)) = val_to_ival(endi(trS2`state`stack, i))) AND
@@ -1440,14 +1442,14 @@ itranslation: THEORY
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         skipRedex?(iS) IMPLIES
-          endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
 
     skipRedex_skip: LEMMA
       FORALL (tD | defs_well_typed(D, tD)):
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         skipRedex?(iS) IMPLIES
-          translate_extract_skip(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
+          translate_extract_skip(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
 
     skipReduce_match: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
@@ -1461,14 +1463,14 @@ itranslation: THEORY
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         popRedex?(iS) IMPLIES
-          endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
 
     popRedex_decl_end: LEMMA
       FORALL (tD | defs_well_typed(D, tD)):
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         popRedex?(iS) IMPLIES
-          translate_extract_decl_end(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
+          translate_extract_decl_end(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
 
     popReduce_match: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
@@ -1522,7 +1524,7 @@ itranslation: THEORY
           extract_call_context(D, tD, iS) =
             compose(extract_call_context(D, tD, iS2),
               npopcs(D`seq(endi(iS`callstack, 1)`ffct)`arity,
-                call_reconstruct_state(D`seq(endi(iS`callstack, 1)`ffct)`body,
+                call_reconstruct_state(me(D`seq(endi(iS`callstack, 1)`ffct)`body),
                   (LAMBDA j: j), endi(iS`callstack, 0)`ffct,
                   endi(iS`callstack, 1)`fpc)`1))
 
@@ -1535,7 +1537,7 @@ itranslation: THEORY
       pop(iS2`callstack) = pop(pop(iS`callstack)) IMPLIES
         extract_call_tv(D, tD, iS) =
             LET (K2, tv2) =
-              call_reconstruct_state(D`seq(endi(iS`callstack, 1)`ffct)`body,
+              call_reconstruct_state(me(D`seq(endi(iS`callstack, 1)`ffct)`body),
                 (LAMBDA j: j), endi(iS`callstack, 0)`ffct,
                 endi(iS`callstack, 1)`fpc) IN
             compose_translate_vars(tv2, extract_call_tv(D, tD, iS2),
@@ -1551,12 +1553,12 @@ itranslation: THEORY
       FORALL (D, (tD | defs_well_typed(D, tD)), iS):
         iS`defs = translate_definitions(D, tD) AND iS`callstack`length > 1 IMPLIES
           endi(iS`callstack, 1)`fpc <
-            translate_length(D`seq(endi(iS`callstack, 1)`ffct)`body)
+            translate_length(me(D`seq(endi(iS`callstack, 1)`ffct)`body))
 
     return_pc_assign: LEMMA
       FORALL (D, (tD | defs_well_typed(D, tD)), iS):
         iS`defs = translate_definitions(D, tD) AND iS`callstack`length > 1 IMPLIES
-          translate_extract_is_assign(D`seq(endi(iS`callstack, 1)`ffct)`body,
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 1)`ffct)`body),
             endi(iS`callstack, 1)`fpc)
 
     reconstruct_state_assign_popDepth: LEMMA
@@ -1611,14 +1613,14 @@ itranslation: THEORY
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         ifRedex?(iS) IMPLIES
-          endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
 
     ifRedex_if: LEMMA
       FORALL (tD | defs_well_typed(D, tD)):
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         ifRedex?(iS) IMPLIES
-          translate_extract_if(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
+          translate_extract_if(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
 
     fct_reconstruct_state_vars_bound: LEMMA
       FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
@@ -1736,14 +1738,14 @@ itranslation: THEORY
       FORALL (tD | defs_well_typed(D, tD)):
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
-        fct_is_result_defined(D`seq(endi(iS`callstack, 0)`ffct)`body, iS`stack,
+        fct_is_result_defined(me(D`seq(endi(iS`callstack, 0)`ffct)`body), iS`stack,
           D`seq(endi(iS`callstack, 0)`ffct)`arity, endi(iS`callstack, 0)`fdepth,
           endi(iS`callstack, 0)`fpc) AND
         ifRedex?(iS) IMPLIES
-          index(condition(fct_reconstruct_state(D`seq(endi(iS`callstack, 0)`ffct)`body,
+          index(condition(fct_reconstruct_state(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
             iS`stack, D`seq(endi(iS`callstack, 0)`ffct)`arity,
             endi(iS`callstack, 0)`fdepth, endi(iS`callstack, 0)`fpc)`1)) <
-              popDepth(fct_reconstruct_state(D`seq(endi(iS`callstack, 0)`ffct)`body,
+              popDepth(fct_reconstruct_state(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
                 iS`stack, D`seq(endi(iS`callstack, 0)`ffct)`arity,
                 endi(iS`callstack, 0)`fdepth, endi(iS`callstack, 0)`fpc)`2)
 
@@ -1828,14 +1830,14 @@ itranslation: THEORY
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         applicationRedex?(iS) IMPLIES
-          endi(iS`callstack, 0)`fpc < translate_length(D`seq(endi(iS`callstack, 0)`ffct)`body)
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
 
     applicationRedex_assign: LEMMA
       FORALL (tD | defs_well_typed(D, tD)):
         iS`defs = translate_definitions(D, tD) AND
         iS`callstack`length > 0 AND
         applicationRedex?(iS) IMPLIES
-          translate_extract_is_assign(D`seq(endi(iS`callstack, 0)`ffct)`body, endi(iS`callstack, 0)`fpc)
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
 
     iapply_nstack_match: LEMMA
       FORALL ((arity: nat), dom,
