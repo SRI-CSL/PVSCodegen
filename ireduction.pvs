@@ -445,7 +445,12 @@ ireduction: THEORY
       iS
 
     valueReduce(iS | iS`callstack`length > 0 AND valueRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 iN
+      iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+               `stack`seq(iS`stack`length - 1 - vindex(avar(s))) :=
+                 IF iconstant?(aexpr(s)) THEN vint(ival(aexpr(s))) ELSE vnil ENDIF
+              ]
 
     iapply_nstack((arity: nat), dom, S,
       (args: list[(ivar?)] | length(args) = arity AND
