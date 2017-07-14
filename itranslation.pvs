@@ -1912,7 +1912,7 @@ itranslation: THEORY
 
     endi_add_tl[T: TYPE]: LEMMA
       FORALL (x: T, l: finseq[T]):
-        i > 0 IMPLIES
+        i > 0 AND i <= l`length IMPLIES
           endi(add(x, l), i) = endi(l, i - 1)
 
     applicationReduce_match: LEMMA
@@ -1953,46 +1953,46 @@ itranslation: THEORY
         IMPLIES
           state_matches(D, trS, valueReduce(iS))
 
-%     redex_stillmatch_assign2: LEMMA
-%       FORALL (D, (trS | defs_well_typed(D, trS`def_types)),
-%                  (trS2 | trS2`def_types = trS`def_types),
-%                  (iS, iS2: {iS | iS`defs = translate_definitions(D, trS`def_types) AND
-%                             iS`callstack`length > 0}),
-%                  (fv1, fv2: stack_frame(iS`defs)),
-%                  (s: istat)):
-%         trS`state`context = trS2`state`context AND
-%         pop(iS`callstack) = pop(iS2`callstack) AND
-%         fv1 = endi(iS`callstack, 0) AND
-%         fv2 = endi(iS2`callstack, 0) AND
-%         fv1`ffct = fv2`ffct AND
-%         fv1`fpc < slength(iS`defs`seq(fv1`ffct)`body) AND
-%         fv2`fpc = next_pc(iS`defs`seq(fv1`ffct)`body, fv1`fpc) AND
-%         fv1`fdepth = fv2`fdepth AND
-%         s = extract_stat(iS`defs`seq(fv1`ffct)`body, fv1`fpc) AND
-%         iassign?(s) AND
-%         stat_is_assign?(trS`state`redex) AND
-%         redex_matches(D, trS, iS) AND
-%         fct_reconstruct_state(me(D`seq(fv1`ffct)`body, iS`stack,
-%           D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc)`1 = trS`state`redex AND
-% %        popDepth(trS`state`redex) = 0 AND
-%         trS`state`stack`length = trS2`state`stack`length AND
-%         value?(trS2`state`redex) AND
-%         trS2`state`redex = ival_to_val(endi(iS2`stack, vindex(avar(s)))) AND
-%         (FORALL (i: below(trS`state`length)):
-%           vars(trS`state`redex)(i) IMPLIES
-%             endi(iS2`stack,
-%               fct_reconstruct_state(me(D`seq(fv1`ffct)`body), iS`stack,
-%                 D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc)`3(i)) =
-%               val_to_ival(endi(trS2`state`stack, i))) AND
-%         (FORALL (i: below(iS`stack`length)):
-%           NOT vars(s)(i) IMPLIES
-%             endi(iS`stack, i) = endi(iS2`stack, i)) AND
-%         (FORALL (i: below(trS`state`stack`length)):
-%           NOT vars(trS`state`redex)(i) IMPLIES
-%             endi(trS`state`stack, i) =
-%               endi(trS2`state`stack, i))
-%         IMPLIES
-%           redex_matches(D, trS2, iS2)
+    redex_stillmatch_assign2: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)),
+                 (trS2 | trS2`def_types = trS`def_types),
+                 (iS, iS2: {iS | iS`defs = translate_definitions(D, trS`def_types) AND
+                            iS`callstack`length > 0}),
+                 (fv1, fv2: stack_frame(iS`defs)),
+                 (s: istat)):
+        trS`state`context = trS2`state`context AND
+        pop(iS`callstack) = pop(iS2`callstack) AND
+        fv1 = endi(iS`callstack, 0) AND
+        fv2 = endi(iS2`callstack, 0) AND
+        fv1`ffct = fv2`ffct AND
+        fv1`fpc < slength(iS`defs`seq(fv1`ffct)`body) AND
+        fv2`fpc = next_pc(iS`defs`seq(fv1`ffct)`body, fv1`fpc) AND
+        fv1`fdepth = fv2`fdepth AND
+        s = extract_stat(iS`defs`seq(fv1`ffct)`body, fv1`fpc)`1 AND
+        iassign?(s) AND
+        stat_is_assign?(trS`state`redex) AND
+        redex_matches(D, trS, iS) AND
+        fct_reconstruct_state(me(D`seq(fv1`ffct)`body), iS`stack,
+          D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc)`1 = trS`state`redex AND
+%        popDepth(trS`state`redex) = 0 AND
+        trS`state`stack`length = trS2`state`stack`length AND
+        value?(trS2`state`redex) AND
+        trS2`state`redex = ival_to_val(endi(iS2`stack, vindex(avar(s)))) AND
+        (FORALL (i: below(trS`state`stack`length)):
+          vars(trS`state`redex)(i) IMPLIES
+            endi(iS2`stack,
+              fct_reconstruct_state(me(D`seq(fv1`ffct)`body), iS`stack,
+                D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc)`3(i)) =
+              val_to_ival(endi(trS2`state`stack, i))) AND
+        (FORALL i:
+          NOT vars(s)(i) IMPLIES
+            endi(iS`stack, i) = endi(iS2`stack, i)) AND
+        (FORALL (i: below(trS`state`stack`length)):
+          NOT vars(trS`state`redex)(i) IMPLIES
+            endi(trS`state`stack, i) =
+              endi(trS2`state`stack, i))
+        IMPLIES
+          redex_matches(D, trS2, iS2)
 
 
 END itranslation
