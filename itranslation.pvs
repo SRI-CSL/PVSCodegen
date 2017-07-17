@@ -1994,5 +1994,65 @@ itranslation: THEORY
         IMPLIES
           redex_matches(D, trS2, iS2)
 
+    redex_matches_vars: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)),
+                 (iS | iS`defs = translate_definitions(D, trS`def_types) AND
+                       iS`callstack`length > 0)):
+        redex_matches(D, trS, iS) AND
+        fct_reconstruct_state(me(D`seq(endi(iS`callstack, 0)`ffct)`body), iS`stack,
+          D`seq(endi(iS`callstack, 0)`ffct)`arity, endi(iS`callstack, 0)`fdepth,
+          endi(iS`callstack, 0)`fpc)`1 = trS`state`redex AND
+        vars(trS`state`redex)(i) IMPLIES
+          endi(iS`stack, 
+            fct_reconstruct_state(me(D`seq(endi(iS`callstack, 0)`ffct)`body), iS`stack,
+              D`seq(endi(iS`callstack, 0)`ffct)`arity, endi(iS`callstack, 0)`fdepth,
+              endi(iS`callstack, 0)`fpc)`3(i)) = val_to_ival(endi(trS`state`stack, i))
+
+    variableRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        variableRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
+
+    variableRedex_assign: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        variableRedex?(iS) IMPLIES
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    variableRedex_fdepth: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        variableRedex?(iS) IMPLIES
+          1 + D`seq(endi(iS`callstack, 0)`ffct)`arity +
+            translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
+              endi(iS`callstack, 0)`fpc) =
+          endi(iS`callstack, 0)`fdepth
+
+    assign_is_result_defined: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+            translate_extract_is_assign(A, pc) IMPLIES
+              translate_is_result_defined(A, S, pc, rv)
+
+    fct_avar_assign_neq_vars: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat | FORALL k: vars(A)(k) IMPLIES k < arity),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_is_assign(A, pc) AND
+        vars(translate_statement_assign(fct_reconstruct_state(A, S, arity, fdepth, pc)`1,
+              fct_reconstruct_state(A, S, arity, fdepth, pc)`3))(i) IMPLIES
+          NOT i = vindex(avar(translate_extract_assign(A, ivar(arity, FALSE), (LAMBDA j: j), pc)))
+
+    variableReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND variableRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), variableReduce(iS))
 
 END itranslation

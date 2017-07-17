@@ -442,11 +442,35 @@ ireduction: THEORY
       iS
 
     variableReduce(iS | iS`callstack`length > 0 AND variableRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
+      LET value = endi(iS`stack, vindex(aexpr(s))) IN
+      IF domainValue?(iS`domain)(value) THEN
+        IF vref?(value) THEN
+          IF vmarked(aexpr(s)) THEN
+            iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+                     `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := value,
+                     `stack`seq(iS`stack`length - 1 - vindex(aexpr(s))) := vnil
+                    ]
+          ELSE
+            iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+                     `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := value,
+                     `count(vrefindex(value)) := iS`count(vrefindex(value)) + 1
+                    ]
+          ENDIF
+        ELSE
+          iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+                   `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := value
+                  ]
+        ENDIF
+      ELSE
+        iS WITH [`error := TRUE]
+      ENDIF
+
 
     valueReduce(iS | iS`callstack`length > 0 AND valueRedex?(iS)): istate =
       LET (lf, fbody) = get_frame_body(iS) IN
-      LET s = extract_stat(fbody, lf`fpc)`1 iN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
       iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
                `stack`seq(iS`stack`length - 1 - vindex(avar(s))) :=
                  IF iconstant?(aexpr(s)) THEN vint(ival(aexpr(s))) ELSE vnil ENDIF
