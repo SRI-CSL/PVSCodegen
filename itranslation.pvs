@@ -2202,6 +2202,21 @@ itranslation: THEORY
             fct_reconstruct_state(A, S, arity, fdepth, pc)`2 AND
           fct_reconstruct_state(A, S2, arity, fdepth, translate_next_pc(A, pc))`3 =
             fct_reconstruct_state(A, S, arity, fdepth, pc)`3
+    
+    translate_is_result_defined_release_next_pc: LEMMA
+      FORALL (A: (pure?), S: ireduction.Stack,
+        translate_vars: [nat -> nat],
+        pc: below(translate_length(A)),
+        (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_release(A, pc) IMPLIES
+          translate_is_result_defined(A, S, translate_next_pc(A, pc), rv)
+ 
+    fct_is_result_defined_release_next_pc: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack), (arity: nat),
+        (fdepth: posnat | fdepth <= S`length),
+        (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_release(A, pc) IMPLIES
+          fct_is_result_defined(A, S, arity, fdepth, translate_next_pc(A, pc))
 
     releaseRedex_release: LEMMA
       FORALL (tD | defs_well_typed(D, tD)):
@@ -2209,6 +2224,13 @@ itranslation: THEORY
         iS`callstack`length > 0 AND
         releaseRedex?(iS) IMPLIES
           translate_extract_release(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    reconstruct_state_release_pure: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_release(A, pc) IMPLIES
+          pure?(reconstruct_state(A, translate_vars, S, pc, rv)`1)
 
     releaseReduce_match: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
