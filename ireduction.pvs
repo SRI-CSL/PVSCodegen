@@ -438,8 +438,59 @@ ireduction: THEORY
                   next_pc(iS`defs`seq(endi(iS`callstack, 0)`ffct)`body,
                           endi(iS`callstack, 0)`fpc)]
 
+    countStore(dom, (str: Store(dom))): nat =
+      Sigma(dom, LAMBDA (r: nat): IF dom(r) THEN count(vref?, str(r)) ELSE 0 ENDIF)
+
+    countStore_update: LEMMA
+      FORALL (dom, (str: Store(dom)), (r: (dom)), (i: below(str(r)`length))):
+        vref?(str(r)`seq(i)) IMPLIES
+          countStore(dom, str WITH [(r)`seq(i) := vnil]) = countStore(dom, str) - 1
+
+    lex2_def: LEMMA
+      FORALL (a, b, c, d: nat):
+        (lex2(a, b) < lex2(c, d)) = (a < c OR (a = c AND b < d))
+
+    idecref(iS, (r: (iS`domain)), (i: upto(iS`store(r)`length))):
+      RECURSIVE {iS2 | countStore(iS2`domain, iS2`store) <= countStore(iS`domain, iS`store) AND
+        iS2`domain = iS`domain AND
+        (FORALL (s: (iS`domain)): iS2`store(s)`length = iS`store(s)`length)} =
+      IF iS`count(r) = 0 THEN
+        IF i = 0 THEN
+          iS
+        ELSE
+          LET v = iS`store(r)`seq(i - 1) IN
+          LET newS =
+            IF vref?(v) AND iS`domain(vrefindex(v)) THEN
+              idecref(iS WITH [`store(r)`seq(i - 1) := vnil,
+                               `count(vrefindex(v)) := iS`count(vrefindex(v)) - 1],
+                      vrefindex(v), iS`store(vrefindex(v))`length)
+            ELSE
+              iS
+            ENDIF
+          IN idecref(newS, r, i - 1)
+        ENDIF
+      ELSE
+        iS
+      ENDIF
+    MEASURE lex2(countStore(iS`domain, iS`store), i)
+
     releaseReduce(iS | iS`callstack`length > 0 AND releaseRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
+      LET value = endi(iS`stack, vindex(rvar(s))) IN
+      IF domainValue?(iS`domain)(value) THEN
+        IF vref?(value) THEN
+          idecref(iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+                           `stack`seq(iS`stack`length - 1 - vindex(rvar(s))) := vnil,
+                           `count(vrefindex(value)) := iS`count(vrefindex(value)) - 1],
+                  vrefindex(value), iS`store(vrefindex(value))`length)
+        ELSE
+          iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc)]
+        ENDIF
+      ELSE
+        iS WITH [`error := TRUE]
+      ENDIF
+
 
     variableReduce(iS | iS`callstack`length > 0 AND variableRedex?(iS)): istate =
       LET (lf, fbody) = get_frame_body(iS) IN

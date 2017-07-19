@@ -1374,7 +1374,8 @@ itranslation: THEORY
           iS`stack`seq(0) = val_to_ival(trS`state`redex)
       ELSE
         redex_matches(D, trS, iS)
-      ENDIF
+      ENDIF AND
+      iS`error = trS`state`error
 
     ival_to_val_val_to_ival: LEMMA
       FORALL (u: (value?)):
@@ -1410,7 +1411,8 @@ itranslation: THEORY
         trS2`state`domain = trS`state`domain AND
         trS2`state`store = trS`state`store AND
         trS2`state`stack = trS`state`stack AND
-        trS2`state`count = trS`state`count IMPLIES
+        trS2`state`count = trS`state`count AND
+        trS2`state`error = trS`state`error IMPLIES
           state_matches(D, trS2, iS) = state_matches(D, trS, iS)
 
     redex_matches_to_topstate: LEMMA
@@ -2054,5 +2056,165 @@ itranslation: THEORY
         state_matches(D, trS, iS) AND iS`callstack`length > 0 AND variableRedex?(iS)
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), variableReduce(iS))
+
+    tdecref(trS, (r: (trS`state`domain)), (i: upto(trS`state`store(r)`length))): typed_rstate =
+      trS WITH [`state := decref(trS`state, r, i)]
+
+    state_matches_tdecref: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS, (r: (iS`domain)), (i: upto(iS`store(r)`length))):
+        state_matches(D, trS, iS) IMPLIES
+          state_matches(D, tdecref(trS, r, i), idecref(iS, r, i))
+
+    state_matches_decref: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), trS2, iS, (r: (trS`state`domain)), (i: upto(trS`state`store(r)`length))):
+        state_matches(D, trS, iS) AND
+        trS2`def_types = trS`def_types AND
+        trS2`state = decref1(trS`state, r, i) IMPLIES
+          state_matches(D, trS2, idecref(iS, r, i))
+
+    releaseRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        releaseRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
+
+    releaseRedex_fdepth: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        releaseRedex?(iS) IMPLIES
+          1 + D`seq(endi(iS`callstack, 0)`ffct)`arity +
+            translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
+              endi(iS`callstack, 0)`fpc) =
+          endi(iS`callstack, 0)`fdepth    
+
+    translate_extract_release(A: (pure?), pc: below(translate_length(A))): RECURSIVE bool =
+      CASES A OF
+        letexpr(B, C):
+          IF pc = 0 THEN
+            FALSE
+          ELSIF pc < 1 + translate_length(B) THEN
+            translate_extract_release(B, pc - 1)
+          ELSIF pc = 1 + translate_length(B) THEN
+            FALSE
+          ELSIF pc < 2 + translate_length(B) + translate_length(C) THEN
+            translate_extract_release(C, pc - 2 - translate_length(B))
+          ELSE
+            FALSE
+          ENDIF,
+        ift(x, B, C):
+          IF pc = 0 THEN
+            FALSE
+          ELSIF pc < 1 + translate_length(B) THEN
+            translate_extract_release(B, pc - 1)
+          ELSE
+            translate_extract_release(C, pc - 1 - translate_length(B))
+          ENDIF,
+        release(x, B):
+          pc = 0 OR translate_extract_release(B, pc - 1)
+        ELSE FALSE
+      ENDCASES
+    MEASURE (A :: IExpression) BY <<
+
+    translate_extract_release_def: LEMMA
+      FORALL (A: (pure?), rv: (ivar?),
+        (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+        dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD)),
+        (translate_vars: [nat -> nat]), pc: below(translate_length(A))):
+      irelease?(extract_stat(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc)`1) =
+        translate_extract_release(A, pc)
+
+    translate_extract_decl_begin_release: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_decl_begin(A, pc) IMPLIES NOT translate_extract_release(A, pc)
+    translate_extract_decl_end_release: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_decl_end(A, pc) IMPLIES NOT translate_extract_release(A, pc)
+    translate_extract_skip_release: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_skip(A, pc) IMPLIES NOT translate_extract_release(A, pc)
+    translate_extract_is_assign_release: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_is_assign(A, pc) IMPLIES NOT translate_extract_release(A, pc)
+    translate_extract_if_release: LEMMA
+      FORALL (A: (pure?), pc: below(translate_length(A))):
+        translate_extract_if(A, pc) IMPLIES NOT translate_extract_release(A, pc)
+
+    reconstruct_state_releaseRedex: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_release(A, pc) IMPLIES
+          releaseRedex?(reconstruct_state(A, translate_vars, S, pc, rv)`1)
+
+    reconstruct_state_release_var: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+          (pc: below(translate_length(A))),
+          (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length),
+          (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+          dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD))):
+        translate_extract_release(A, pc) IMPLIES
+          vindex(rvar(extract_stat(translate_statement(A,rv,stypes,dom_types,tD,tA,translate_vars), pc)`1)) =
+            reconstruct_state(A, translate_vars, S, pc, rv)`3
+              (index(rvar(reconstruct_state(A, translate_vars, S, pc, rv)`1)))
+
+    fct_reconstruct_state_release_var: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack),
+          (arity : nat), (fdepth : posnat | fdepth <= S`length),
+          (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth),
+          (stypes | FORALL i: cvars(A)(i) IMPLIES i < stypes`length),
+          dom_types, tD, (tA | is_well_typed(A, tA, stypes, dom_types, tD))):
+        translate_extract_release(A, pc) IMPLIES
+          vindex(rvar(extract_stat(translate_statement(A,ivar(arity,FALSE),stypes,dom_types,tD,tA,(LAMBDA j: j)), pc)`1)) =
+            fct_reconstruct_state(A, S, arity, fdepth, pc)`3
+              (index(rvar(fct_reconstruct_state(A, S, arity, fdepth, pc)`1)))
+
+
+    translate_next_pc_release_no_overflow: LEMMA
+      FORALL (A: (pure?), (pc: below(translate_length(A)))):
+        translate_extract_release(A, pc) IMPLIES translate_next_pc(A, pc) < translate_length(A)
+
+    reconstruct_state_next_pc_release: LEMMA
+      FORALL (A: (pure?), (translate_vars: [nat -> nat]), (S : ireduction.Stack),
+                (S2 : ireduction.Stack | S2`length = S`length),
+                (pc: below(translate_length(A))),
+                (rv: (ivar?) | vindex(rv) + translate_stack_size_at(A, pc) < S`length)):
+        translate_extract_release(A, pc)
+        IMPLIES
+          reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`1 =
+            rexpr(reconstruct_state(A, translate_vars, S, pc, rv)`1) AND
+          reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`2 =
+            reconstruct_state(A, translate_vars, S, pc, rv)`2 AND
+          reconstruct_state(A, translate_vars, S2, translate_next_pc(A, pc), rv)`3 =
+            reconstruct_state(A, translate_vars, S, pc, rv)`3
+
+    fct_reconstruct_state_next_pc_release: LEMMA
+      FORALL (A: (pure?), (S : ireduction.Stack),
+                (S2 : ireduction.Stack | S2`length = S`length),
+                (arity : nat), (fdepth : posnat | fdepth <= S`length),
+                (pc: below(translate_length(A)) | translate_stack_size_at(A, pc) + arity + 1 = fdepth)):
+        translate_extract_release(A, pc)
+        IMPLIES
+          fct_reconstruct_state(A, S2, arity, fdepth, translate_next_pc(A, pc))`1 =
+            rexpr(fct_reconstruct_state(A, S, arity, fdepth, pc)`1) AND
+          fct_reconstruct_state(A, S2, arity, fdepth, translate_next_pc(A, pc))`2 =
+            fct_reconstruct_state(A, S, arity, fdepth, pc)`2 AND
+          fct_reconstruct_state(A, S2, arity, fdepth, translate_next_pc(A, pc))`3 =
+            fct_reconstruct_state(A, S, arity, fdepth, pc)`3
+
+    releaseRedex_release: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        releaseRedex?(iS) IMPLIES
+          translate_extract_release(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    releaseReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND releaseRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), releaseReduce(iS))
 
 END itranslation
