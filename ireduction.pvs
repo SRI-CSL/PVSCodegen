@@ -605,9 +605,66 @@ ireduction: THEORY
         iS WITH [`error := TRUE]
       ENDIF
 
+    maybe_clear_stack_at(dom, (S: Stack), (cnt: [(dom) -> int]), (x: (ivar?) | vindex(x) < S`length)): [Stack, [(dom) -> int]] =
+      IF vmarked(x) AND vref?(endi(S, vindex(x))) AND dom(vrefindex(endi(S, vindex(x)))) THEN
+        (S WITH [`seq(S`length - vindex(x) - 1) := vnil], cnt WITH [(vrefindex(endi(S, vindex(x)))) := cnt(vrefindex(endi(S, vindex(x)))) - 1])
+      ELSE
+        (S, cnt)
+      ENDIF
+
+    update_store(dom, (str: Store(dom)), (cnt: [(dom) -> int]), (r: (dom)), (i: below(str(r)`length)), (v: (domainValue?(dom)))): [Store(dom), [(dom) -> int]] =
+      (str WITH [(r)`seq(i) := v],
+       LET ov = str(r)`seq(i) IN
+       LET cnt1 = IF vref?(ov) AND dom(vrefindex(ov)) THEN cnt WITH [(vrefindex(ov)) := cnt(vrefindex(ov)) - 1] ELSE cnt ENDIF IN
+       IF vref?(v) THEN cnt1 WITH [(vrefindex(v)) := cnt1(vrefindex(v)) + 1] ELSE cnt1 ENDIF)
+
+    count_copy(dom, (cnt: [(dom) -> int]), (V: finseq[ivalue])): [(dom) -> int] =
+      LAMBDA (i: (dom)): cnt(i) + count(LAMBDA (v: ivalue): vref?(v) AND vrefindex(v) = i, V)
 
     updateReduce(iS | iS`callstack`length > 0 AND updateRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
+      LET aval = endi(iS`stack, vindex(itarget(aexpr(s)))) IN
+      LET lval = endi(iS`stack, vindex(ilhs(aexpr(s)))) IN
+      LET rval = endi(iS`stack, vindex(irhs(aexpr(s)))) IN
+      IF vref?(aval) AND iS`domain(vrefindex(aval)) AND vint?(lval) AND 0 <= vvalue(lval) AND
+          vvalue(lval) < iS`store(vrefindex(aval))`length AND
+          domainValue?(iS`domain)(rval) THEN
+        LET (nstack, ncount) = maybe_clear_stack_at(iS`domain, iS`stack, iS`count, irhs(aexpr(s))) IN
+        IF ncount(vrefindex(aval)) > 1 OR NOT vmarked(itarget(aexpr(s))) OR rval = aval THEN
+          % Copy and update
+          LET (nnstack, nncount) = maybe_clear_stack_at(iS`domain, iS`stack, iS`count, itarget(aexpr(s))) IN
+          LET newref = least_out(iS`domain) IN
+          LET nstore = iS`store WITH [(newref) |-> iS`store(vrefindex(aval))] IN
+          LET nnncount = count_copy(add(newref, iS`domain), nncount WITH [(newref) |-> 1], iS`store(vrefindex(aval))) IN
+          LET (nnstore, nnnncount) = update_store(add(newref, iS`domain), nstore, nnncount, newref, vvalue(lval), rval) IN
+          iS WITH
+            [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+             `stack := nnstack WITH [`seq(iS`stack`length - 1 - vindex(avar(s))) := vref(newref)],
+             `domain := add(newref, iS`domain),
+             `count := nnnncount,
+             `store := nnstore]
+        ELSE
+          % Destructive update
+          LET oldvalue = iS`store(vrefindex(aval))`seq(vvalue(lval)) IN
+          LET nnstack = nstack WITH [`seq(iS`stack`length - 1 - vindex(itarget(aexpr(s)))) := vnil] IN
+          LET (newstore, nncount) = update_store(iS`domain, iS`store, iS`count,
+            vrefindex(aval), vvalue(lval), rval) IN
+          LET niS = iS WITH
+            [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+             `stack := nnstack WITH [`seq(iS`stack`length - 1 - vindex(avar(s))) := aval],
+             `count := nncount,
+             `store := newstore]
+          IN
+          IF vref?(oldvalue) AND iS`domain(vrefindex(oldvalue)) THEN
+            idecref(niS, vrefindex(oldvalue), iS`store(vrefindex(oldvalue))`length)
+          ELSE
+            niS
+          ENDIF
+        ENDIF
+      ELSE
+        iS WITH [`error := TRUE]
+      ENDIF
 
     newintReduce(iS | iS`callstack`length > 0 AND newintRedex?(iS)): istate =
       LET (lf, fbody) = get_frame_body(iS) IN
