@@ -2304,4 +2304,56 @@ itranslation: THEORY
           state_matches(D, typed_iareduce(D)(trS), newrefReduce(iS))
 
 
+
+    lookupRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        lookupRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
+
+    lookupRedex_assign: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        lookupRedex?(iS) IMPLIES
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    lookupRedex_fdepth: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        lookupRedex?(iS) IMPLIES
+          1 + D`seq(endi(iS`callstack, 0)`ffct)`arity +
+            translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
+              endi(iS`callstack, 0)`fpc) =
+          endi(iS`callstack, 0)`fdepth
+
+
+
+    updateRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        updateRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
+
+    updateRedex_assign: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        updateRedex?(iS) IMPLIES
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    updateRedex_fdepth: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        updateRedex?(iS) IMPLIES
+          1 + D`seq(endi(iS`callstack, 0)`ffct)`arity +
+            translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
+              endi(iS`callstack, 0)`fpc) =
+          endi(iS`callstack, 0)`fdepth
+
+
 END itranslation

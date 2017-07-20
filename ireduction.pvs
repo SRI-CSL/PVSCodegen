@@ -576,7 +576,35 @@ ireduction: THEORY
       ENDIF
 
     lookupReduce(iS | iS`callstack`length > 0 AND lookupRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
+      LET aval = endi(iS`stack, vindex(iaval(aexpr(s)))) IN
+      LET pos = endi(iS`stack, vindex(ipos(aexpr(s)))) IN
+      IF vref?(aval) AND iS`domain(vrefindex(aval)) AND vint?(pos) AND 0 <= vvalue(pos) AND
+          vvalue(pos) < iS`store(vrefindex(aval))`length AND
+          domainValue?(iS`domain)(iS`store(vrefindex(aval))`seq(vvalue(pos))) THEN
+        LET value = iS`store(vrefindex(aval))`seq(vvalue(pos)) IN
+        LET niS = IF vref?(value) THEN
+          iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+                   `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := value,
+                   `count(vrefindex(value)) := iS`count(vrefindex(value)) + 1
+                  ]
+        ELSE
+          iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+                   `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := value
+                  ]
+        ENDIF IN
+        IF vmarked(iaval(aexpr(s))) THEN
+          idecref(niS WITH [`stack`seq(iS`stack`length - 1 - vindex(iaval(aexpr(s)))) := vnil,
+                            `count(vrefindex(aval)) := niS`count(vrefindex(aval)) - 1],
+                  vrefindex(aval), iS`store(vrefindex(aval))`length)
+        ELSE
+          niS
+        ENDIF
+      ELSE
+        iS WITH [`error := TRUE]
+      ENDIF
+
 
     updateReduce(iS | iS`callstack`length > 0 AND updateRedex?(iS)): istate =
       iS
