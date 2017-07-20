@@ -2329,6 +2329,17 @@ itranslation: THEORY
               endi(iS`callstack, 0)`fpc) =
           endi(iS`callstack, 0)`fdepth
 
+    state_error_stillmatch: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        state_matches(D, trS, iS) IMPLIES
+          state_matches(D, trS WITH [`state := trS`state WITH [`error := TRUE]], iS WITH [`error := TRUE])
+
+    lookupReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND lookupRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), lookupReduce(iS))
 
 
     updateRedex_pc: LEMMA
