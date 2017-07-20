@@ -582,10 +582,26 @@ ireduction: THEORY
       iS
 
     newintReduce(iS | iS`callstack`length > 0 AND newintRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
+      LET r = least_out(iS`domain) IN
+      iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+               `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := vref(r),
+               `domain := add(r, iS`domain),
+               `store := iS`store WITH [(r) |-> (# length := size(aexpr(s)), seq := (LAMBDA (i: below(size(aexpr(s)))): vint(0)) #)],
+               `count := iS`count WITH [(r) |-> 1]
+              ]
 
     newrefReduce(iS | iS`callstack`length > 0 AND newrefRedex?(iS)): istate =
-      iS
+      LET (lf, fbody) = get_frame_body(iS) IN
+      LET s = extract_stat(fbody, lf`fpc)`1 IN
+      LET r = least_out(iS`domain) IN
+      iS WITH [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
+               `stack`seq(iS`stack`length - 1 - vindex(avar(s))) := vref(r),
+               `domain := add(r, iS`domain),
+               `store := iS`store WITH [(r) |-> (# length := size(aexpr(s)), seq := (LAMBDA (i: below(size(aexpr(s)))): vnil) #)],
+               `count := iS`count WITH [(r) |-> 1]
+              ]
 
     reduce(iS | NOT iS`error): istate =
       IF iS`callstack`length = 0 THEN

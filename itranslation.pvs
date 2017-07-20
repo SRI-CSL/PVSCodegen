@@ -2239,4 +2239,69 @@ itranslation: THEORY
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), releaseReduce(iS))
 
+
+    newintRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        newintRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
+
+    newintRedex_assign: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        newintRedex?(iS) IMPLIES
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    newintRedex_fdepth: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        newintRedex?(iS) IMPLIES
+          1 + D`seq(endi(iS`callstack, 0)`ffct)`arity +
+            translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
+              endi(iS`callstack, 0)`fpc) =
+          endi(iS`callstack, 0)`fdepth
+
+    newintReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND newintRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), newintReduce(iS))
+
+
+    newrefRedex_pc: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        newrefRedex?(iS) IMPLIES
+          endi(iS`callstack, 0)`fpc < translate_length(me(D`seq(endi(iS`callstack, 0)`ffct)`body))
+
+    newrefRedex_assign: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        newrefRedex?(iS) IMPLIES
+          translate_extract_is_assign(me(D`seq(endi(iS`callstack, 0)`ffct)`body), endi(iS`callstack, 0)`fpc)
+
+    newrefRedex_fdepth: LEMMA
+      FORALL (tD | defs_well_typed(D, tD)):
+        iS`defs = translate_definitions(D, tD) AND
+        iS`callstack`length > 0 AND
+        newrefRedex?(iS) IMPLIES
+          1 + D`seq(endi(iS`callstack, 0)`ffct)`arity +
+            translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
+              endi(iS`callstack, 0)`fpc) =
+          endi(iS`callstack, 0)`fdepth
+
+    newrefReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND newrefRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), newrefReduce(iS))
+
+
 END itranslation
