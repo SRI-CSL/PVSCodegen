@@ -621,6 +621,13 @@ ireduction: THEORY
     count_copy(dom, (cnt: [(dom) -> int]), (V: finseq[ivalue])): [(dom) -> int] =
       LAMBDA (i: (dom)): cnt(i) + count(LAMBDA (v: ivalue): vref?(v) AND vrefindex(v) = i, V)
 
+    idecref_chk(iS, (v: ivalue)): istate =
+      IF vref?(v) AND iS`domain(vrefindex(v)) THEN
+        idecref(iS, vrefindex(v), iS`store(vrefindex(v))`length)
+      ELSE
+        iS
+      ENDIF
+
     updateReduce(iS | iS`callstack`length > 0 AND updateRedex?(iS)): istate =
       LET (lf, fbody) = get_frame_body(iS) IN
       LET s = extract_stat(fbody, lf`fpc)`1 IN
@@ -633,7 +640,7 @@ ireduction: THEORY
         LET (nstack, ncount) = maybe_clear_stack_at(iS`domain, iS`stack, iS`count, irhs(aexpr(s))) IN
         IF ncount(vrefindex(aval)) > 1 OR NOT vmarked(itarget(aexpr(s))) OR rval = aval THEN
           % Copy and update
-          LET (nnstack, nncount) = maybe_clear_stack_at(iS`domain, iS`stack, iS`count, itarget(aexpr(s))) IN
+          LET (nnstack, nncount) = maybe_clear_stack_at(iS`domain, nstack, iS`count, itarget(aexpr(s))) IN
           LET newref = least_out(iS`domain) IN
           LET nstore = iS`store WITH [(newref) |-> iS`store(vrefindex(aval))] IN
           LET nnncount = count_copy(add(newref, iS`domain), nncount WITH [(newref) |-> 1], iS`store(vrefindex(aval))) IN
@@ -648,7 +655,7 @@ ireduction: THEORY
           % Destructive update
           LET oldvalue = iS`store(vrefindex(aval))`seq(vvalue(lval)) IN
           LET nnstack = nstack WITH [`seq(iS`stack`length - 1 - vindex(itarget(aexpr(s)))) := vnil] IN
-          LET (newstore, nncount) = update_store(iS`domain, iS`store, iS`count,
+          LET (newstore, nncount) = update_store(iS`domain, iS`store, ncount,
             vrefindex(aval), vvalue(lval), rval) IN
           LET niS = iS WITH
             [`callstack`seq(iS`callstack`length - 1)`fpc := next_pc(fbody, lf`fpc),
@@ -656,11 +663,7 @@ ireduction: THEORY
              `count := nncount,
              `store := newstore]
           IN
-          IF vref?(oldvalue) AND iS`domain(vrefindex(oldvalue)) THEN
-            idecref(niS, vrefindex(oldvalue), iS`store(vrefindex(oldvalue))`length)
-          ELSE
-            niS
-          ENDIF
+	  idecref_chk(niS, iS`store(vrefindex(aval))`seq(vvalue(lval)))
         ENDIF
       ELSE
         iS WITH [`error := TRUE]

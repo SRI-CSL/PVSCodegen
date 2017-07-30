@@ -2342,6 +2342,19 @@ itranslation: THEORY
           state_matches(D, typed_iareduce(D)(trS), lookupReduce(iS))
 
 
+    state_matches_decref_chk: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), trS2, iS, (v: (IL.domainValue?(trS`state`domain)))):
+        state_matches(D, trS, iS) AND
+        trS2`def_types = trS`def_types AND
+        trS2`state = decref1_chk(trS`state, v) IMPLIES
+          state_matches(D, trS2, idecref_chk(iS, val_to_ival(v)))
+
+    state_error_stillmatch2: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS, (n: nat)):
+        state_matches(D, trS, iS) IMPLIES
+          state_matches(D, trS WITH [`state := trS`state WITH [`error := TRUE], `dom_types := trS`dom_types WITH [(least_out(trS`state`domain)) := n]], iS WITH [`error := TRUE])
+
+
     updateRedex_pc: LEMMA
       FORALL (tD | defs_well_typed(D, tD)):
         iS`defs = translate_definitions(D, tD) AND
@@ -2365,6 +2378,14 @@ itranslation: THEORY
             translate_stack_size_at(me(D`seq(endi(iS`callstack, 0)`ffct)`body),
               endi(iS`callstack, 0)`fpc) =
           endi(iS`callstack, 0)`fdepth
+
+    updateReduce_match: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT trS`state`error AND NOT iS`error AND
+        state_matches(D, trS, iS) AND iS`callstack`length > 0 AND updateRedex?(iS)
+        IMPLIES
+          state_matches(D, typed_iareduce(D)(trS), updateReduce(iS))
+
 
 
 END itranslation
