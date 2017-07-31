@@ -2379,6 +2379,10 @@ itranslation: THEORY
               endi(iS`callstack, 0)`fpc) =
           endi(iS`callstack, 0)`fdepth
 
+   count_map[T, T2: TYPE]: LEMMA
+     FORALL (f: [T -> T2], Q: [T2 -> bool], L: list[T]):
+       count(Q, map(f)(L)) = count(Q o f, L)
+
     updateReduce_match: LEMMA
       FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
         NOT trS`state`error AND NOT iS`error AND
