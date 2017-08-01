@@ -2390,6 +2390,16 @@ itranslation: THEORY
         IMPLIES
           state_matches(D, typed_iareduce(D)(trS), updateReduce(iS))
 
+    max_inst_steps(iS): nat =
+      sum((LAMBDA (fv: stack_frame(iS`defs)): 1 + slength(iS`defs`seq(fv`ffct)`body) - fv`fpc), iS`callstack)
 
+    next_pc_gt: LEMMA
+      FORALL (s: istat, i: below(slength(s))):
+        next_pc(s, i) > i
+
+    bisimulation_lemma: LEMMA
+      FORALL (D, (trS | defs_well_typed(D, trS`def_types)), iS):
+        NOT iS`error AND state_matches(D, trS, iS) IMPLIES
+          (state_matches(D, trS, reduce(iS)) AND max_inst_steps(reduce(iS)) < max_inst_steps(iS)) OR state_matches(D, typed_iareduce(D)(trS), reduce(iS))
 
 END itranslation
