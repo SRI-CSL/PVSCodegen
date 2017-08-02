@@ -624,6 +624,10 @@ reduction_props: THEORY
       IF n = 0 OR rS`error THEN rS ELSE rreduce_n(D)(n - 1, reduce(D)(rS)) ENDIF
     MEASURE n
 
+    rreduce_n_err: LEMMA
+      FORALL (n: nat, rS: (noDanglingRefs?)):
+        rS`error IMPLIES rreduce_n(D)(n, rS) = rS
+
     rreduce_n_ndr: LEMMA
       FORALL (n: nat, rS: (noDanglingRefs?)):
         noDanglingRefs?(rreduce_n(D)(n, rS))
