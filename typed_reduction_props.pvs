@@ -128,6 +128,14 @@ typed_reduction_props: THEORY
        ENDIF
      MEASURE k
 
+    same_shape(K, tK): RECURSIVE bool =
+      CASES K OF
+        hole: tK = holet,
+        letc(K1, A): letct?(tK) AND same_shape(K1, lcrhs(tK)),
+        popc(K1): popct?(tK) AND same_shape(K1, pctbody(tK))
+      ENDCASES
+    MEASURE K BY <<
+
     apply_iterm_match(D)(A, tA, K, tK, tD, dom, (S | every(domainValue?(dom))(S)),
         (L | FORALL i: in_varlist(L)(i) IMPLIES i < S`length),
         (k: upto(2 * length(L))), trS, (str: Store(dom)), (cnt:[(dom)->nat]),
@@ -137,7 +145,27 @@ typed_reduction_props: THEORY
       LET (stypes2, tB) = iapply_nstacktypes_iterm(k, stypes, args_types, tA) IN
       trS`stack_types = stypes2 AND
         typeinfo_fill(trS`context_type, trS`redex_type) = typeinfo_fill(tK, tB) AND
-        trS`def_types = tD
+        trS`def_types = tD AND
+        same_shape(K, tK)
+
+    composet(tK1, tK2): RECURSIVE typeinfo_ctx =
+      CASES tK1 OF
+        holet: tK2,
+        letct(n, tK, tB): letct(n, composet(tK, tK2), tB),
+        popct(tK): popct(composet(tK, tK2))
+      ENDCASES
+    MEASURE tK1 BY <<
+
+    composition_typeinfo: LEMMA
+      typeinfo_fill(composet(tK1, tK2), tA) = typeinfo_fill(tK1, typeinfo_fill(tK2, tA))
+
+    compose_same_shape: LEMMA
+      same_shape(K1, tK1) AND same_shape(K2, tK2) IMPLIES
+        same_shape(compose(K1, K2), composet(tK1, tK2))
+
+    buildRedexType_fill: LEMMA
+      same_shape(K, tK) AND redex?(A) IMPLIES
+        buildRedexType(fill(K, A), typeinfo_fill(tK, tA)) = (tK, tA)
 
     applyReduce_match_rec: LEMMA
       FORALL (k, (A: (pure?)), K, dom, (S | every(domainValue?(dom))(S)),
@@ -150,13 +178,66 @@ typed_reduction_props: THEORY
           apply_iterm_match(D)(A,tA,K,tK,tD,dom,S,L,k,trS,str,cnt,stypes,args_types) IMPLIES
             apply_iterm_match(D)(A,tA,K,tK,tD,dom,S,L,k+1,typed_reduce(D)(trS),str,cnt,stypes,args_types)
 
+    is_well_typed_same_shape: LEMMA
+      FORALL (K: (cpure?), tK, (stypes | popDepth(K) <= stypes`length AND
+        FORALL i: cvars(K)(i) IMPLIES i < stypes`length), dom_types, def_types, (hole_type: nat)):
+          is_well_typed_ctx(K, tK, stypes, dom_types, def_types, hole_type) IMPLIES same_shape(K, tK)
 
+    applyReduce_match_init: LEMMA
+      applyRedex?(trS`state`redex) AND NOT trS`state`error AND
+      defs_well_typed(D, trS`def_types) AND
+      fun(trS`state`redex) < D`length AND
+      length(args(trS`state`redex)) = D`seq(fun(trS`state`redex))`arity IMPLIES
+        apply_iterm_match(D)(mark(emptyset)(D`seq(fun(trS`state`redex))`body),
+          trS`def_types`seq(fun(trS`state`redex))`body_type,
+          trS`state`context, trS`context_type, trS`def_types,
+          trS`state`domain, trS`state`stack, args(trS`state`redex), 0,
+          typed_reduce(D)(trS), trS`state`store, trS`state`count,
+          trS`stack_types, trS`def_types`seq(fun(trS`state`redex))`args_type)
+
+    iapply_nstacktypes_iterm_end: LEMMA
+      FORALL ((arity: nat), stypes, (args_type: list[nat] | length(args_type) = arity), tA):
+        iapply_nstacktypes_iterm(2 * arity, stypes, args_type, tA)`1 = stypes o args_type AND
+        iapply_nstacktypes_iterm(2 * arity, stypes, args_type, tA)`2 = npopts(arity, tA)
+
+    typed_reduce_n_err: LEMMA
+      FORALL (i: nat, (trS | defs_well_typed(D, trS`def_types))):
+        trS`state`error IMPLIES typed_reduce_n(D)(i, trS) = trS
+
+    typed_reduce_n_def_types: LEMMA
+      FORALL (i: nat, (trS | defs_well_typed(D, trS`def_types))):
+        typed_reduce_n(D)(i, trS)`def_types = trS`def_types
+
+    typed_reduce_n_compose: LEMMA
+      FORALL (i,j: nat, (trS | defs_well_typed(D, trS`def_types))):
+        typed_reduce_n(D)(i, typed_reduce_n(D)(j, trS)) = typed_reduce_n(D)(i + j, trS)
+
+    applyReduce_match_lemma: LEMMA
+      applyRedex?(trS`state`redex) AND NOT trS`state`error AND
+      defs_well_typed(D, trS`def_types) AND
+      fun(trS`state`redex) < D`length AND
+      length(args(trS`state`redex)) = D`seq(fun(trS`state`redex))`arity IMPLIES
+      FORALL (k: upto(2 * length(args(trS`state`redex)))):
+        apply_iterm_match(D)(mark(emptyset)(D`seq(fun(trS`state`redex))`body),
+          trS`def_types`seq(fun(trS`state`redex))`body_type,
+          trS`state`context, trS`context_type, trS`def_types,
+          trS`state`domain, trS`state`stack, args(trS`state`redex), k,
+          typed_reduce_n(D)(k + 1, trS), trS`state`store, trS`state`count,
+          trS`stack_types, trS`def_types`seq(fun(trS`state`redex))`args_type)
 
     applyReduce_match: LEMMA
-      NOT trS`state`error AND NOT value?(typed_to_topstate(tS)`state`redex) AND
-        applyRedex?(make_redex_typed(typed_to_topstate(tS))`state`redex) IMPLIES
+      NOT trS`state`error AND NOT value?(typed_to_topstate(trS)`state`redex) AND
+        applyRedex?(make_redex_typed(typed_to_topstate(trS))`state`redex) AND
+        defs_well_typed(D, trS`def_types) IMPLIES
           EXISTS (n: posnat):
             iastate_matches(typed_reduce_n(D)(n, trS), typed_iareduce(D)(trS))
+
+    bisimulation_lemma_i: THEOREM
+      NOT trS1`state`error AND NOT trS2`state`error AND
+      defs_well_typed(D, trS1`def_types) AND
+      iastate_matches(trS1, trS2) IMPLIES
+        EXISTS (n: posnat):
+          iastate_matches(typed_reduce_n(D)(n, trS1), typed_iareduce(D)(trS2))
 
 
   END typed_reduction_props
