@@ -1,4 +1,6 @@
 top: THEORY
   BEGIN
-    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems, reduction, typeinfo, typeinfo_adt, preprocess, rreduction, reduction_props, iareduction, typed_reduction, typed_rreduction, typed_reduction_props, ireduction, itranslation
+    IMPORTING IExpression, IL, finite_set_theorems, finseq_theorems
+    IMPORTING reduction, preprocess, rreduction, reduction_props, iareduction
+    IMPORTING typeinfo, typeinfo_adt, typed_reduction, typed_rreduction, typed_reduction_props, ireduction, itranslation
   END top
