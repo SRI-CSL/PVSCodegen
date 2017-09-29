@@ -16,6 +16,6 @@ finite_map   [dom, range: TYPE ]
 
    add(x, u, F): finite_map =
      (# domain := add(x, F`domain),
-        map := F`map WITH [(x) := u] #)
+        map := F`map WITH [(x) |-> u] #)
 
   END finite_map
