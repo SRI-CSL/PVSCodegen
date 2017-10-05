@@ -625,7 +625,7 @@ rreduction      : THEORY
                ref?(S`seq(S`length - 1 - i)) AND NOT (i = index(x) AND marked(x))} =
          LET v = get(S)(x) IN
          IF marked(x) AND ref?(v) THEN
-           (S WITH [`seq(S`length - index(x) - 1) := nil], cnt WITH [(refindex(v)) := cnt(refindex(v)) - 1])
+           (S WITH [`seq(S`length - index(x) - 1) := nil], cnt WITH [(refindex(v)) |-> cnt(refindex(v)) - 1])
          ELSE
            (S, cnt)
          ENDIF
