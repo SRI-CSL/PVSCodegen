@@ -1986,7 +1986,7 @@ itranslation: THEORY
               fct_reconstruct_state(me(D`seq(fv1`ffct)`body), iS`stack,
                 D`seq(fv1`ffct)`arity, fv1`fdepth, fv1`fpc)`3(i)) =
               val_to_ival(endi(trS2`state`stack, i))) AND
-        (FORALL i:
+        (FORALL (i: below(iS`stack`length)):
           NOT vars(s)(i) IMPLIES
             endi(iS`stack, i) = endi(iS2`stack, i)) AND
         (FORALL (i: below(trS`state`stack`length)):

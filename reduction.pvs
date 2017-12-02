@@ -214,7 +214,7 @@ reduction : THEORY
           newrefindex = least_out(domain)
        IN gS WITH [`redex := ref(newrefindex),
                    `domain |-> add(newrefindex, domain),
-                   `store |-> store WITH [(newrefindex) := (# length := size,
+                   `store |-> store WITH [(newrefindex) |-> (# length := size,
                                                               seq := (LAMBDA (i:below(size)): nil) #)]])
 
 
