@@ -26967,8 +26967,53 @@ rS`store(s)`seq(j) OR (ref?(rS`store(s)`seq(j)) AND rS2`store(s)`seq(j)
     "iareduction.aifReduce(typed_rreduction.D)(typed_rreduction.nS`state)"
     "{rS: rreduction.rstate | booleans.AND(rreduction.noDanglingRefs?(rS), booleans.AND(preprocess.allReleaseMarked?(rS`redex), preprocess.armc?(rS`context)))}")))
  (typed_iareduce_TCC8 0
-  (typed_iareduce_TCC8-1 nil 3720239385 ("" (subtype-tcc) nil nil) nil
-   nil
+  (typed_iareduce_TCC8-1 nil 3720239385
+   ("" (skeep* :preds? t)
+    (("" (expand aifReduce)
+      (("" (case "marked(condition(nS`state`redex))")
+        (("1" (assert)
+          (("1"
+            (typepred "typed_reduce(D)(typed_reduce(D)(tS))`dom_types")
+            (("1" (inst -1 r j)
+              (("1" (assert)
+                (("1" (expand typed_reduce -1 (2 4 6))
+                  (("1" (replace -6 :dir RL)
+                    (("1" (replace -8 :dir RL)
+                      (("1" (name-replace nnS "typed_reduce(D)(tS)")
+                        (("1" (expand typed_reduce -1)
+                          (("1" (replace -7 :dir RL)
+                            (("1" (replace -9 :dir RL)
+                              (("1"
+                                (replace -1)
+                                (("1"
+                                  (expand typed_reduce -2)
+                                  (("1"
+                                    (case
+                                     "pureReleaseRedex?(make_redex_typed(typed_to_topstate(nnS))`state`redex)")
+                                    (("1" (postpone) nil nil)
+                                     ("2" (postpone) nil nil)
+                                     ("3" (postpone) nil nil))
+                                    nil))
+                                  nil))
+                                nil))
+                              nil))
+                            nil))
+                          nil))
+                        nil))
+                      nil))
+                    nil))
+                  nil))
+                nil)
+               ("2" (postpone) nil nil) ("3" (postpone) nil nil))
+              nil)
+             ("2" (postpone) nil nil))
+            nil))
+          nil)
+         ("2" (postpone) nil nil) ("3" (postpone) nil nil))
+        nil))
+      nil))
+    nil)
+   nil nil
    (typed_iareduce subtype "typed_rreduction.nS`dom_types"
     "{dom_types | FORALL (r: (iareduction.aifReduce(typed_rreduction.D)(typed_rreduction.nS`state)`domain)): FORALL (j: naturalnumbers.below(iareduction.aifReduce(typed_rreduction.D)(typed_rreduction.nS`state)`store(r)`length)): typed_reduction.value_of_type(iareduction.aifReduce(typed_rreduction.D)(typed_rreduction.nS`state)`store(r)`seq(j), typed_rreduction.dom_types(r), typed_rreduction.dom_types)}")))
  (typed_iareduce_TCC9 0
