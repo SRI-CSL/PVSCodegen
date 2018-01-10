@@ -5,7 +5,7 @@
     (domainValue? const-decl "bool" IL nil))
    nil
    (decref_induction subtype "IExpression_adt.nil"
-    "(IL.domainValue?(rS`domain))")))
+    "(IL.domainValue?(reduction_props.rS`domain))")))
  (decref_induction_TCC2 0
   (decref_induction_TCC2-1 nil 3700406650
    ("" (skeep*)
@@ -61,7 +61,8 @@
      integers nil))
    nil
    (decref_induction subtype
-    "IExpression_adt.refindex(rS`store(r)`seq(i))" "(rS`domain)")))
+    "IExpression_adt.refindex(reduction_props.rS`store(reduction_props.r)`seq(reduction_props.i))"
+    "(reduction_props.rS`domain)")))
  (decref_induction_TCC3 0
   (decref_induction_TCC3-1 nil 3700406650
    ("" (skeep* :preds? t)
@@ -159,8 +160,86 @@
      integers nil))
    nil
    (decref_induction subtype
-    "rS`count(IExpression_adt.refindex(rS`store(r)`seq(i))) - 1"
-    "{j | rreduction.j = rreduction.refcount(rS`domain, rS`store WITH [(r)(seq)(i) := IExpression_adt.nil], rS`stack, rS`redex)(IExpression_adt.refindex(rS`store(r)`seq(i)))}")))
+    "(number_fields.-)(reduction_props.rS`count(IExpression_adt.refindex(reduction_props.rS`store(reduction_props.r)`seq(reduction_props.i))), 1)"
+    "{j | rreduction.j = rreduction.refcount(reduction_props.rS`domain, reduction_props.rS`store WITH [(reduction_props.r)`seq(reduction_props.i) := IExpression_adt.nil], reduction_props.rS`stack, reduction_props.rS`redex)(IExpression_adt.refindex(reduction_props.rS`store(reduction_props.r)`seq(reduction_props.i)))}")))
+ (decref_induction_TCC4 0
+  (decref_induction_TCC4-1 nil 3724502337
+   ("" (skeep* :preds? t)
+    (("" (typepred "rS`count(x)")
+      (("" (rewrite -1)
+        (("" (expand refcount)
+          (("" (rewrite refcountStore_set)
+            (("1" (grind) nil nil) ("2" (grind) nil nil)) nil))
+          nil))
+        nil))
+      nil))
+    nil)
+   ((rstate type-eq-decl nil rreduction nil)
+    (refcount const-decl "nat" rreduction nil)
+    (Store type-eq-decl nil reduction nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (contextPure? def-decl "bool" IL nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (popDepth def-decl "nat" IL nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (< const-decl "bool" reals nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (refs def-decl "bool" IL nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (domainValue? const-decl "bool" IL nil)
+    (every const-decl "bool" finseq_theorems nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Stack type-eq-decl nil IL nil) (value? const-decl "bool" IL nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (below type-eq-decl nil nat_types nil)
+    (emptyset const-decl "set" sets nil)
+    (markc def-decl "IContext" preprocess nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (cpure? def-decl "bool" IL nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (IContext type-decl nil IL nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (count const-decl "nat" finseq_theorems nil)
+    (refcountArray const-decl "nat" rreduction nil)
+    (member const-decl "bool" sets nil)
+    (empty? const-decl "bool" sets nil)
+    (allcount const-decl "nat" rreduction nil)
+    (refcountStore const-decl "nat" rreduction nil)
+    (int_plus_int_is_int application-judgement "int" integers nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (nil adt-constructor-decl "(nil?)" IExpression_adt nil)
+    (nil? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (refcountStore_set formula-decl nil rreduction nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil))
+   nil
+   (decref_induction subtype
+    "reduction_props.rS`count(reduction_props.x)"
+    "{j | rreduction.j = rreduction.refcount(reduction_props.rS`domain, reduction_props.rS`store WITH [(reduction_props.r)`seq(reduction_props.i) := IExpression_adt.nil], reduction_props.rS`stack, reduction_props.rS`redex)(reduction_props.x)}")))
  (decref_induction 0
   (decref_induction-1 nil 3700487573
    ("" (expand decref)
@@ -639,13 +718,13 @@
     (noDanglingRefs? const-decl "bool" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
     (refcount const-decl "nat" rreduction nil)
-    (Store type-eq-decl nil reduction nil) nil
+    (Store type-eq-decl nil reduction nil)
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) nil nil nil
+    (<= const-decl "bool" reals nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
-    (< const-decl "bool" reals nil) nil (refs def-decl "bool" IL nil)
+    (< const-decl "bool" reals nil) (refs def-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
     (domainValue? const-decl "bool" IL nil)
     (every const-decl "bool" finseq_theorems nil)
@@ -797,22 +876,27 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (decref_preserves_jdg subtype "rreduction.decref(rS, r, t)"
-    "{rS2 | rS2`redex = rS`redex AND rS2`stack = rS`stack AND rS2`context = rS`context AND rS2`error = rS`error}")))
+   (decref_preserves_jdg subtype
+    "rreduction.decref(reduction_props.rS, reduction_props.r, reduction_props.t)"
+    "{rS2 | booleans.AND(reduction_props.rS2`redex = reduction_props.rS`redex, booleans.AND(reduction_props.rS2`stack = reduction_props.rS`stack, booleans.AND(reduction_props.rS2`context = reduction_props.rS`context, reduction_props.rS2`error = reduction_props.rS`error)))}")))
  (translate_refs_TCC1 0
   (translate_refs_TCC1-1 nil 3699880315
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    nil
-   (translate_refs termination "translate_refs(translate)(B)" "nil")))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.B)"
+    "nil")))
  (translate_refs_TCC2 0
   (translate_refs_TCC2-1 nil 3699880315
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    nil
-   (translate_refs termination "translate_refs(translate)(C)" "nil")))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.C)"
+    "nil")))
  (translate_refs_TCC3 0
   (translate_refs_TCC3-1 nil 3699880315 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -824,7 +908,9 @@
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    nil
-   (translate_refs termination "translate_refs(translate)(B)" "nil")))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.B)"
+    "nil")))
  (translate_refs_TCC4 0
   (translate_refs_TCC4-2 "" 3700407020
    ("" (skeep* :preds? t)
@@ -839,7 +925,9 @@
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    shostak
-   (translate_refs termination "translate_refs(translate)(C)" "nil"))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.C)"
+    "nil"))
   (translate_refs_TCC4-1 nil 3699880315
    ("" (skeep* :preds? t)
     (("" (split)
@@ -857,13 +945,17 @@
                IExpression_adt nil)
     (pure_contextPure formula-decl nil IL nil))
    nil
-   (translate_refs termination "translate_refs(translate)(C)" "nil")))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.C)"
+    "nil")))
  (translate_refs_TCC5 0
   (translate_refs_TCC5-1 nil 3699880315 ("" (termination-tcc) nil nil)
    ((<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    nil
-   (translate_refs termination "translate_refs(translate)(B)" "nil")))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.B)"
+    "nil")))
  (translate_refs_TCC6 0
   (translate_refs_TCC6-2 "" 3700407052 ("" (termination-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -875,7 +967,9 @@
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    shostak
-   (translate_refs termination "translate_refs(translate)(B)" "nil"))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.B)"
+    "nil"))
   (translate_refs_TCC6-1 nil 3699880315
    ("" (skeep* :preds? t)
     (("" (split 1)
@@ -892,7 +986,9 @@
     (<< adt-def-decl "(strict_well_founded?[IExpression])"
      IExpression_adt nil))
    nil
-   (translate_refs termination "translate_refs(translate)(B)" "nil")))
+   (translate_refs termination
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.B)"
+    "nil")))
  (translate_refs_pure_TCC1 0
   (translate_refs_pure_TCC1-2 "" 3700416459
    ("" (skeep* :preds? t) (("" (grind) nil nil)) nil)
@@ -900,7 +996,8 @@
      real_props nil)
     (pure? def-decl "bool" IL nil))
    shostak
-   (translate_refs_pure_ subtype "IExpression_adt.ref(translate(r))"
+   (translate_refs_pure_ subtype
+    "IExpression_adt.ref(reduction_props.translate(reduction_props.r))"
     "(IL.pure?)"))
   (translate_refs_pure_TCC1-1 nil 3700317399
    ("" (skeep*)
@@ -911,7 +1008,8 @@
      real_props nil)
     (pure? def-decl "bool" IL nil))
    nil
-   (translate_refs_pure_ subtype "IExpression_adt.ref(translate(r))"
+   (translate_refs_pure_ subtype
+    "IExpression_adt.ref(reduction_props.translate(reduction_props.r))"
     "(IL.pure?)")))
  (translate_refs_pure_TCC2 0
   (translate_refs_pure_TCC8-1 nil 3700406650
@@ -921,7 +1019,9 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (pure? def-decl "bool" IL nil))
-   nil (translate_refs_pure_ subtype "B" "{A | IL.pure?(A)}")))
+   nil
+   (translate_refs_pure_ subtype "reduction_props.B"
+    "{A | IL.pure?(reduction_props.A)}")))
  (translate_refs_pure_TCC3 0
   (translate_refs_pure_TCC9-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -931,13 +1031,15 @@
     (IExpression type-decl nil IExpression_adt nil)
     (pure? def-decl "bool" IL nil))
    nil
-   (translate_refs_pure_ subtype "IExpression_adt.pop(v(translate)(B))"
-    "(IL.pure?)")))
+   (translate_refs_pure_ subtype "reduction_props.C"
+    "{A | IL.pure?(reduction_props.A)}")))
  (translate_refs_pure_TCC4 0
   (translate_refs_pure_TCC10-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
    ((pure? def-decl "bool" IL nil)) nil
-   (translate_refs_pure_ subtype "B" "{A | IL.pure?(A)}")))
+   (translate_refs_pure_ subtype
+    "IExpression_adt.letexpr(reduction_props.v(reduction_props.translate)(reduction_props.B), reduction_props.v(reduction_props.translate)(reduction_props.C))"
+    "(IL.pure?)")))
  (translate_refs_pure_TCC5 0
   (translate_refs_pure_TCC11-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -949,8 +1051,8 @@
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil))
    nil
-   (translate_refs_pure_ subtype
-    "IExpression_adt.release(x, v(translate)(B))" "(IL.pure?)")))
+   (translate_refs_pure_ subtype "reduction_props.B"
+    "{A | IL.pure?(reduction_props.A)}")))
  (translate_refs_pure_TCC6 0
   (translate_refs_pure_TCC2-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -961,12 +1063,16 @@
     (pure? def-decl "bool" IL nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil))
-   nil (translate_refs_pure_ subtype "B" "{A | IL.pure?(A)}")))
+   nil
+   (translate_refs_pure_ subtype "reduction_props.C"
+    "{A | IL.pure?(reduction_props.A)}")))
  (translate_refs_pure_TCC7 0
   (translate_refs_pure_TCC3-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
    ((pure? def-decl "bool" IL nil)) nil
-   (translate_refs_pure_ subtype "C" "{A | IL.pure?(A)}")))
+   (translate_refs_pure_ subtype
+    "IExpression_adt.ift(reduction_props.x, reduction_props.v(reduction_props.translate)(reduction_props.B), reduction_props.v(reduction_props.translate)(reduction_props.C))"
+    "(IL.pure?)")))
  (translate_refs_pure_TCC8 0
   (translate_refs_pure_TCC4-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -976,9 +1082,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (pure? def-decl "bool" IL nil))
    nil
-   (translate_refs_pure_ subtype
-    "IExpression_adt.letexpr(v(translate)(B), v(translate)(C))"
-    "(IL.pure?)")))
+   (translate_refs_pure_ subtype "reduction_props.B"
+    "{A | IL.pure?(reduction_props.A)}")))
  (translate_refs_pure_TCC9 0
   (translate_refs_pure_TCC5-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -987,7 +1092,10 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (IExpression type-decl nil IExpression_adt nil)
     (pure? def-decl "bool" IL nil))
-   nil (translate_refs_pure_ subtype "B" "{A | IL.pure?(A)}")))
+   nil
+   (translate_refs_pure_ subtype
+    "IExpression_adt.pop(reduction_props.v(reduction_props.translate)(reduction_props.B))"
+    "(IL.pure?)")))
  (translate_refs_pure_TCC10 0
   (translate_refs_pure_TCC6-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -998,13 +1106,15 @@
     (pure? def-decl "bool" IL nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil))
-   nil (translate_refs_pure_ subtype "C" "{A | IL.pure?(A)}")))
+   nil
+   (translate_refs_pure_ subtype "reduction_props.B"
+    "{A | IL.pure?(reduction_props.A)}")))
  (translate_refs_pure_TCC11 0
   (translate_refs_pure_TCC7-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
    ((pure? def-decl "bool" IL nil)) nil
    (translate_refs_pure_ subtype
-    "IExpression_adt.ift(x, v(translate)(B), v(translate)(C))"
+    "IExpression_adt.release(reduction_props.x, reduction_props.v(reduction_props.translate)(reduction_props.B))"
     "(IL.pure?)")))
  (translate_refs_pure 0
   (translate_refs_pure-1 nil 3700317400
@@ -1060,7 +1170,8 @@
    ("" (recursive-judgement-tcc) nil nil)
    ((contextPure? def-decl "bool" IL nil)) nil
    (translate_refs_contextPure_ subtype
-    "IExpression_adt.ref(translate(r))" "(IL.contextPure?)")))
+    "IExpression_adt.ref(reduction_props.translate(reduction_props.r))"
+    "(IL.contextPure?)")))
  (translate_refs_contextPure_TCC2 0
   (translate_refs_contextPure_TCC5-1 "" 3710696932
    ("" (skeep* :preds? t)
@@ -1080,8 +1191,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
    nil
-   (translate_refs_contextPure_ subtype "C"
-    "{A | IL.contextPure?(A)}")))
+   (translate_refs_contextPure_ subtype "reduction_props.B"
+    "{A | IL.contextPure?(reduction_props.A)}")))
  (translate_refs_contextPure_TCC3 0
   (translate_refs_contextPure_TCC3-1 "" 3710696880
    ("" (skeep* :preds? t)
@@ -1098,9 +1209,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
    nil
-   (translate_refs_contextPure_ subtype
-    "IExpression_adt.release(x, v(translate)(B))"
-    "(IL.contextPure?)")))
+   (translate_refs_contextPure_ subtype "reduction_props.C"
+    "{A | IL.contextPure?(reduction_props.A)}")))
  (translate_refs_contextPure_TCC4 0
   (translate_refs_contextPure_TCC4-1 "" 3710696912
    ("" (skeep* :preds? t)
@@ -1158,13 +1268,17 @@
     (translate_refs_pure recursive-judgement-axiom nil reduction_props
      nil))
    nil
-   (translate_refs_contextPure_ subtype "B"
-    "{A | IL.contextPure?(A)}")))
+   (translate_refs_contextPure_ subtype
+    "IExpression_adt.letexpr(reduction_props.v(reduction_props.translate)(reduction_props.B), reduction_props.v(reduction_props.translate)(reduction_props.C))"
+    "(IL.contextPure?)")))
  (translate_refs_contextPure_TCC5 0
   (translate_refs_contextPure_TCC5-1 "" 3710698909
    ("" (skeep* :preds? t)
     (("" (rewrite pure_contextPure +) (("" (grind) nil nil)) nil)) nil)
-   nil shostak
+   ((pure_contextPure formula-decl nil IL nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (contextPure? def-decl "bool" IL nil))
+   shostak
    (translate_refs_contextPure_ subtype "reduction_props.B"
     "{A | IL.contextPure?(reduction_props.A)}"))
   (translate_refs_contextPure_TCC8-1 nil 3700406650
@@ -1173,8 +1287,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
    nil
-   (translate_refs_contextPure_ subtype "B"
-    "{A | IL.contextPure?(A)}")))
+   (translate_refs_contextPure_ subtype "reduction_props.B"
+    "{A | IL.contextPure?(reduction_props.A)}")))
  (translate_refs_contextPure_TCC6 0
   (translate_refs_contextPure_TCC6-1 "" 3710696945
    ("" (skeep* :preds? t)
@@ -1192,9 +1306,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
    nil
-   (translate_refs_contextPure_ subtype
-    "IExpression_adt.letexpr(v(translate)(B), v(translate)(C))"
-    "(IL.contextPure?)")))
+   (translate_refs_contextPure_ subtype "reduction_props.C"
+    "{A | IL.contextPure?(reduction_props.A)}")))
  (translate_refs_contextPure_TCC7 0
   (translate_refs_contextPure_TCC9-1 nil 3700406650
    ("" (skeep* :preds? t)
@@ -1231,7 +1344,8 @@
      nil))
    nil
    (translate_refs_contextPure_ subtype
-    "IExpression_adt.pop(v(translate)(B))" "(IL.contextPure?)")))
+    "IExpression_adt.ift(reduction_props.x, reduction_props.v(reduction_props.translate)(reduction_props.B), reduction_props.v(reduction_props.translate)(reduction_props.C))"
+    "(IL.contextPure?)")))
  (translate_refs_contextPure_TCC8 0
   (translate_refs_contextPure_TCC10-1 nil 3700406650
    ("" (recursive-judgement-tcc) nil nil)
@@ -1241,8 +1355,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (contextPure? def-decl "bool" IL nil))
    nil
-   (translate_refs_contextPure_ subtype "B"
-    "{A | IL.contextPure?(A)}")))
+   (translate_refs_contextPure_ subtype "reduction_props.B"
+    "{A | IL.contextPure?(reduction_props.A)}")))
  (translate_refs_contextPure_TCC9 0
   (translate_refs_contextPure_TCC5-1 nil 3700406650
    ("" (skeep* :preds? t)
@@ -1259,8 +1373,9 @@
       nil))
     nil)
    ((contextPure? def-decl "bool" IL nil)) nil
-   (translate_refs_contextPure_ subtype "B"
-    "{A | IL.contextPure?(A)}")))
+   (translate_refs_contextPure_ subtype
+    "IExpression_adt.pop(reduction_props.v(reduction_props.translate)(reduction_props.B))"
+    "(IL.contextPure?)")))
  (translate_refs_contextPure_TCC10 0
   (translate_refs_contextPure_TCC6-1 nil 3700406650
    ("" (skeep* :preds? t)
@@ -1268,8 +1383,8 @@
    ((pure_contextPure formula-decl nil IL nil)
     (contextPure? def-decl "bool" IL nil))
    nil
-   (translate_refs_contextPure_ subtype "C"
-    "{A | IL.contextPure?(A)}")))
+   (translate_refs_contextPure_ subtype "reduction_props.B"
+    "{A | IL.contextPure?(reduction_props.A)}")))
  (translate_refs_contextPure_TCC11 0
   (translate_refs_contextPure_TCC7-1 nil 3700406650
    ("" (skeep* :preds? t)
@@ -1280,7 +1395,7 @@
     nil)
    ((contextPure? def-decl "bool" IL nil)) nil
    (translate_refs_contextPure_ subtype
-    "IExpression_adt.ift(x, v(translate)(B), v(translate)(C))"
+    "IExpression_adt.release(reduction_props.x, reduction_props.v(reduction_props.translate)(reduction_props.B))"
     "(IL.contextPure?)")))
  (translate_refs_value 0
   (translate_refs_value-1 nil 3700406650
@@ -1294,7 +1409,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (value? const-decl "bool" IL nil))
    nil
-   (translate_refs_value subtype "translate_refs(translate)(A)"
+   (translate_refs_value subtype
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.A)"
     "(IL.value?)")))
  (translate_refs_atom 0
   (translate_refs_atom-1 nil 3700406650
@@ -1309,7 +1425,8 @@
     (IExpression type-decl nil IExpression_adt nil)
     (atom? const-decl "bool" IL nil) (value? const-decl "bool" IL nil))
    nil
-   (translate_refs_atom subtype "translate_refs(translate)(A)"
+   (translate_refs_atom subtype
+    "reduction_props.translate_refs(reduction_props.translate)(reduction_props.A)"
     "(IL.atom?)")))
  (translate_refs_pure_eq 0
   (translate_refs_pure_eq-1 nil 3700496981
@@ -1581,7 +1698,10 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
-   nil (stack_matches subtype "S`length - i - 1" "below[S`length]")))
+   nil
+   (stack_matches subtype
+    "(number_fields.-)((number_fields.-)(reduction_props.S`length, reduction_props.i), 1)"
+    "below[S`length]")))
  (stack_matches_TCC2 0
   (stack_matches_TCC2-2 "" 3700417085 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -1609,7 +1729,9 @@
      "(strict_total_order?[real])" real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    shostak
-   (stack_matches subtype "S1`length - i - 1" "below[S1`length]"))
+   (stack_matches subtype
+    "(number_fields.-)((number_fields.-)(reduction_props.S1`length, reduction_props.i), 1)"
+    "below[S1`length]"))
   (stack_matches_TCC2-1 nil 3699880315
    ("" (skeep* :preds? t)
     (("" (typepred "S`seq(S`length -i-1)")
@@ -1639,7 +1761,10 @@
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
-   nil (stack_matches subtype "S1`length - i - 1" "below[S1`length]")))
+   nil
+   (stack_matches subtype
+    "(number_fields.-)((number_fields.-)(reduction_props.S1`length, reduction_props.i), 1)"
+    "below[S1`length]")))
  (store_matches_TCC1 0
   (store_matches_TCC1-2 "" 3700417113 ("" (subtype-tcc) nil nil)
    ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
@@ -1691,7 +1816,8 @@
     (rstate type-eq-decl nil rreduction nil)
     (below type-eq-decl nil naturalnumbers nil))
    shostak
-   (store_matches subtype "j" "below[store1(translate(r))`length]"))
+   (store_matches subtype "reduction_props.j"
+    "below[store1(translate(r))`length]"))
   (store_matches_TCC1-1 nil 3699880315
    ("" (skeep* :preds? t)
     (("" (typepred "store(r)`seq(j)") (("" (grind) nil nil)) nil)) nil)
@@ -1739,7 +1865,8 @@
     (rstate type-eq-decl nil rreduction nil)
     (below type-eq-decl nil naturalnumbers nil))
    nil
-   (store_matches subtype "j" "below[store1(translate(r))`length]")))
+   (store_matches subtype "reduction_props.j"
+    "below[store1(translate(r))`length]")))
  (state_matches_eq 0
   (state_matches_eq-1 nil 3700587734
    ("" (with-labels (skeep) ((stm treq obj)))
@@ -2308,7 +2435,9 @@
     (stack_matches const-decl "boolean" reduction_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (stack_stillmatch subtype "S`length - i - 1" "below[S`length]")))
+   (stack_stillmatch subtype
+    "(number_fields.-)((number_fields.-)(reduction_props.S`length, reduction_props.i), 1)"
+    "below[S`length]")))
  (stack_stillmatch_TCC2 0
   (stack_stillmatch_TCC2-1 nil 3699975962 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -2337,7 +2466,9 @@
     (stack_matches const-decl "boolean" reduction_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (stack_stillmatch subtype "S2`length - i - 1" "below[S2`length]")))
+   (stack_stillmatch subtype
+    "(number_fields.-)((number_fields.-)(reduction_props.S2`length, reduction_props.i), 1)"
+    "below[S2`length]")))
  (stack_stillmatch 0
   (stack_stillmatch-2 "" 3700417311
    ("" (skeep*)
@@ -2702,8 +2833,8 @@
      nil)
     (maybe_clear_stack_at const-decl "{((newStack: Stack
        | every(domainValue?(dom))(newStack) AND
-          newStack`length = S`length)),
- ((newcnt: [i: (dom) -> {j | j = refcount(dom, str, newStack, A)(i)}])) |
+          newStack`length = S`length),
+  (newcnt: [i: (dom) -> {j | j = refcount(dom, str, newStack, A)(i)}])) |
    FORALL (i: below(S`length)):
      ref?(newStack`seq(newStack`length - 1 - i)) IMPLIES
       ref?(S`seq(S`length - 1 - i)) AND NOT (i = index(x) AND marked(x))}"
@@ -2741,8 +2872,8 @@
     nil)
    ((maybe_clear_stack_at const-decl "{((newStack: Stack
        | every(domainValue?(dom))(newStack) AND
-          newStack`length = S`length)),
- ((newcnt: [i: (dom) -> {j | j = refcount(dom, str, newStack, A)(i)}])) |
+          newStack`length = S`length),
+  (newcnt: [i: (dom) -> {j | j = refcount(dom, str, newStack, A)(i)}])) |
    FORALL (i: below(S`length)):
      ref?(newStack`seq(newStack`length - 1 - i)) IMPLIES
       ref?(S`seq(S`length - 1 - i)) AND NOT (i = index(x) AND marked(x))}"
@@ -2811,8 +2942,8 @@
         nil))
       nil))
     nil)
-   ((update_store const-decl "{((newstr: Store(dom))),
- ((newcnt: [i: (dom) -> {j | j = refcount(dom, newstr, S, A)(i)}])) |
+   ((update_store const-decl "{((newstr: Store(dom)),
+  (newcnt: [i: (dom) -> {j | j = refcount(dom, newstr, S, A)(i)}])) |
    newstr = str WITH [(r)`seq(i) := nv]}" rreduction nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (IExpression type-decl nil IExpression_adt nil)
@@ -2845,7 +2976,9 @@
    shostak))
  (count_copy_count_TCC1 0
   (count_copy_count_TCC1-1 nil 3706282145 ("" (subtype-tcc) nil nil)
-   nil nil (count_copy_count subtype "V`length" "upto(V`length)")))
+   nil nil
+   (count_copy_count subtype "reduction_props.V`length"
+    "naturalnumbers.upto(reduction_props.V`length)")))
  (count_copy_count 0
   (count_copy_count-1 nil 3706282145
    ("" (skeep* :preds? t)
@@ -2927,7 +3060,9 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil))
-   nil (store_stillmatch subtype "r" "(rS2`domain)")))
+   nil
+   (store_stillmatch subtype "reduction_props.r"
+    "(reduction_props.rS2`domain)")))
  (store_stillmatch_TCC2 0
   (store_stillmatch_TCC2-1 nil 3700406650 ("" (subtype-tcc) nil nil)
    ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
@@ -2977,7 +3112,9 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (bool nonempty-type-eq-decl nil booleans nil)
     (boolean nonempty-type-decl nil booleans nil))
-   nil (store_stillmatch subtype "r" "(rS2`domain)")))
+   nil
+   (store_stillmatch subtype "reduction_props.r"
+    "(reduction_props.rS2`domain)")))
  (store_stillmatch 0
   (store_stillmatch-1 nil 3700419320
    ("" (skeep* :preds? t)
@@ -3264,7 +3401,7 @@
     (IContext type-decl nil IL nil)
     (= const-decl "[T, T -> boolean]" equalities nil)
     (fill def-decl "IExpression" IL nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
@@ -3362,8 +3499,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (top_release_reduce subtype "rreduction.to_topstate(grS)"
-    "{t: rreduction.rtopstate | NOT IL.value?(t`redex)}")))
+   (top_release_reduce subtype
+    "rreduction.to_topstate(reduction_props.grS)"
+    "{t: rreduction.rtopstate | }")))
  (top_release_reduce_TCC2 0
   (top_release_reduce_TCC2-1 nil 3701461661
    ("" (skeep)
@@ -3403,7 +3541,7 @@
    ((to_topstate const-decl "rtopstate" rreduction nil)
     (make_redex const-decl "{rS | pureRedex?(rS`redex)}" rreduction
      nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -3485,8 +3623,8 @@
      integers nil))
    nil
    (top_release_reduce subtype
-    "rreduction.make_redex(rreduction.to_topstate(grS))"
-    "{grS | IL.pureReleaseRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+    "rreduction.make_redex(rreduction.to_topstate(reduction_props.grS))"
+    "{grS | booleans.AND(IL.pureReleaseRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (top_release_reduce 0
   (top_release_reduce-1 nil 3701541851
    ("" (skeep)
@@ -3722,9 +3860,9 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (goodrstate type-eq-decl nil reduction_props nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -3813,22 +3951,6 @@
     nil)
    ((decref1_induction formula-decl nil rreduction nil)
     (upto nonempty-type-eq-decl nil naturalnumbers nil)
-    (real_ge_is_total_order name-judgement "(total_order?[real])"
-     real_props nil)
-    (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
-    (rS2 skolem-const-decl "rstate" reduction_props nil)
-    (r!1 skolem-const-decl "(rS2`domain)" reduction_props nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (real_lt_is_strict_total_order name-judgement
-     "(strict_total_order?[real])" real_props nil)
-    (translate_refs_value application-judgement "(value?)"
-     reduction_props nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (nil? adt-recognizer-decl "[IExpression -> boolean]"
-     IExpression_adt nil)
-    (nil adt-constructor-decl "(nil?)" IExpression_adt nil)
-    (below type-eq-decl nil naturalnumbers nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
     (unmark_cpure rec-application-judgement "(cpure?)" preprocess nil)
@@ -3836,14 +3958,30 @@
      preprocess nil)
     (translate_refs_contextPure rec-application-judgement
      "(contextPure?)" reduction_props nil)
-    (int_minus_int_is_int application-judgement "int" integers nil)
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (stack_matches const-decl "boolean" reduction_props nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (nil adt-constructor-decl "(nil?)" IExpression_adt nil)
+    (nil? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (translate_refs_value application-judgement "(value?)"
+     reduction_props nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (r!1 skolem-const-decl "(rS2`domain)" reduction_props nil)
+    (rS2 skolem-const-decl "rstate" reduction_props nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
     (union const-decl "set" sets nil)
     (bumpn const-decl "finite_set[nat]" IL nil)
     (member const-decl "bool" sets nil)
     (store_matches const-decl "boolean" reduction_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
     (state_matches const-decl "boolean" reduction_props nil)
     (estate type-eq-decl nil reduction nil)
     (pred type-eq-decl nil defined_types nil)
@@ -4099,8 +4237,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (releaseReduce_match subtype "grS"
-    "{grS | IL.pureReleaseRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+   (releaseReduce_match subtype "reduction_props.grS"
+    "{grS | booleans.AND(IL.pureReleaseRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (releaseReduce_match 0
   (releaseReduce_match-6 "" 3700423366
    ("" (with-labels (skeep* :preds? t) ((err prr ndm arm stm obj)))
@@ -4532,7 +4670,7 @@
          rS1`count(s) <= rS`count(s) AND
           (rS1`count(s) = 0 OR rS1`store(s) = rS`store(s)))
       AND noDanglingRefs?(rS1)}" rreduction nil)
-    (i skolem-const-decl "below(grS`stack`length)" reduction_props nil)
+    nil
     (translate_refs_value application-judgement "(value?)"
      reduction_props nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
@@ -4552,8 +4690,7 @@
     (unmark def-decl "IExpression" preprocess nil)
     (allReleaseMarked? def-decl "bool" preprocess nil)
     (add const-decl "(nonempty?)" sets nil)
-    (member const-decl "bool" sets nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (member const-decl "bool" sets nil) nil
     (union const-decl "set" sets nil)
     (mult_divides1 application-judgement "(divides(n))" divides nil)
     (mult_divides2 application-judgement "(divides(m))" divides nil)
@@ -4601,7 +4738,7 @@
     (nil adt-constructor-decl "(nil?)" IExpression_adt nil)
     (rexpr adt-accessor-decl "[(release?) -> IExpression]"
      IExpression_adt nil)
-    (grS skolem-const-decl "goodrstate" reduction_props nil)
+    nil
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (ref? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
@@ -4651,14 +4788,10 @@
     (every const-decl "bool" finseq_theorems nil)
     (domainValue? const-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) nil nil nil nil
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil) nil
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -7951,7 +8084,7 @@
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
    (release_marked_match subtype
-    "rS`stack`length - IExpression_adt.index(x) - IL.popDepth(rS`redex) - 1"
+    "(number_fields.-)((number_fields.-)((number_fields.-)(reduction_props.rS`stack`length, IExpression_adt.index(reduction_props.x)), IL.popDepth(reduction_props.rS`redex)), 1)"
     "below[rS`stack`length]")))
  (release_marked_match_TCC2 0
   (release_marked_match_TCC2-2 "" 3700424094 ("" (grind) nil nil)
@@ -7979,7 +8112,7 @@
     (int_minus_int_is_int application-judgement "int" integers nil))
    shostak
    (release_marked_match subtype
-    "rS`stack`length - IExpression_adt.index(x) - IL.popDepth(rS`redex) - 1"
+    "(number_fields.-)((number_fields.-)((number_fields.-)(reduction_props.rS`stack`length, IExpression_adt.index(reduction_props.x)), IL.popDepth(reduction_props.rS`redex)), 1)"
     "below[eS`stack`length]"))
   (release_marked_match_TCC2-1 nil 3700234159
    (""
@@ -8063,7 +8196,7 @@
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
    (release_marked_match subtype
-    "rS`stack`length - IExpression_adt.index(x) - IL.popDepth(rS`redex) - 1"
+    "(number_fields.-)((number_fields.-)((number_fields.-)(reduction_props.rS`stack`length, IExpression_adt.index(reduction_props.x)), IL.popDepth(reduction_props.rS`redex)), 1)"
     "below[eS`stack`length]")))
  (release_marked_match_TCC3 0
   (release_marked_match_TCC3-2 "" 3700424111 ("" (grind) nil nil)
@@ -8081,8 +8214,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    shostak
-   (release_marked_match subtype "x"
-    "{x | IExpression_adt.index(rreduction.x) + IL.popDepth(rS`redex) < rS`stack`length AND (IExpression_adt.marked(rreduction.x) IMPLIES NOT sets[nat].member(IExpression_adt.index(rreduction.x), IL.vars(rS`redex)) AND NOT sets[nat].member(IExpression_adt.index(rreduction.x), preprocess.cvars(rS`context)))}"))
+   (release_marked_match subtype "reduction_props.x"
+    "{x | booleans.AND(reals.<((number_fields.+)(IExpression_adt.index(rreduction.x), IL.popDepth(reduction_props.rS`redex)), reduction_props.rS`stack`length), (booleans.IMPLIES(IExpression_adt.marked(rreduction.x), booleans.AND(, ))))}"))
   (release_marked_match_TCC3-1 nil 3700234159
    ("" (skeep*) (("" (use extend_finite) nil nil)) nil)
    ((variable? adt-recognizer-decl "[IExpression -> boolean]"
@@ -8099,8 +8232,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (release_marked_match subtype "x"
-    "{x | IExpression_adt.index(rreduction.x) + IL.popDepth(rS`redex) < rS`stack`length AND (IExpression_adt.marked(rreduction.x) IMPLIES NOT sets[nat].member(IExpression_adt.index(rreduction.x), IL.vars(rS`redex)) AND NOT sets[nat].member(IExpression_adt.index(rreduction.x), preprocess.cvars(rS`context)))}")))
+   (release_marked_match subtype "reduction_props.x"
+    "{x | booleans.AND(reals.<((number_fields.+)(IExpression_adt.index(rreduction.x), IL.popDepth(reduction_props.rS`redex)), reduction_props.rS`stack`length), (booleans.IMPLIES(IExpression_adt.marked(rreduction.x), booleans.AND(, ))))}")))
  (release_marked_match 0
   (release_marked_match-1 nil 3700424516
    (""
@@ -8281,8 +8414,9 @@
     (unmarkvars_length rec-application-judgement
      "{J | length(J) = length(L)}" preprocess nil))
    nil
-   (letApply_unmark subtype "preprocess.unmarkvars(args)"
-    "{args: list[(IExpression_adt.variable?)] | list_props[(IExpression_adt.variable?)].length(args) = i}")))
+   (letApply_unmark subtype
+    "preprocess.unmarkvars(reduction_props.args)"
+    "{args: list_adt[(IExpression_adt.variable?)].list | list_props[(IExpression_adt.variable?)].length(args) = reduction_props.i}")))
  (letApply_unmark 0
   (letApply_unmark-1 nil 3700835332
    ("" (induct i)
@@ -8442,7 +8576,7 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (applyReduce_match subtype "gS"
+   (applyReduce_match subtype "reduction_props.gS"
     "{gS | IL.applyRedex?(reduction.gS`redex)}")))
  (applyReduce_match 0
   (applyReduce_match-2 "" 3710697494
@@ -8792,11 +8926,11 @@
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
      preprocess nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
@@ -9057,18 +9191,18 @@
          nil)
     (markc def-decl "IContext" preprocess nil)
     (emptyset const-decl "set" sets nil)
-    (mark def-decl "IExpression" preprocess nil) nil
+    (mark def-decl "IExpression" preprocess nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
     (goodrstate type-eq-decl nil reduction_props nil)
     (state_error_match formula-decl nil reduction_props nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
@@ -9100,7 +9234,7 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (vars_mark formula-decl nil preprocess nil)
-    (member const-decl "bool" sets nil) nil nil
+    (member const-decl "bool" sets nil)
     (pure_letApply recursive-judgement-axiom nil rreduction nil)
     (letApply_unmark formula-decl nil reduction_props nil)
     (unmarkvars_length rec-application-judgement
@@ -9111,7 +9245,7 @@
     (unmark_mark formula-decl nil preprocess nil)
     (unmark_pure rec-application-judgement "(pure?)" preprocess nil)
     (store_matches const-decl "boolean" reduction_props nil)
-    (stack_matches const-decl "boolean" reduction_props nil) nil
+    (stack_matches const-decl "boolean" reduction_props nil)
     (translate_refs def-decl "IExpression" reduction_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (translate_refs_contextPure rec-application-judgement
@@ -9133,7 +9267,7 @@
           IExpression_adt nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
-    nil (PRED type-eq-decl nil defined_types nil)
+    (PRED type-eq-decl nil defined_types nil)
     (length def-decl "nat" list_props nil)
     (list type-decl nil list_adt nil)
     (IExpression type-decl nil IExpression_adt nil)
@@ -9149,10 +9283,10 @@
     (domainValue? const-decl "bool" IL nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil) nil (< const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) (< const-decl "bool" reals nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    nil nil nil (<= const-decl "bool" reals nil)
+    (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
     (Store type-eq-decl nil reduction nil)
     (estate type-eq-decl nil reduction nil)
@@ -9183,7 +9317,7 @@
    ((state_matches? const-decl "boolean" reduction_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
     (nonempty_singleton_finite application-judgement
-     "non_empty_finite_set[T]" countability "sets_aux/")
+     "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
     (unmark_cpure rec-application-judgement "(cpure?)" preprocess nil)
@@ -9206,7 +9340,7 @@
   (variableReduce_match_TCC1-1 nil 3706301597
    ("" (use variable_match) nil nil)
    ((variable_match formula-decl nil reduction_props nil)) nil
-   (variableReduce_match subtype "gS"
+   (variableReduce_match subtype "reduction_props.gS"
     "{gS | IExpression_adt.variable?(reduction.gS`redex)}")))
  (variableReduce_match 0
   (variableReduce_match-1 nil 3706301597
@@ -9461,16 +9595,18 @@
     (real_gt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
     (refcountStack const-decl "nat" rreduction nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
     (stack_stillmatch formula-decl nil reduction_props nil)
     (stack_subset_match formula-decl nil reduction_props nil)
     (nonempty_finite_union1 application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (singleton? const-decl "bool" sets nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
@@ -9553,7 +9689,7 @@
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
     (nonempty_singleton_finite application-judgement
-     "non_empty_finite_set[T]" countability "sets_aux/")
+     "non_empty_finite_set[nat]" countability "sets_aux/")
     (state_matches const-decl "boolean" reduction_props nil)
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
@@ -9723,7 +9859,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (ift_condtion_match subtype "grS`redex" "(IExpression_adt.ift?)")))
+   (ift_condtion_match subtype "reduction_props.grS`redex"
+    "(IExpression_adt.ift?)")))
  (ift_condtion_match_TCC2 0
   (ift_condtion_match_TCC2-1 nil 3700425131
    ("" (use ifReduce_correct_indexing) (("" (grind) nil nil)) nil)
@@ -9797,8 +9934,9 @@
     (IContext type-decl nil IL nil)
     (ifReduce_correct_indexing formula-decl nil rreduction nil))
    nil
-   (ift_condtion_match subtype "IExpression_adt.condition(grS`redex)"
-    "{x | IExpression_adt.index(IL.x) < grS`stack`length}")))
+   (ift_condtion_match subtype
+    "IExpression_adt.condition(reduction_props.grS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.grS`stack`length)}")))
  (ift_condtion_match_TCC3 0
   (ift_condtion_match_TCC3-1 nil 3700425131
    ("" (use ift_match) (("" (grind) nil nil)) nil)
@@ -9869,7 +10007,8 @@
     (IContext type-decl nil IL nil)
     (ift_match formula-decl nil reduction_props nil))
    nil
-   (ift_condtion_match subtype "gS`redex" "(IExpression_adt.ift?)")))
+   (ift_condtion_match subtype "reduction_props.gS`redex"
+    "(IExpression_adt.ift?)")))
  (ift_condtion_match_TCC4 0
   (ift_condtion_match_TCC4-1 nil 3700425131
    ("" (skeep*)
@@ -9960,8 +10099,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (ift_condtion_match subtype "IExpression_adt.condition(gS`redex)"
-    "{x | IExpression_adt.index(IL.x) < gS`stack`length}")))
+   (ift_condtion_match subtype
+    "IExpression_adt.condition(reduction_props.gS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.gS`stack`length)}")))
  (ift_condtion_match 0
   (ift_condtion_match-1 nil 3700425030
    ("" (with-labels (skeep*) ((iftr stm obj)))
@@ -10215,7 +10355,7 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (ifReduce_match subtype "gS"
+   (ifReduce_match subtype "reduction_props.gS"
     "{gS | IL.pureIftRedex?(reduction.gS`redex)}")))
  (ifReduce_match 0
   (ifReduce_match-3 "" 3700426340
@@ -11338,11 +11478,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (store_matches const-decl "boolean" reduction_props nil)
@@ -11416,7 +11556,7 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (arrayvalue_translate subtype "grS`redex"
+   (arrayvalue_translate subtype "reduction_props.grS`redex"
     "(IExpression_adt.lookup?)")))
  (arrayvalue_translate_TCC2 0
   (arrayvalue_translate_TCC2-1 nil 3700857840
@@ -11476,8 +11616,8 @@
      integers nil))
    nil
    (arrayvalue_translate subtype
-    "IExpression_adt.arrayvalue(grS`redex)"
-    "{x | IExpression_adt.index(IL.x) < grS`stack`length}")))
+    "IExpression_adt.arrayvalue(reduction_props.grS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.grS`stack`length)}")))
  (arrayvalue_translate_TCC3 0
   (arrayvalue_translate_TCC3-1 nil 3700857840 ("" (grind) nil nil)
    ((IContext type-decl nil IL nil)
@@ -11544,7 +11684,7 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (arrayvalue_translate subtype "gS`redex"
+   (arrayvalue_translate subtype "reduction_props.gS`redex"
     "(IExpression_adt.lookup?)")))
  (arrayvalue_translate_TCC4 0
   (arrayvalue_translate_TCC4-1 nil 3700857840
@@ -11636,11 +11776,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (goodrstate type-eq-decl nil rreduction nil)
@@ -11648,8 +11788,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (arrayvalue_translate subtype "IExpression_adt.arrayvalue(gS`redex)"
-    "{x | IExpression_adt.index(IL.x) < gS`stack`length}")))
+   (arrayvalue_translate subtype
+    "IExpression_adt.arrayvalue(reduction_props.gS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.gS`stack`length)}")))
  (arrayvalue_translate 0
   (arrayvalue_translate-1 nil 3700923396
    ("" (skeep*)
@@ -11753,11 +11894,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (add const-decl "(nonempty?)" sets nil)
     (member const-decl "bool" sets nil)
@@ -11822,8 +11963,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (position_translate subtype "IExpression_adt.position(grS`redex)"
-    "{x | IExpression_adt.index(IL.x) < grS`stack`length}")))
+   (position_translate subtype
+    "IExpression_adt.position(reduction_props.grS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.grS`stack`length)}")))
  (position_translate_TCC2 0
   (position_translate_TCC2-1 nil 3700857840
    ("" (skeep*)
@@ -11915,11 +12057,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (goodrstate type-eq-decl nil rreduction nil)
@@ -11927,8 +12069,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (position_translate subtype "IExpression_adt.position(gS`redex)"
-    "{x | IExpression_adt.index(IL.x) < gS`stack`length}")))
+   (position_translate subtype
+    "IExpression_adt.position(reduction_props.gS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.gS`stack`length)}")))
  (position_translate 0
   (position_translate-1 nil 3700923597
    ("" (skeep)
@@ -12032,11 +12175,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (add const-decl "(nonempty?)" sets nil)
     (member const-decl "bool" sets nil)
@@ -12068,11 +12211,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (store_matches const-decl "boolean" reduction_props nil)
@@ -12087,7 +12230,7 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (lookupReduce_match subtype "gS"
+   (lookupReduce_match subtype "reduction_props.gS"
     "{gS | IL.lookupRedex?(reduction.gS`redex)}")))
  (lookupReduce_match 0
   (lookupReduce_match-2 "" 3710697607
@@ -12960,11 +13103,11 @@
     (lookupRedex_arrayvalue_index formula-decl nil rreduction nil)
     (goodrstate type-eq-decl nil rreduction nil)
     (IExpression_lookup_eta formula-decl nil IExpression_adt nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
@@ -12981,8 +13124,6 @@
     (member const-decl "bool" sets nil)
     (store_stillmatch formula-decl nil reduction_props nil)
     (refcountStore_ref formula-decl nil rreduction nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
     (IExpression_ref_extensionality formula-decl nil IExpression_adt
      nil)
     (real_gt_is_strict_total_order name-judgement
@@ -12994,6 +13135,8 @@
     (refcountStore const-decl "nat" rreduction nil)
     (refcountExpr const-decl "nat" rreduction nil)
     (refcountStack const-decl "nat" rreduction nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
     (stack_subset_match formula-decl nil reduction_props nil)
     (purePopDepth formula-decl nil IL nil)
     (union const-decl "set" sets nil)
@@ -13898,7 +14041,7 @@
      integers nil)
     (goodrstate type-eq-decl nil reduction_props nil)
     (rstate type-eq-decl nil rreduction nil)
-    (refcount const-decl "nat" rreduction nil) nil
+    (refcount const-decl "nat" rreduction nil)
     (mark def-decl "IExpression" preprocess nil)
     (emptyset const-decl "set" sets nil)
     (markc def-decl "IContext" preprocess nil)
@@ -13908,10 +14051,10 @@
     (estate type-eq-decl nil reduction nil)
     (Store type-eq-decl nil reduction nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) nil nil nil
+    (<= const-decl "bool" reals nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
-    (< const-decl "bool" reals nil) nil (refs def-decl "bool" IL nil)
+    (< const-decl "bool" reals nil) (refs def-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
     (domainValue? const-decl "bool" IL nil)
@@ -13954,12 +14097,11 @@
     (nonempty? const-decl "bool" sets nil)
     (nonempty_finite_union1 application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
-    nil nil
     (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (count_elem formula-decl nil finseq_theorems nil)
     (release_marked_match formula-decl nil reduction_props nil)
     (pure? def-decl "bool" IL nil)
-    (setRedex const-decl "rstate" rreduction nil) nil nil nil
+    (setRedex const-decl "rstate" rreduction nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (odd_minus_odd_is_even application-judgement "even_int" integers
@@ -13994,18 +14136,18 @@
      preprocess nil)
     (markv const-decl "(variable?)" preprocess nil)
     (add const-decl "(nonempty?)" sets nil)
-    (stack_matches const-decl "boolean" reduction_props nil) nil
+    (stack_matches const-decl "boolean" reduction_props nil)
     (lookupRedex? const-decl "bool" IL nil)
     (unmarkvar const-decl "(variable?)" preprocess nil)
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (IExpression_lookup_eta formula-decl nil IExpression_adt nil)
     (goodrstate type-eq-decl nil rreduction nil)
@@ -14116,7 +14258,7 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (newintReduce_match subtype "gS"
+   (newintReduce_match subtype "reduction_props.gS"
     "{gS | IL.newintRedex?(reduction.gS`redex)}")))
  (newintReduce_match 0
   (newintReduce_match-2 nil 3700589475
@@ -14278,11 +14420,11 @@
     (int_minus_int_is_int application-judgement "int" integers nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (stack_matches const-decl "boolean" reduction_props nil)
@@ -14495,7 +14637,7 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (newrefReduce_match subtype "gS"
+   (newrefReduce_match subtype "reduction_props.gS"
     "{gS | IL.newrefRedex?(reduction.gS`redex)}")))
  (newrefReduce_match 0
   (newrefReduce_match-1 nil 3700589504
@@ -14657,11 +14799,11 @@
     (int_minus_int_is_int application-judgement "int" integers nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (stack_matches const-decl "boolean" reduction_props nil)
@@ -14796,11 +14938,11 @@
     (store_matches const-decl "boolean" reduction_props nil)
     (posint_plus_nnint_is_posint application-judgement "posint"
      integers nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (finite_union application-judgement "finite_set[nat]" countability
@@ -14810,7 +14952,7 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (popReduce_match subtype "gS"
+   (popReduce_match subtype "reduction_props.gS"
     "{gS | IL.popRedex?(reduction.gS`redex)}")))
  (popReduce_match_TCC2 0
   (popReduce_match_TCC2-1 nil 3700234159 ("" (subtype-tcc) nil nil)
@@ -14874,8 +15016,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (popReduce_match subtype "grS"
-    "{grS | IL.popRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+   (popReduce_match subtype "reduction_props.grS"
+    "{grS | booleans.AND(IL.popRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (popReduce_match 0
   (popReduce_match-1 nil 3700847531
    ("" (with-labels (skeep) ((prx ndr stm obj)))
@@ -15035,11 +15177,11 @@
        reduction_props nil)
     (cvars_vars_ctx formula-decl nil preprocess nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (bump const-decl "finite_set[nat]" IL nil)
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
@@ -15162,11 +15304,11 @@
           IExpression_adt nil)
     (unmark_pure recursive-judgement-axiom nil preprocess nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (finite_union application-judgement "finite_set[nat]" countability
@@ -15230,7 +15372,7 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (letReduce_match subtype "gS"
+   (letReduce_match subtype "reduction_props.gS"
     "{gS | IL.pureLetRedex?(reduction.gS`redex)}")))
  (letReduce_match 0
   (letReduce_match-1 nil 3700837737
@@ -15567,6 +15709,7 @@
     (pureLetRedex? const-decl "bool" IL nil)
     (letRedex? const-decl "bool" IL nil)
     (purePopDepth formula-decl nil IL nil)
+    (minus_odd_is_odd application-judgement "odd_int" integers nil)
     (translate_refs_value application-judgement "(value?)"
      reduction_props nil)
     (grS skolem-const-decl "goodrstate" reduction_props nil)
@@ -15630,11 +15773,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (store_matches const-decl "boolean" reduction_props nil)
@@ -15707,7 +15850,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (target_translate subtype "grS`redex" "(IExpression_adt.update?)")))
+   (target_translate subtype "reduction_props.grS`redex"
+    "(IExpression_adt.update?)")))
  (target_translate_TCC2 0
   (target_translate_TCC2-1 nil 3700940681
    ("" (skeep) (("" (typepred "grS`redex") (("" (grind) nil nil)) nil))
@@ -15790,11 +15934,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
@@ -15802,8 +15946,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (target_translate subtype "IExpression_adt.target(grS`redex)"
-    "{x | IExpression_adt.index(IL.x) < grS`stack`length}")))
+   (target_translate subtype
+    "IExpression_adt.target(reduction_props.grS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.grS`stack`length)}")))
  (target_translate_TCC3 0
   (target_translate_TCC3-1 nil 3700940681
    ("" (skeep) (("" (use update_match) (("" (grind) nil nil)) nil))
@@ -15866,11 +16011,11 @@
     (store_matches const-decl "boolean" reduction_props nil)
     (state_matches const-decl "boolean" reduction_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (nonempty_add_finite application-judgement
@@ -15885,7 +16030,8 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (target_translate subtype "gS`redex" "(IExpression_adt.update?)")))
+   (target_translate subtype "reduction_props.gS`redex"
+    "(IExpression_adt.update?)")))
  (target_translate_TCC4 0
   (target_translate_TCC4-1 nil 3700940681
    ("" (skeep) (("" (typepred "gS`redex") (("" (grind) nil nil)) nil))
@@ -15960,11 +16106,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
@@ -15972,8 +16118,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (target_translate subtype "IExpression_adt.target(gS`redex)"
-    "{x | IExpression_adt.index(IL.x) < gS`stack`length}")))
+   (target_translate subtype
+    "IExpression_adt.target(reduction_props.gS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.gS`stack`length)}")))
  (target_translate 0
   (target_translate-1 nil 3701110891
    ("" (skeep)
@@ -16001,11 +16148,11 @@
      real_props nil)
     (member const-decl "bool" sets nil)
     (add const-decl "(nonempty?)" sets nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (nonempty_add_finite application-judgement
@@ -16175,11 +16322,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
@@ -16187,8 +16334,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (lhs_translate subtype "IExpression_adt.lhs(grS`redex)"
-    "{x | IExpression_adt.index(IL.x) < grS`stack`length}")))
+   (lhs_translate subtype
+    "IExpression_adt.lhs(reduction_props.grS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.grS`stack`length)}")))
  (lhs_translate_TCC2 0
   (lhs_translate_TCC2-1 nil 3700940681
    ("" (skeep) (("" (typepred "gS`redex") (("" (grind) nil nil)) nil))
@@ -16263,11 +16411,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
@@ -16275,8 +16423,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (lhs_translate subtype "IExpression_adt.lhs(gS`redex)"
-    "{x | IExpression_adt.index(IL.x) < gS`stack`length}")))
+   (lhs_translate subtype
+    "IExpression_adt.lhs(reduction_props.gS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.gS`stack`length)}")))
  (lhs_translate 0
   (lhs_translate-1 nil 3701111044
    ("" (skeep)
@@ -16304,11 +16453,11 @@
      real_props nil)
     (member const-decl "bool" sets nil)
     (add const-decl "(nonempty?)" sets nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (nonempty_add_finite application-judgement
@@ -16478,11 +16627,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
@@ -16490,8 +16639,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (rhs_translate subtype "IExpression_adt.rhs(grS`redex)"
-    "{x | IExpression_adt.index(IL.x) < grS`stack`length}")))
+   (rhs_translate subtype
+    "IExpression_adt.rhs(reduction_props.grS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.grS`stack`length)}")))
  (rhs_translate_TCC2 0
   (rhs_translate_TCC2-1 nil 3700940681
    ("" (skeep) (("" (typepred "gS`redex") (("" (grind) nil nil)) nil))
@@ -16566,11 +16716,11 @@
     (nonempty_add_finite application-judgement
      "non_empty_finite_set[nat]" countability "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (real_lt_is_strict_total_order name-judgement
@@ -16578,8 +16728,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (rhs_translate subtype "IExpression_adt.rhs(gS`redex)"
-    "{x | IExpression_adt.index(IL.x) < gS`stack`length}")))
+   (rhs_translate subtype
+    "IExpression_adt.rhs(reduction_props.gS`redex)"
+    "{x | reals.<(IExpression_adt.index(IL.x), reduction_props.gS`stack`length)}")))
  (rhs_translate 0
   (rhs_translate-1 nil 3701111130
    ("" (skeep)
@@ -16607,11 +16758,11 @@
      real_props nil)
     (member const-decl "bool" sets nil)
     (add const-decl "(nonempty?)" sets nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (nonempty_add_finite application-judgement
@@ -16766,7 +16917,7 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (updateReduce_match subtype "gS"
+   (updateReduce_match subtype "reduction_props.gS"
     "{gS | IL.updateRedex?(reduction.gS`redex)}")))
  (updateReduce_match_TCC2 0
   (updateReduce_match_TCC2-1 nil 3700940681 ("" (subtype-tcc) nil nil)
@@ -16829,8 +16980,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (updateReduce_match subtype "grS"
-    "{grS | IL.updateRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+   (updateReduce_match subtype "reduction_props.grS"
+    "{grS | booleans.AND(IL.updateRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (updateReduce_match 0
   (updateReduce_match-5 "" 3706274624
    ("" (with-labels (skeep*) ((upr ndr stm obj)))
@@ -19336,16 +19487,12 @@
     (NOT const-decl "[bool -> bool]" booleans nil)
     (rstate type-eq-decl nil rreduction nil)
     (refcount const-decl "nat" rreduction nil)
-    (Store type-eq-decl nil reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (Store type-eq-decl nil reduction nil) nil
     (mark def-decl "IExpression" preprocess nil)
     (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
+    (<= const-decl "bool" reals nil) nil nil nil
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (vars def-decl "finite_set[nat]" IL nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil) nil
     (refs def-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
     (domainValue? const-decl "bool" IL nil)
@@ -19396,8 +19543,7 @@
     (ref adt-constructor-decl "[nat -> (ref?)]" IExpression_adt nil)
     (rhs adt-accessor-decl "[(update?) -> (variable?)]" IExpression_adt
          nil)
-    (state_matches const-decl "boolean" reduction_props nil)
-    (r_2 skolem-const-decl "nat" reduction_props nil)
+    (state_matches const-decl "boolean" reduction_props nil) nil
     (update_store_count formula-decl nil reduction_props nil)
     (count_copy_count formula-decl nil reduction_props nil)
     (finite_remove application-judgement "finite_set[nat]" countability
@@ -19422,13 +19568,11 @@
     (count_elem formula-decl nil finseq_theorems nil)
     (refcountStack const-decl "nat" rreduction nil)
     (upto nonempty-type-eq-decl nil naturalnumbers nil)
-    (translate_refs_eq formula-decl nil reduction_props nil)
-    (gS skolem-const-decl "goodstate" reduction_props nil)
+    (translate_refs_eq formula-decl nil reduction_props nil) nil
     (goodrstate type-eq-decl nil rreduction nil)
-    (updateRedex_rhs_index formula-decl nil rreduction nil)
-    (rval skolem-const-decl "(value?)" reduction_props nil)
-    (update_store const-decl "{((newstr: Store(dom))),
- ((newcnt: [i: (dom) -> {j | j = refcount(dom, newstr, S, A)(i)}])) |
+    (updateRedex_rhs_index formula-decl nil rreduction nil) nil
+    (update_store const-decl "{((newstr: Store(dom)),
+  (newcnt: [i: (dom) -> {j | j = refcount(dom, newstr, S, A)(i)}])) |
    newstr = str WITH [(r)`seq(i) := nv]}" rreduction nil)
     (count_copy def-decl "[(dom) -> nat]" rreduction nil)
     (finseq_appl const-decl "[below[length(fs)] -> T]" finite_sequences
@@ -19436,11 +19580,7 @@
     (translate_refs_value application-judgement "(value?)"
      reduction_props nil)
     (IF const-decl "[boolean, T, T -> T]" if_def nil)
-    (stack_subset_match formula-decl nil reduction_props nil)
-    (grS skolem-const-decl "goodrstate" reduction_props nil)
-    (i!1 skolem-const-decl
-     "(union(cvars(grS`redex), bumpn(cvars(grS`context), popDepth(grS`redex))))"
-     reduction_props nil)
+    (stack_subset_match formula-decl nil reduction_props nil) nil nil
     (pure? def-decl "bool" IL nil)
     (real_le_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
@@ -19461,11 +19601,11 @@
     (stack_matches const-decl "boolean" reduction_props nil)
     (member const-decl "bool" sets nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (update adt-constructor-decl
      "[[(variable?), (variable?), (variable?)] -> (update?)]"
@@ -19480,47 +19620,19 @@
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
     (maybe_clear_stack_at_match formula-decl nil reduction_props nil)
-    (union const-decl "set" sets nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (union const-decl "set" sets nil) nil
     (bumpn const-decl "finite_set[nat]" IL nil)
     (unmark def-decl "IExpression" preprocess nil)
     (least_out const-decl "{n | NOT NS(n)}" finite_set_theorems nil)
-    (copying skolem-const-decl "boolean" reduction_props nil)
-    (nil adt-constructor-decl "(nil?)" IExpression_adt nil)
+    nil (nil adt-constructor-decl "(nil?)" IExpression_adt nil)
     (nil? adt-recognizer-decl "[IExpression -> boolean]"
      IExpression_adt nil)
-    (decref1_chk_stillmatch formula-decl nil reduction_props nil)
-    (r skolem-const-decl "nat" reduction_props nil)
-    (i!1 skolem-const-decl
-     "(union(cvars(ref(r)), bumpn(cvars(grS`context), popDepth(ref(r)))))"
-     reduction_props nil)
-    (count_update formula-decl nil finseq_theorems nil)
+    (decref1_chk_stillmatch formula-decl nil reduction_props nil) nil
+    nil (count_update formula-decl nil finseq_theorems nil)
     (IExpression_ref_extensionality formula-decl nil IExpression_adt
      nil)
     (rhs_translate formula-decl nil reduction_props nil)
-    (refcountStore_ref formula-decl nil rreduction nil)
-    (j skolem-const-decl "below(update_store(grS`domain, grS`store,
-                   maybe_clear_stack_at(grS`domain,
-                                        grS`store,
-                                        grS`stack,
-                                        grS`redex,
-                                        grS`count,
-                                        rhs(grS`redex))`1
-                     WITH [(seq)
-                             (grS`stack`length - 1 -
-                               index(target(grS`redex)))
-                             := nil],
-                   ref(r),
-                   maybe_clear_stack_at(grS`domain,
-                                        grS`store,
-                                        grS`stack,
-                                        grS`redex,
-                                        grS`count,
-                                        rhs(grS`redex))`2,
-                   r, i, rval)`1
-          (r_1)`length)" reduction_props nil)
-    (r_1 skolem-const-decl "(grS`domain)" reduction_props nil)
-    (i skolem-const-decl "int" reduction_props nil)
+    (refcountStore_ref formula-decl nil rreduction nil) nil nil nil
     (OR const-decl "[bool, bool -> bool]" booleans nil)
     (> const-decl "bool" reals nil)
     (below type-eq-decl nil naturalnumbers nil)
@@ -19529,8 +19641,8 @@
      nil)
     (maybe_clear_stack_at const-decl "{((newStack: Stack
        | every(domainValue?(dom))(newStack) AND
-          newStack`length = S`length)),
- ((newcnt: [i: (dom) -> {j | j = refcount(dom, str, newStack, A)(i)}])) |
+          newStack`length = S`length),
+  (newcnt: [i: (dom) -> {j | j = refcount(dom, str, newStack, A)(i)}])) |
    FORALL (i: below(S`length)):
      ref?(newStack`seq(newStack`length - 1 - i)) IMPLIES
       ref?(S`seq(S`length - 1 - i)) AND NOT (i = index(x) AND marked(x))}"
@@ -24490,11 +24602,11 @@
     (updateRedex? const-decl "bool" IL nil)
     (stack_matches const-decl "boolean" reduction_props nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (stack_subset_match formula-decl nil reduction_props nil)
     (unmark_cpure rec-application-judgement "(cpure?)" preprocess nil)
@@ -26750,11 +26862,11 @@
     (nonempty? const-decl "bool" sets nil)
     (finite_remove application-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (emptyset const-decl "set" sets nil)
@@ -27039,8 +27151,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (releaseReduce_arm subtype "grS"
-    "{grS | IL.pureReleaseRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+   (releaseReduce_arm subtype "reduction_props.grS"
+    "{grS | booleans.AND(IL.pureReleaseRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (releaseReduce_arm 0
   (releaseReduce_arm-1 nil 3701175825
    ("" (skeep)
@@ -27247,11 +27359,11 @@
     (arm_mark_unmark formula-decl nil reduction_props nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
@@ -27543,8 +27655,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (popReduce_arm subtype "grS"
-    "{grS | IL.popRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+   (popReduce_arm subtype "reduction_props.grS"
+    "{grS | booleans.AND(IL.popRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (popReduce_arm 0
   (popReduce_arm-1 nil 3701176334
    ("" (skeep)
@@ -27630,8 +27742,8 @@
      integers nil)
     (int_minus_int_is_int application-judgement "int" integers nil))
    nil
-   (updateReduce_arm subtype "grS"
-    "{grS | IL.updateRedex?(rreduction.grS`redex) AND rreduction.noDanglingRefs?(rreduction.grS)}")))
+   (updateReduce_arm subtype "reduction_props.grS"
+    "{grS | booleans.AND(IL.updateRedex?(rreduction.grS`redex), rreduction.noDanglingRefs?(rreduction.grS))}")))
  (updateReduce_arm 0
   (updateReduce_arm-1 nil 3701176465
    ("" (skeep)
@@ -27984,7 +28096,7 @@
    ((reduce const-decl "rstate" rreduction nil)
     (arm_fill formula-decl nil preprocess nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (releaseReduce_arm formula-decl nil reduction_props nil)
     (pureReleaseRedex? const-decl "bool" IL nil)
@@ -28006,7 +28118,7 @@
     allReleaseMarked?(grS`redex) AND armc?(grS`context)}"
      reduction_props nil)
     (make_redex_ndr judgement-tcc nil rreduction nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -28075,8 +28187,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (reduce_arm subtype "rreduction.reduce(D)(grS)"
-    "{rS | preprocess.allReleaseMarked?(rS`redex) AND preprocess.armc?(rS`context)}"))
+   (reduce_arm subtype
+    "rreduction.reduce(reduction_props.D)(reduction_props.grS)"
+    "{rS | booleans.AND(preprocess.allReleaseMarked?(reduction_props.rS`redex), preprocess.armc?(reduction_props.rS`context))}"))
   (reduce_arm-1 nil 3701180728
    ("" (with-labels (skeep :preds? t) ((ndr arm armc obj)))
     (("" (expand reduce)
@@ -28223,7 +28336,7 @@
    ((reduce const-decl "rstate" rreduction nil)
     (arm_fill formula-decl nil preprocess nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (releaseReduce_arm formula-decl nil reduction_props nil)
     (pureReleaseRedex? const-decl "bool" IL nil)
@@ -28240,7 +28353,7 @@
     (unmark def-decl "IExpression" preprocess nil)
     (pure? def-decl "bool" IL nil)
     (make_redex_ndr judgement-tcc nil rreduction nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -28304,8 +28417,9 @@
     (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
      integers nil))
    nil
-   (reduce_arm subtype "rreduction.reduce(D)(grS)"
-    "{rS | preprocess.allReleaseMarked?(rS`redex) AND preprocess.armc?(rS`context)}")))
+   (reduce_arm subtype
+    "rreduction.reduce(reduction_props.D)(reduction_props.grS)"
+    "{rS | booleans.AND(preprocess.allReleaseMarked?(reduction_props.rS`redex), preprocess.armc?(reduction_props.rS`context))}")))
  (rreduce_n_TCC1 0
   (rreduce_n_TCC1-1 nil 3701439191 ("" (subtype-tcc) nil nil)
    ((boolean nonempty-type-decl nil booleans nil)
@@ -28360,16 +28474,19 @@
      integers nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil))
-   nil (rreduce_n subtype "n - 1" "nat")))
+   nil
+   (rreduce_n subtype "(number_fields.-)(reduction_props.n, 1)"
+    "nat")))
  (rreduce_n_TCC2 0
   (rreduce_n_TCC2-1 nil 3701439191 ("" (subtype-tcc) nil nil) nil nil
-   (rreduce_n subtype "rS"
+   (rreduce_n subtype "reduction_props.rS"
     "{grS | rreduction.noDanglingRefs?(rreduction.grS)}")))
  (rreduce_n_TCC3 0
   (rreduce_n_TCC3-1 nil 3701439191 ("" (termination-tcc) nil nil) nil
    nil
    (rreduce_n termination
-    "rreduce_n(D)(n - 1, rreduction.reduce(D)(rS))" "nil")))
+    "reduction_props.rreduce_n(reduction_props.D)((number_fields.-)(reduction_props.n, 1), rreduction.reduce(reduction_props.D)(reduction_props.rS))"
+    "nil")))
  (rreduce_n_err 0
   (rreduce_n_err-1 nil 3710697779
    ("" (induct n) (("1" (grind) nil nil) ("2" (grind) nil nil)) nil)
@@ -28583,70 +28700,70 @@
       nil)
      ("3" (skeep) (("3" (rewrite rreduce_n_ndr) nil nil)) nil))
     nil)
-   ((nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
-     integers nil)
-    (rreduce_n def-decl "rstate" reduction_props nil)
-    (noDanglingRefs? const-decl "bool" rreduction nil)
-    (rstate type-eq-decl nil rreduction nil)
-    (refcount const-decl "nat" rreduction nil)
-    (Store type-eq-decl nil reduction nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (contextPure? def-decl "bool" IL nil)
-    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil)
-    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (refs def-decl "bool" IL nil)
-    (domainValue? const-decl "bool" IL nil)
-    (every const-decl "bool" finseq_theorems nil)
-    (finseq type-eq-decl nil finite_sequences nil)
-    (Stack type-eq-decl nil IL nil) (value? const-decl "bool" IL nil)
-    (emptyset const-decl "set" sets nil)
-    (markc def-decl "IContext" preprocess nil)
-    (cpure? def-decl "bool" IL nil) (IContext type-decl nil IL nil)
-    (Defs type-eq-decl nil reduction_props nil)
-    (Definition type-eq-decl nil reduction_props nil)
-    (unmark def-decl "IExpression" preprocess nil)
-    (= const-decl "[T, T -> boolean]" equalities nil)
-    (< const-decl "bool" reals nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (finite_set type-eq-decl nil finite_sets nil)
-    (is_finite const-decl "bool" finite_sets nil)
-    (set type-eq-decl nil sets nil)
-    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (pure? def-decl "bool" IL nil)
-    (AND const-decl "[bool, bool -> bool]" booleans nil)
-    (IExpression type-decl nil IExpression_adt nil)
-    (below type-eq-decl nil nat_types nil)
-    (nat nonempty-type-eq-decl nil naturalnumbers nil)
-    (>= const-decl "bool" reals nil)
-    (bool nonempty-type-eq-decl nil booleans nil)
-    (int nonempty-type-eq-decl nil integers nil)
-    (integer_pred const-decl "[rational -> boolean]" integers nil)
-    (rational nonempty-type-from-decl nil rationals nil)
-    (rational_pred const-decl "[real -> boolean]" rationals nil)
-    (real nonempty-type-from-decl nil reals nil)
-    (real_pred const-decl "[number_field -> boolean]" reals nil)
-    (number_field nonempty-type-from-decl nil number_fields nil)
-    (number_field_pred const-decl "[number -> boolean]" number_fields
-     nil)
-    (boolean nonempty-type-decl nil booleans nil)
-    (number nonempty-type-decl nil numbers nil)
-    (pred type-eq-decl nil defined_types nil)
-    (nat_induction formula-decl nil naturalnumbers nil)
-    (posint_plus_nnint_is_posint application-judgement "posint"
-     integers nil)
-    (rreduce_n_err formula-decl nil reduction_props nil)
-    (Definition type-eq-decl nil rreduction nil)
-    (Defs type-eq-decl nil rreduction nil)
-    (NOT const-decl "[bool -> bool]" booleans nil)
-    (goodrstate type-eq-decl nil rreduction nil)
-    (reduce const-decl "rstate" rreduction nil)
+   ((rreduce_n_ndr formula-decl nil reduction_props nil)
     (reduce_ndr application-judgement "(noDanglingRefs?)" rreduction
      nil)
-    (rreduce_n_ndr formula-decl nil reduction_props nil))
+    (reduce const-decl "rstate" rreduction nil)
+    (goodrstate type-eq-decl nil rreduction nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (Defs type-eq-decl nil rreduction nil)
+    (Definition type-eq-decl nil rreduction nil)
+    (rreduce_n_err formula-decl nil reduction_props nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (nat_induction formula-decl nil naturalnumbers nil)
+    (pred type-eq-decl nil defined_types nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (below type-eq-decl nil nat_types nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (pure? def-decl "bool" IL nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (set type-eq-decl nil sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (< const-decl "bool" reals nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (Definition type-eq-decl nil reduction_props nil)
+    (Defs type-eq-decl nil reduction_props nil)
+    (IContext type-decl nil IL nil) (cpure? def-decl "bool" IL nil)
+    (markc def-decl "IContext" preprocess nil)
+    (emptyset const-decl "set" sets nil)
+    (value? const-decl "bool" IL nil) (Stack type-eq-decl nil IL nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (every const-decl "bool" finseq_theorems nil)
+    (domainValue? const-decl "bool" IL nil)
+    (refs def-decl "bool" IL nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (popDepth def-decl "nat" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    (contextPure? def-decl "bool" IL nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (Store type-eq-decl nil reduction nil)
+    (refcount const-decl "nat" rreduction nil)
+    (rstate type-eq-decl nil rreduction nil)
+    (noDanglingRefs? const-decl "bool" rreduction nil)
+    (rreduce_n def-decl "rstate" reduction_props nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil))
    shostak))
  (build_redex_match 0
   (build_redex_match-2 nil 3706042406
@@ -28872,7 +28989,7 @@
      real_props nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (unmark def-decl "IContext" preprocess nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (IContext type-decl nil IL nil)
     (release? adt-recognizer-decl "[IExpression -> boolean]"
@@ -29119,7 +29236,7 @@
      real_props nil)
     (IExpression_induction formula-decl nil IExpression_adt nil)
     (unmark def-decl "IContext" preprocess nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (IContext type-decl nil IL nil)
     (release? adt-recognizer-decl "[IExpression -> boolean]"
@@ -29262,7 +29379,7 @@
     (make_redex const-decl "{rS | pureRedex?(rS`redex)}" rreduction
      nil)
     (releaseRedex? const-decl "bool" IL nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -29287,14 +29404,14 @@
      real_props nil)
     (cvars_fill formula-decl nil preprocess nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (stack_matches const-decl "boolean" reduction_props nil)
@@ -29425,11 +29542,11 @@
     (hole? adt-recognizer-decl "[IContext -> boolean]" IL nil)
     (hole adt-constructor-decl "(hole?)" IL nil)
     (cvars_fill formula-decl nil preprocess nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
@@ -29814,7 +29931,160 @@
         nil))
       nil))
     nil)
-   nil shostak)
+   ((goodrstate type-eq-decl nil reduction_props nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (to_topstate const-decl "rtopstate" rreduction nil)
+    (rtopstate type-eq-decl nil rreduction nil)
+    (hole adt-constructor-decl "(hole?)" IL nil)
+    (hole? adt-recognizer-decl "[IContext -> boolean]" IL nil)
+    (rstate type-eq-decl nil rreduction nil)
+    (refcount const-decl "nat" rreduction nil)
+    (Store type-eq-decl nil reduction nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (contextPure? def-decl "bool" IL nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (popDepth def-decl "nat" IL nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (< const-decl "bool" reals nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (refs def-decl "bool" IL nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (domainValue? const-decl "bool" IL nil)
+    (every const-decl "bool" finseq_theorems nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Stack type-eq-decl nil IL nil)
+    (below type-eq-decl nil nat_types nil)
+    (emptyset const-decl "set" sets nil)
+    (markc def-decl "IContext" preprocess nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (cpure? def-decl "bool" IL nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (IContext type-decl nil IL nil) (value? const-decl "bool" IL nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (fill def-decl "IExpression" IL nil)
+    (popc? adt-recognizer-decl "[IContext -> boolean]" IL nil)
+    (letc? adt-recognizer-decl "[IContext -> boolean]" IL nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (top_releases_ct def-decl "nat" reduction_props nil)
+    (pureRedex? const-decl "bool" IL nil)
+    (make_redex const-decl "{rS | pureRedex?(rS`redex)}" rreduction
+     nil)
+    (translate_popDepth formula-decl nil reduction_props nil)
+    (unmark_popDepth_ctx formula-decl nil preprocess nil)
+    (contextPurefill formula-decl nil IL nil)
+    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
+     preprocess nil)
+    (refs_fill formula-decl nil IL nil)
+    (unmark_vars formula-decl nil preprocess nil)
+    (unmark_vars_ctx formula-decl nil preprocess nil)
+    (translate_vars formula-decl nil reduction_props nil)
+    (unmark_popDepth formula-decl nil preprocess nil)
+    (state_matches const-decl "boolean" reduction_props nil)
+    (releaseRedex? const-decl "bool" IL nil)
+    (popRedex? const-decl "bool" IL nil)
+    (newrefRedex? const-decl "bool" IL nil)
+    (newintRedex? const-decl "bool" IL nil)
+    (lookupRedex? const-decl "bool" IL nil)
+    (updateRedex? const-decl "bool" IL nil)
+    (pureIftRedex? const-decl "bool" IL nil)
+    (iftRedex? const-decl "bool" IL nil)
+    (applyRedex? const-decl "bool" IL nil)
+    (pureLetRedex? const-decl "bool" IL nil)
+    (letRedex? const-decl "bool" IL nil)
+    (top_releases_ct_fill formula-decl nil reduction_props nil)
+    (top_releases_build_redex formula-decl nil reduction_props nil)
+    (make_redex_ndr judgement-tcc nil rreduction nil)
+    (grS skolem-const-decl "goodrstate" reduction_props nil)
+    (to_topstate_dangling judgement-tcc nil rreduction nil)
+    (arm_fill formula-decl nil preprocess nil)
+    (allReleaseMarked? def-decl "bool" preprocess nil)
+    (releaseReduce_match formula-decl nil reduction_props nil)
+    (topstate type-eq-decl nil reduction nil)
+    (to_topstate const-decl "topstate" reduction nil)
+    (nS skolem-const-decl "estate" reduction_props nil)
+    (translate_fill formula-decl nil reduction_props nil)
+    (unmark_fill formula-decl nil preprocess nil)
+    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
+     nil)
+    (buildRedexPure rec-application-judgement "{(K, B) |
+   fill(K, B) = A AND
+    ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
+     nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (to_topstate_match formula-decl nil reduction_props nil)
+    (Defs type-eq-decl nil reduction_props nil)
+    (Definition type-eq-decl nil reduction_props nil)
+    (releaseReduce const-decl "rstate" rreduction nil)
+    (noDanglingRefs? const-decl "bool" rreduction nil)
+    (pureReleaseRedex? const-decl "bool" IL nil)
+    (goodrstate type-eq-decl nil rreduction nil)
+    (Defs type-eq-decl nil rreduction nil)
+    (Definition type-eq-decl nil rreduction nil)
+    (pure? def-decl "bool" IL nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (union const-decl "set" sets nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (stack_matches const-decl "boolean" reduction_props nil)
+    (store_matches const-decl "boolean" reduction_props nil)
+    (member const-decl "bool" sets nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (cvars_fill formula-decl nil preprocess nil)
+    (translate_refs_value application-judgement "(value?)"
+     reduction_props nil)
+    (j skolem-const-decl "below(rS`store(r)`length)" reduction_props
+     nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (r skolem-const-decl "(rS`domain)" reduction_props nil)
+    (unmark_contextPure rec-application-judgement "(contextPure?)"
+     preprocess nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (unmark def-decl "IContext" preprocess nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (translate_refs def-decl "IExpression" reduction_props nil)
+    (goodstate type-eq-decl nil reduction nil)
+    (estate type-eq-decl nil reduction nil)
+    (translate_refs_contextPure rec-application-judgement
+     "(contextPure?)" reduction_props nil)
+    (unmark_cpure rec-application-judgement "(cpure?)" preprocess nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil))
+   shostak)
   (releaseReduce_reduce_match-2 nil 3706042595
    (""
     (with-labels (skeep* :preds? t)
@@ -30194,12 +30464,10 @@
      real_props nil)
     (unmark_contextPure rec-application-judgement "(contextPure?)"
      preprocess nil)
-    (r skolem-const-decl "(rS`domain)" reduction_props nil)
+    nil
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (below type-eq-decl nil naturalnumbers nil)
-    (j skolem-const-decl "below(rS`store(r)`length)" reduction_props
-     nil)
+    (below type-eq-decl nil naturalnumbers nil) nil
     (translate_refs_value application-judgement "(value?)"
      reduction_props nil)
     (cvars_fill formula-decl nil preprocess nil)
@@ -30209,17 +30477,16 @@
     (store_matches const-decl "boolean" reduction_props nil)
     (stack_matches const-decl "boolean" reduction_props nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (union const-decl "set" sets nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (union const-decl "set" sets nil) nil
     (bumpn const-decl "finite_set[nat]" IL nil)
     (pure? def-decl "bool" IL nil)
     (Definition type-eq-decl nil rreduction nil)
@@ -30232,23 +30499,19 @@
     (Defs type-eq-decl nil reduction_props nil)
     (to_topstate_match formula-decl nil reduction_props nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
-    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
-     nil)
-    (unmark_fill formula-decl nil preprocess nil)
-    (translate_fill formula-decl nil reduction_props nil)
-    (nS skolem-const-decl "estate" reduction_props nil)
+    nil (unmark_fill formula-decl nil preprocess nil)
+    (translate_fill formula-decl nil reduction_props nil) nil
     (to_topstate const-decl "topstate" reduction nil)
     (topstate type-eq-decl nil reduction nil)
     (releaseReduce_match formula-decl nil reduction_props nil)
     (allReleaseMarked? def-decl "bool" preprocess nil)
     (arm_fill formula-decl nil preprocess nil)
-    (to_topstate_dangling judgement-tcc nil rreduction nil)
-    (grS skolem-const-decl "goodrstate" reduction_props nil)
+    (to_topstate_dangling judgement-tcc nil rreduction nil) nil
     (make_redex_ndr judgement-tcc nil rreduction nil)
     (top_releases_build_redex formula-decl nil reduction_props nil)
     (top_releases_ct_fill formula-decl nil reduction_props nil)
@@ -30313,17 +30576,12 @@
     (every const-decl "bool" finseq_theorems nil)
     (domainValue? const-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (< const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) nil (< const-decl "bool" reals nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    nil nil nil (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil) nil
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -30786,11 +31044,11 @@
     (to_topstate const-decl "topstate" reduction nil)
     (translate_fill formula-decl nil reduction_props nil)
     (unmark_fill formula-decl nil preprocess nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
     (to_topstate_match formula-decl nil reduction_props nil)
     (Defs type-eq-decl nil reduction_props nil)
@@ -30807,11 +31065,11 @@
     (finite_union application-judgement "finite_set[nat]" countability
      "sets_aux/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (int_minus_int_is_int application-judgement "int" integers nil)
     (stack_matches const-decl "boolean" reduction_props nil)
@@ -32652,7 +32910,262 @@
         nil))
       nil))
     nil)
-   nil shostak)
+   ((decref const-decl "{rS1 |
+   allcountStore(rS1) <= allcountStore(rS) AND
+    rS1`domain = rS`domain AND
+     (FORALL (s: (rS`domain)):
+        rS1`store(s)`length = rS`store(s)`length AND
+         rS1`count(s) <= rS`count(s) AND
+          (rS1`count(s) = 0 OR rS1`store(s) = rS`store(s)))
+      AND noDanglingRefs?(rS1)}" rreduction nil)
+    (decref1_preserves_error formula-decl nil reduction_props nil)
+    (decref_preserves_jdg application-judgement "{rS2 |
+   rS2`redex = rS`redex AND
+    rS2`stack = rS`stack AND
+     rS2`context = rS`context AND rS2`error = rS`error}"
+     reduction_props nil)
+    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
+     nil)
+    (translate_popDepth formula-decl nil reduction_props nil)
+    (unmark_popDepth_ctx formula-decl nil preprocess nil)
+    (contextPurefill formula-decl nil IL nil)
+    (vars_mark_type application-judgement "{C | vars(C) = vars(B)}"
+     preprocess nil)
+    (refs_fill formula-decl nil IL nil)
+    (unmark_vars formula-decl nil preprocess nil)
+    (unmark_vars_ctx formula-decl nil preprocess nil)
+    (translate_vars formula-decl nil reduction_props nil)
+    (unmark_popDepth formula-decl nil preprocess nil)
+    (releaseReduce_match formula-decl nil reduction_props nil)
+    (nS skolem-const-decl "estate" reduction_props nil)
+    (translate_fill formula-decl nil reduction_props nil)
+    (unmark_fill formula-decl nil preprocess nil)
+    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
+     nil)
+    (to_topstate_match formula-decl nil reduction_props nil)
+    (releaseReduce const-decl "rstate" rreduction nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (cvars_fill formula-decl nil preprocess nil)
+    (finite_emptyset name-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
+     "sets_aux/")
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
+     "sigma_set/")
+    (finite_emptyset name-judgement "finite_set" finite_sets nil)
+    (union const-decl "set" sets nil)
+    (r skolem-const-decl "(rS`domain)" reduction_props nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (below type-eq-decl nil naturalnumbers nil)
+    (j skolem-const-decl "below(rS`store(r)`length)" reduction_props
+     nil)
+    (translate_refs_value application-judgement "(value?)"
+     reduction_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (top_release_reduce formula-decl nil reduction_props nil)
+    (reduce_arm judgement-tcc nil reduction_props nil)
+    (reduce_ndr judgement-tcc nil rreduction nil)
+    (top_releases_reduce formula-decl nil reduction_props nil)
+    (int_plus_int_is_int application-judgement "int" integers nil)
+    (D skolem-const-decl "Defs" reduction_props nil)
+    (goodrstate type-eq-decl nil rreduction nil)
+    (Defs type-eq-decl nil rreduction nil)
+    (Definition type-eq-decl nil rreduction nil)
+    (reduce_ndr application-judgement "(noDanglingRefs?)" rreduction
+     nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (IExpression_induction formula-decl nil IExpression_adt nil)
+    (make_redex const-decl "{rS | pureRedex?(rS`redex)}" rreduction
+     nil)
+    (pureRedex? const-decl "bool" IL nil)
+    (state_matches const-decl "boolean" reduction_props nil)
+    (fill def-decl "IExpression" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
+    (OR const-decl "[bool, bool -> bool]" booleans nil)
+    (arm_fill formula-decl nil preprocess nil)
+    (variable? adt-recognizer-decl "[IExpression -> boolean]"
+               IExpression_adt nil)
+    (variable_match formula-decl nil reduction_props nil)
+    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
+     nil)
+    (eS skolem-const-decl "{eS | pureRedex?(eS`redex)}" reduction_props
+     nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (singleton const-decl "(singleton?)" sets nil)
+    (bumpn const-decl "finite_set[nat]" IL nil)
+    (translate_refs def-decl "IExpression" reduction_props nil)
+    (stack_matches const-decl "boolean" reduction_props nil)
+    (store_matches const-decl "boolean" reduction_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (finite_union application-judgement "finite_set[nat]" countability
+     "sets_aux/")
+    (unmark_cpure rec-application-judgement "(cpure?)" preprocess nil)
+    (unmark_contextPure rec-application-judgement "(contextPure?)"
+     preprocess nil)
+    (translate_refs_contextPure rec-application-judgement
+     "(contextPure?)" reduction_props nil)
+    (variableReduce_match formula-decl nil reduction_props nil)
+    (applyRedex? const-decl "bool" IL nil)
+    (IExpression_application_eta formula-decl nil IExpression_adt nil)
+    (application? adt-recognizer-decl "[IExpression -> boolean]"
+                  IExpression_adt nil)
+    (unmarkvars_length rec-application-judgement
+     "{J | length(J) = length(L)}" preprocess nil)
+    (buildRedexPure rec-application-judgement "{(K, B) |
+   fill(K, B) = A AND
+    ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
+     nil)
+    (applyReduce_match formula-decl nil reduction_props nil)
+    (updateRedex? const-decl "bool" IL nil)
+    (IExpression_update_eta formula-decl nil IExpression_adt nil)
+    (update? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (unmarkvar const-decl "(variable?)" preprocess nil)
+    (updateReduce_match formula-decl nil reduction_props nil)
+    (newintRedex? const-decl "bool" IL nil)
+    (newint? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_newint_eta formula-decl nil IExpression_adt nil)
+    (newintReduce_match formula-decl nil reduction_props nil)
+    (popRedex? const-decl "bool" IL nil)
+    (unmark def-decl "IContext" preprocess nil)
+    (pbody adt-accessor-decl "[(pop?) -> IExpression]" IExpression_adt
+     nil)
+    (IExpression_pop_eta formula-decl nil IExpression_adt nil)
+    (pop? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (popReduce_match formula-decl nil reduction_props nil)
+    (top_releases_ct_fill formula-decl nil reduction_props nil)
+    (releaseRedex? const-decl "bool" IL nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (top_releases_build_redex formula-decl nil reduction_props nil)
+    (pureReleaseRedex? const-decl "bool" IL nil)
+    (newrefReduce_match formula-decl nil reduction_props nil)
+    (newref? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_newref_eta formula-decl nil IExpression_adt nil)
+    (newrefRedex? const-decl "bool" IL nil)
+    (lookupReduce_match formula-decl nil reduction_props nil)
+    (lookup? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_lookup_eta formula-decl nil IExpression_adt nil)
+    (member const-decl "bool" sets nil)
+    (add const-decl "(nonempty?)" sets nil)
+    (lookupRedex? const-decl "bool" IL nil)
+    (ifReduce_match formula-decl nil reduction_props nil)
+    (iftRedex? const-decl "bool" IL nil)
+    (elseexpr adt-accessor-decl "[(ift?) -> IExpression]"
+     IExpression_adt nil)
+    (thenexpr adt-accessor-decl "[(ift?) -> IExpression]"
+     IExpression_adt nil)
+    (ift? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_ift_eta formula-decl nil IExpression_adt nil)
+    (pureIftRedex? const-decl "bool" IL nil)
+    (letReduce_match formula-decl nil reduction_props nil)
+    (letRedex? const-decl "bool" IL nil)
+    (translate_refs_pure recursive-judgement-axiom nil reduction_props
+     nil)
+    (body adt-accessor-decl "[(letexpr?) -> IExpression]"
+          IExpression_adt nil)
+    (unmark_pure recursive-judgement-axiom nil preprocess nil)
+    (translate_refs_value judgement-tcc nil reduction_props nil)
+    (letrhs adt-accessor-decl "[(letexpr?) -> IExpression]"
+     IExpression_adt nil)
+    (unmark_value judgement-tcc nil preprocess nil)
+    (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
+     IExpression_adt nil)
+    (IExpression_letexpr_eta formula-decl nil IExpression_adt nil)
+    (pureLetRedex? const-decl "bool" IL nil)
+    (grS skolem-const-decl "goodrstate" reduction_props nil)
+    (to_topstate_dangling judgement-tcc nil rreduction nil)
+    (make_redex_ndr judgement-tcc nil rreduction nil)
+    (make_redex_match formula-decl nil reduction_props nil)
+    (make_redex_e const-decl "{eS | pureRedex?(eS`redex)}" reduction
+     nil)
+    (reduce const-decl "rstate" rreduction nil)
+    (rreduce_n def-decl "rstate" reduction_props nil)
+    (reduce const-decl "estate" reduction nil)
+    (Defs type-eq-decl nil reduction nil)
+    (Definition type-eq-decl nil reduction nil)
+    (to_topstate const-decl "rtopstate" rreduction nil)
+    (rtopstate type-eq-decl nil rreduction nil)
+    (to_topstate const-decl "topstate" reduction nil)
+    (topstate type-eq-decl nil reduction nil)
+    (hole adt-constructor-decl "(hole?)" IL nil)
+    (hole? adt-recognizer-decl "[IContext -> boolean]" IL nil)
+    (state_matches? const-decl "boolean" reduction_props nil)
+    (armc? def-decl "bool" preprocess nil)
+    (allReleaseMarked? def-decl "bool" preprocess nil)
+    (noDanglingRefs? const-decl "bool" rreduction nil)
+    (goodstate type-eq-decl nil reduction nil)
+    (estate type-eq-decl nil reduction nil)
+    (Defs type-eq-decl nil reduction_props nil)
+    (Definition type-eq-decl nil reduction_props nil)
+    (unmark def-decl "IExpression" preprocess nil)
+    (pure? def-decl "bool" IL nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (wf_nat formula-decl nil naturalnumbers nil)
+    (top_releases_ct def-decl "nat" reduction_props nil)
+    (naturalnumber type-eq-decl nil naturalnumbers nil)
+    (goodrstate type-eq-decl nil reduction_props nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (rstate type-eq-decl nil rreduction nil)
+    (refcount const-decl "nat" rreduction nil)
+    (Store type-eq-decl nil reduction nil)
+    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil)
+    (contextPure? def-decl "bool" IL nil)
+    (<= const-decl "bool" reals nil) (popDepth def-decl "nat" IL nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (popDepth def-decl "nat" IL nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (< const-decl "bool" reals nil)
+    (vars def-decl "finite_set[nat]" IL nil)
+    (refs def-decl "bool" IL nil)
+    (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
+    (domainValue? const-decl "bool" IL nil)
+    (every const-decl "bool" finseq_theorems nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (Stack type-eq-decl nil IL nil) (value? const-decl "bool" IL nil)
+    (IExpression type-decl nil IExpression_adt nil)
+    (below type-eq-decl nil nat_types nil)
+    (emptyset const-decl "set" sets nil)
+    (markc def-decl "IContext" preprocess nil)
+    (finite_set type-eq-decl nil finite_sets nil)
+    (is_finite const-decl "bool" finite_sets nil)
+    (set type-eq-decl nil sets nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (cpure? def-decl "bool" IL nil)
+    (AND const-decl "[bool, bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (IContext type-decl nil IL nil)
+    (measure_induction formula-decl nil measure_induction nil)
+    (well_founded? const-decl "bool" orders nil)
+    (pred type-eq-decl nil defined_types nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil))
+   shostak)
   (bisimulation_lemma-9 "" 3706301033
    ("" (measure-induct+ "top_releases_ct(grS`redex)" ("grS"))
     (("" (name-replace grS "x!1")
@@ -34485,17 +34998,12 @@
     (every const-decl "bool" finseq_theorems nil)
     (domainValue? const-decl "bool" IL nil)
     (IMPLIES const-decl "[bool, bool -> bool]" booleans nil)
-    (refs def-decl "bool" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (< const-decl "bool" reals nil)
+    (refs def-decl "bool" IL nil) nil (< const-decl "bool" reals nil)
     (numfield nonempty-type-eq-decl nil number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (popDepth def-decl "nat" IL nil)
-    (vars def-decl "finite_set[nat]" IL nil)
-    (popDepth def-decl "nat" IL nil) (<= const-decl "bool" reals nil)
+    nil nil nil (<= const-decl "bool" reals nil)
     (contextPure? def-decl "bool" IL nil)
-    (mark def-decl "IExpression" preprocess nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
+    (mark def-decl "IExpression" preprocess nil) nil
     (Store type-eq-decl nil reduction nil)
     (refcount const-decl "nat" rreduction nil)
     (rstate type-eq-decl nil rreduction nil)
@@ -34531,8 +35039,7 @@
      nil)
     (make_redex_match formula-decl nil reduction_props nil)
     (make_redex_ndr judgement-tcc nil rreduction nil)
-    (to_topstate_dangling judgement-tcc nil rreduction nil)
-    (grS skolem-const-decl "goodrstate" reduction_props nil)
+    (to_topstate_dangling judgement-tcc nil rreduction nil) nil
     (pureLetRedex? const-decl "bool" IL nil)
     (IExpression_letexpr_eta formula-decl nil IExpression_adt nil)
     (letexpr? adt-recognizer-decl "[IExpression -> boolean]"
@@ -34596,7 +35103,7 @@
     (IExpression_update_eta formula-decl nil IExpression_adt nil)
     (updateRedex? const-decl "bool" IL nil)
     (applyReduce_match formula-decl nil reduction_props nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -34619,18 +35126,13 @@
     (stack_matches const-decl "boolean" reduction_props nil)
     (translate_refs def-decl "IExpression" reduction_props nil)
     (bumpn const-decl "finite_set[nat]" IL nil)
-    (singleton const-decl "(singleton?)" sets nil)
-    (cvars def-decl "finite_set[nat]" preprocess nil)
-    (eS skolem-const-decl "{eS | pureRedex?(eS`redex)}" reduction_props
-     nil)
-    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
-     nil)
+    (singleton const-decl "(singleton?)" sets nil) nil nil nil
     (variable_match formula-decl nil reduction_props nil)
     (variable? adt-recognizer-decl "[IExpression -> boolean]"
                IExpression_adt nil)
     (arm_fill formula-decl nil preprocess nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (state_matches const-decl "boolean" reduction_props nil)
     (pureRedex? const-decl "bool" IL nil)
@@ -34643,8 +35145,7 @@
      nil)
     (Definition type-eq-decl nil rreduction nil)
     (Defs type-eq-decl nil rreduction nil)
-    (goodrstate type-eq-decl nil rreduction nil)
-    (D skolem-const-decl "Defs" reduction_props nil)
+    (goodrstate type-eq-decl nil rreduction nil) nil
     (int_plus_int_is_int application-judgement "int" integers nil)
     (top_releases_reduce formula-decl nil reduction_props nil)
     (reduce_ndr judgement-tcc nil rreduction nil)
@@ -34654,30 +35155,24 @@
      real_props nil)
     (translate_refs_value application-judgement "(value?)"
      reduction_props nil)
-    (j skolem-const-decl "below(rS`store(r)`length)" reduction_props
-     nil)
-    (below type-eq-decl nil naturalnumbers nil)
+    nil (below type-eq-decl nil naturalnumbers nil)
     (real_lt_is_strict_total_order name-judgement
      "(strict_total_order?[real])" real_props nil)
-    (r skolem-const-decl "(rS`domain)" reduction_props nil)
-    (union const-decl "set" sets nil)
+    nil (union const-decl "set" sets nil)
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
     (cvars_fill formula-decl nil preprocess nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (releaseReduce const-decl "rstate" rreduction nil)
-    (to_topstate_match formula-decl nil reduction_props nil)
-    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
-     nil)
+    (to_topstate_match formula-decl nil reduction_props nil) nil
     (unmark_fill formula-decl nil preprocess nil)
-    (translate_fill formula-decl nil reduction_props nil)
-    (nS skolem-const-decl "estate" reduction_props nil)
+    (translate_fill formula-decl nil reduction_props nil) nil
     (releaseReduce_match formula-decl nil reduction_props nil)
     (unmark_popDepth formula-decl nil preprocess nil)
     (translate_vars formula-decl nil reduction_props nil)
@@ -34688,9 +35183,7 @@
      preprocess nil)
     (contextPurefill formula-decl nil IL nil)
     (unmark_popDepth_ctx formula-decl nil preprocess nil)
-    (translate_popDepth formula-decl nil reduction_props nil)
-    (rS skolem-const-decl "{rS | pureRedex?(rS`redex)}" reduction_props
-     nil)
+    (translate_popDepth formula-decl nil reduction_props nil) nil
     (decref_preserves_jdg application-judgement "{rS2 |
    rS2`redex = rS`redex AND
     rS2`stack = rS`stack AND
@@ -43067,11 +43560,11 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (cvars_fill formula-decl nil preprocess nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (union const-decl "set" sets nil)
@@ -43098,7 +43591,7 @@
     (pureRedex? const-decl "bool" IL nil)
     (state_matches const-decl "boolean" reduction_props nil)
     (fill def-decl "IExpression" IL nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
     (arm_fill formula-decl nil preprocess nil)
     (pureLetRedex? const-decl "bool" IL nil)
@@ -43176,7 +43669,7 @@
     (IExpression_update_eta formula-decl nil IExpression_adt nil)
     (updateRedex? const-decl "bool" IL nil)
     (applyReduce_match formula-decl nil reduction_props nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -45089,7 +45582,7 @@
                   IExpression_adt nil)
     (unmarkvars_length rec-application-judgement
      "{J | length(J) = length(L)}" preprocess nil)
-    (buildRedexPure rec-application-judgement "{K, B |
+    (buildRedexPure rec-application-judgement "{(K, B) |
    fill(K, B) = A AND
     ((cpure?(K) AND pureRedex?(B)) OR (K = hole AND value?(B)))}" IL
      nil)
@@ -45170,7 +45663,7 @@
     (pureLetRedex? const-decl "bool" IL nil)
     (arm_fill formula-decl nil preprocess nil)
     (OR const-decl "[bool, bool -> bool]" booleans nil)
-    (buildRedex def-decl "{K, B | fill(K, B) = A}" IL nil)
+    (buildRedex def-decl "{(K, B) | fill(K, B) = A}" IL nil)
     (fill def-decl "IExpression" IL nil)
     (state_matches const-decl "boolean" reduction_props nil)
     (pureRedex? const-decl "bool" IL nil)
@@ -45216,11 +45709,11 @@
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
     (cvars_fill formula-decl nil preprocess nil)
-    (finite_emptyset name-judgement "finite_set[T]" countability
+    (finite_emptyset name-judgement "finite_set[nat]" countability
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" countable_props
+    (finite_emptyset name-judgement "finite_set[T]" countable_props
      "sets_aux/")
-    (finite_emptyset name-judgement "finite_set" sigma_set
+    (finite_emptyset name-judgement "finite_set[T]" sigma_set
      "sigma_set/")
     (finite_emptyset name-judgement "finite_set" finite_sets nil)
     (union const-decl "set" sets nil)

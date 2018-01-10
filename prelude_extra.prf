@@ -62,11 +62,60 @@
     (finseq2list_length_rec formula-decl nil list2finseq_extra nil))
    shostak))
  (finseq2list_nth_rec_TCC1 0
-  (finseq2list_nth_rec_TCC1-1 nil 3703275951 ("" (subtype-tcc) nil nil)
-   nil nil))
+  (finseq2list_nth_rec_TCC1-1 nil 3703275951
+   ("" (skeep* :preds? t)
+    (("" (rewrite finseq2list_length_rec) nil nil)) nil)
+   ((finseq2list_length_rec formula-decl nil list2finseq_extra nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (below type-eq-decl nil nat_types nil)
+    (T formal-type-decl nil list2finseq_extra nil)
+    (finseq type-eq-decl nil finite_sequences nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil))
+   nil
+   (finseq2list_nth_rec subtype "list2finseq_extra.i"
+    "below[length[T](finseq2list_rec[T](fs, n))]")))
  (finseq2list_nth_rec_TCC2 0
   (finseq2list_nth_rec_TCC2-1 nil 3703275951 ("" (subtype-tcc) nil nil)
-   nil nil))
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (>= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nnint_plus_nnint_is_nnint application-judgement "nonneg_int"
+     integers nil))
+   nil
+   (finseq2list_nth_rec subtype
+    "(number_fields.+)((number_fields.-)(list2finseq_extra.fs`length, list2finseq_extra.n), list2finseq_extra.i)"
+    "below[fs`length]")))
  (finseq2list_nth_rec 0
   (finseq2list_nth_rec-1 nil 3703275978
    ("" (induct i)
@@ -133,7 +182,9 @@
    shostak))
  (finseq2list_nth_TCC1 0
   (finseq2list_nth_TCC1-1 nil 3703275468 ("" (subtype-tcc) nil nil) nil
-   nil))
+   nil
+   (finseq2list_nth subtype "list2finseq_extra.i"
+    "below[length[T](finseq2list[T](fs))]")))
  (finseq2list_nth 0
   (finseq2list_nth-1 nil 3703275605
    ("" (skeep* :preds? t)
@@ -213,7 +264,7 @@
     (finseq type-eq-decl nil finite_sequences nil)
     (finseq2list const-decl "list[T]" list2finseq nil)
     (nth def-decl "T" list_props nil)
-    (IFF const-decl "[bool, bool -> bool]" booleans nil) nil)
+    (IFF const-decl "[bool, bool -> bool]" booleans nil))
    shostak))
  (list2finseq_inj 0
   (list2finseq_inj-1 nil 3703276701
@@ -312,10 +363,10 @@
      list2finseq_extra nil)
     (real_ge_is_total_order name-judgement "(total_order?[real])"
      real_props nil)
-    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
-    (numfield nonempty-type-eq-decl nil number_fields nil)
-    (IF const-decl "[boolean, T, T -> T]" if_def nil)
     (int_minus_int_is_int application-judgement "int" integers nil)
+    (IF const-decl "[boolean, T, T -> T]" if_def nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
     (NOT const-decl "[bool -> bool]" booleans nil)
     (AND const-decl "[bool, bool -> bool]" booleans nil)
